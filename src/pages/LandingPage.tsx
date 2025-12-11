@@ -1,39 +1,14 @@
 import { Box, Container, Typography, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { churchInfoService } from '../services/churchInfoService';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { YouTubeVideos } from '../components/YouTubeVideos';
 import { MissionCard } from '../components/MissionCard';
 import { CHURCH_LOGO_URL } from '../utils/constants';
 import foundersImage from '../assets/491100347_18079396636707663_2804182089416872660_n.jpg';
-import type { ChurchInfo } from '../types';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 export const LandingPage = () => {
-  const [churchInfo, setChurchInfo] = useState<ChurchInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadChurchInfo = async () => {
-      try {
-        const info = await churchInfoService.get();
-        setChurchInfo(info);
-      } catch (error) {
-        console.error('Error loading church info:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadChurchInfo();
-  }, []);
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
 
   const missions = [
     {

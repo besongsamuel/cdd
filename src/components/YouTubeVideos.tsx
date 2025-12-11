@@ -3,7 +3,7 @@ import { Box, Container, Typography, Card, CardMedia, CardContent, Button } from
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { youtubeService, type YouTubeVideo } from '../services/youtubeService';
 import { LoadingSpinner } from './common/LoadingSpinner';
-import { YOUTUBE_CHANNEL_ID, SOCIAL_MEDIA_LINKS } from '../utils/constants';
+import { SOCIAL_MEDIA_LINKS } from '../utils/constants';
 
 export const YouTubeVideos = () => {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
