@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -16,7 +16,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
-import { CHURCH_LOGO_URL } from '../../utils/constants';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 
 export const Header = () => {
@@ -24,6 +23,17 @@ export const Header = () => {
   const { isAdmin } = useAuth();
   const { t } = useTranslation('navigation');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { label: t('home'), path: '/' },
@@ -48,8 +58,28 @@ export const Header = () => {
               to={item.path}
               selected={location.pathname === item.path}
               sx={{
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: 'rgba(30, 58, 138, 0.08)',
+                  color: 'primary.main',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '3px',
+                    height: '60%',
+                    background: 'linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%)',
+                    borderRadius: '0 2px 2px 0',
+                  },
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(30, 58, 138, 0.06)',
+                  transform: 'translateX(4px)',
                 },
               }}
             >
@@ -83,10 +113,20 @@ export const Header = () => {
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backgroundColor: scrolled 
+            ? 'rgba(255, 255, 255, 0.95)' 
+            : 'rgba(255, 255, 255, 0.8)',
           backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+          borderBottom: scrolled
+            ? '1px solid rgba(0, 0, 0, 0.12)'
+            : '1px solid rgba(0, 0, 0, 0.08)',
           color: 'text.primary',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(-20px)',
+          boxShadow: scrolled 
+            ? '0 2px 20px rgba(0, 0, 0, 0.08)' 
+            : 'none',
         }}
       >
         <Toolbar sx={{ px: { xs: 2, sm: 4 } }}>
@@ -95,7 +135,15 @@ export const Header = () => {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ 
+              mr: 2, 
+              display: { sm: 'none' },
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.06)',
+                transform: 'scale(1.05)',
+              },
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -108,30 +156,25 @@ export const Header = () => {
               textDecoration: 'none',
               color: 'inherit',
               mr: 4,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'scale(1.02)',
+                opacity: 0.8,
+              },
             }}
           >
-            <Box
-              component="img"
-              src={CHURCH_LOGO_URL}
-              alt="City of David Logo"
-              sx={{
-                height: 32,
-                mr: 1.5,
-                objectFit: 'contain',
-                display: { xs: 'none', sm: 'block' },
-              }}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-              }}
-            />
             <Typography
               variant="h6"
               component="div"
               sx={{
                 fontWeight: 600,
-                fontSize: '17px',
+                fontSize: { xs: '16px', sm: '18px' },
                 letterSpacing: '-0.01em',
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                transition: 'all 0.3s ease',
               }}
             >
               {t('appName', { ns: 'common' })}
@@ -139,7 +182,7 @@ export const Header = () => {
           </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5, alignItems: 'center' }}>
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <Button
                 key={item.path}
                 component={Link}
@@ -148,13 +191,45 @@ export const Header = () => {
                   color: 'text.primary',
                   fontSize: '17px',
                   fontWeight: location.pathname === item.path ? 600 : 400,
-                  px: 2,
-                  py: 1,
+                  px: 2.5,
+                  py: 1.2,
                   borderRadius: 2,
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    width: location.pathname === item.path ? '80%' : '0%',
+                    height: '2px',
+                    background: 'linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)',
+                    transform: 'translateX(-50%)',
+                    transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   },
-                  transition: 'all 0.2s ease',
+                  '&:hover::before': {
+                    width: '80%',
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(30, 58, 138, 0.06)',
+                    transform: 'translateY(-2px)',
+                    color: location.pathname === item.path ? 'primary.main' : 'text.primary',
+                  },
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  opacity: mounted ? 1 : 0,
+                  animation: mounted 
+                    ? `fadeInUp 0.5s ease ${index * 0.05}s both`
+                    : 'none',
+                  '@keyframes fadeInUp': {
+                    from: {
+                      opacity: 0,
+                      transform: 'translateY(10px)',
+                    },
+                    to: {
+                      opacity: 1,
+                      transform: 'translateY(0)',
+                    },
+                  },
                 }}
               >
                 {item.label}
@@ -167,18 +242,28 @@ export const Header = () => {
                 sx={{
                   color: 'text.primary',
                   fontSize: '17px',
-                  px: 2,
-                  py: 1,
+                  px: 2.5,
+                  py: 1.2,
                   borderRadius: 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    backgroundColor: 'rgba(30, 58, 138, 0.06)',
+                    transform: 'translateY(-2px)',
                   },
                 }}
               >
                 {t('admin')}
               </Button>
             )}
-            <LanguageSwitcher />
+            <Box
+              sx={{
+                opacity: mounted ? 1 : 0,
+                transform: mounted ? 'scale(1)' : 'scale(0.8)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s',
+              }}
+            >
+              <LanguageSwitcher />
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>
@@ -195,11 +280,14 @@ export const Header = () => {
             boxSizing: 'border-box',
             width: 280,
             pt: 2,
+            background: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(20px)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.08)',
           },
         }}
       >
         {drawer}
-        <Box sx={{ px: 2, py: 2 }}>
+        <Box sx={{ px: 2, py: 2, borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
           <LanguageSwitcher />
         </Box>
       </Drawer>

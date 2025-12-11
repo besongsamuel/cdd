@@ -37,12 +37,15 @@ export const LanguageSwitcher = () => {
         sx={{
           color: 'text.primary',
           fontSize: '17px',
-          px: 2,
-          py: 1,
+          px: 2.5,
+          py: 1.2,
           borderRadius: 2,
           minWidth: 'auto',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+            backgroundColor: 'rgba(30, 58, 138, 0.06)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           },
         }}
       >
@@ -68,7 +71,19 @@ export const LanguageSwitcher = () => {
             selected={currentLang === lang.code}
             sx={{
               fontSize: '17px',
-              minHeight: '44px', // Ensure adequate touch target
+              minHeight: '44px',
+              borderRadius: 1,
+              mx: 0.5,
+              my: 0.5,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(30, 58, 138, 0.08)',
+              },
+              '&.Mui-selected': {
+                backgroundColor: 'rgba(30, 58, 138, 0.12)',
+                color: 'primary.main',
+                fontWeight: 600,
+              },
             }}
           >
             {lang.label}

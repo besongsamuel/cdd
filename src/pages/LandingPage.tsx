@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { YouTubeVideos } from '../components/YouTubeVideos';
 import { MissionCard } from '../components/MissionCard';
 import { SEO } from '../components/SEO';
-import { CHURCH_LOGO_URL } from '../utils/constants';
+import cddLogo from '../assets/cddLogo.png';
 import foundersImage from '../assets/491100347_18079396636707663_2804182089416872660_n.jpg';
 import dancingImage from '../assets/dancing.jpg';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -114,24 +114,31 @@ export const LandingPage = () => {
         >
           <Box
             component="img"
-            src={CHURCH_LOGO_URL}
+            src={cddLogo}
             alt="City of David Logo"
             sx={{
-              width: { xs: 120, md: 180 },
+              width: { xs: 140, md: 200 },
               height: 'auto',
               mx: 'auto',
               mb: 5,
               objectFit: 'contain',
               opacity: 0,
-              animation: 'fadeIn 1s ease-in-out 0.3s forwards',
-              filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3))',
-              '@keyframes fadeIn': {
-                to: { opacity: 1 },
+              animation: 'fadeInScale 1s ease-in-out 0.3s forwards',
+              filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4))',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: { xs: 2, md: 3 },
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              '@keyframes fadeInScale': {
+                from: {
+                  opacity: 0,
+                  transform: 'scale(0.9)',
+                },
+                to: {
+                  opacity: 1,
+                  transform: 'scale(1)',
+                },
               },
-            }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
             }}
           />
           <Typography
