@@ -25,3 +25,4 @@ CREATE POLICY "Authenticated users can update gallery_photos" ON gallery_photos
 CREATE POLICY "Authenticated users can delete gallery_photos" ON gallery_photos
   FOR DELETE USING (auth.role() = 'authenticated');
 
+

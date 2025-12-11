@@ -1,30 +1,30 @@
-import { useState } from 'react';
 import {
-  Container,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  Paper,
   Alert,
-  MenuItem,
-  Select,
+  Box,
+  Button,
+  Container,
   FormControl,
   InputLabel,
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { requestsService } from '../services/requestsService';
-import { SEO } from '../components/SEO';
-import type { RequestType } from '../types';
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { SEO } from "../components/SEO";
+import { requestsService } from "../services/requestsService";
+import type { RequestType } from "../types";
 
 export const RequestsPage = () => {
-  const { t } = useTranslation('requests');
+  const { t } = useTranslation("requests");
   const [formData, setFormData] = useState({
-    type: 'prayer' as RequestType,
-    name: '',
-    email: '',
-    phone: '',
-    content: '',
+    type: "prayer" as RequestType,
+    name: "",
+    email: "",
+    phone: "",
+    content: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -38,7 +38,7 @@ export const RequestsPage = () => {
 
     // Basic validation
     if (!formData.content.trim()) {
-      setError(t('form.error'));
+      setError(t("form.error"));
       setLoading(false);
       return;
     }
@@ -47,7 +47,7 @@ export const RequestsPage = () => {
     if (formData.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        setError(t('form.error'));
+        setError(t("form.error"));
         setLoading(false);
         return;
       }
@@ -57,20 +57,22 @@ export const RequestsPage = () => {
       await requestsService.create(formData);
       setSuccess(true);
       setFormData({
-        type: 'prayer',
-        name: '',
-        email: '',
-        phone: '',
-        content: '',
+        type: "prayer",
+        name: "",
+        email: "",
+        phone: "",
+        content: "",
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('form.error'));
+      setError(err instanceof Error ? err.message : t("form.error"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -86,66 +88,107 @@ export const RequestsPage = () => {
 
   return (
     <>
-      <SEO title={t('title')} description={t('subtitle')} url="/requests" />
-      <Container sx={{ py: 6 }}>
-        <Typography variant="h3" component="h1" gutterBottom textAlign="center">
-          {t('title')}
+      <SEO title={t("title")} description={t("subtitle")} url="/requests" />
+      <Container sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3 } }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          textAlign="center"
+          sx={{ fontSize: { xs: "32px", md: "40px" } }}
+        >
+          {t("title")}
         </Typography>
-        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
-          {t('subtitle')}
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          textAlign="center"
+          sx={{ mb: 4, fontSize: { xs: "15px", md: "16px" } }}
+        >
+          {t("subtitle")}
         </Typography>
 
-        <Box sx={{ maxWidth: '600px', mx: 'auto' }}>
-          <Paper sx={{ p: 3 }}>
+        <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 } }}>
             <form onSubmit={handleSubmit}>
-              <FormControl fullWidth margin="normal" required>
-                <InputLabel>{t('form.type')}</InputLabel>
+              <FormControl
+                fullWidth
+                margin="normal"
+                required
+                sx={{
+                  "& .MuiInputBase-input": {
+                    fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
+                  },
+                }}
+              >
+                <InputLabel>{t("form.type")}</InputLabel>
                 <Select
                   value={formData.type}
                   onChange={handleTypeChange}
-                  label={t('form.type')}
+                  label={t("form.type")}
                 >
-                  <MenuItem value="prayer">{t('form.prayer')}</MenuItem>
-                  <MenuItem value="support">{t('form.support')}</MenuItem>
-                  <MenuItem value="testimony">{t('form.testimony')}</MenuItem>
+                  <MenuItem value="prayer">{t("form.prayer")}</MenuItem>
+                  <MenuItem value="support">{t("form.support")}</MenuItem>
+                  <MenuItem value="testimony">{t("form.testimony")}</MenuItem>
                 </Select>
               </FormControl>
 
               <TextField
                 fullWidth
-                label={t('form.name')}
+                label={t("form.name")}
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 margin="normal"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
+                  },
+                }}
               />
               <TextField
                 fullWidth
-                label={t('form.email')}
+                label={t("form.email")}
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
                 margin="normal"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
+                  },
+                }}
               />
               <TextField
                 fullWidth
-                label={t('form.phone')}
+                label={t("form.phone")}
                 name="phone"
+                type="tel"
                 value={formData.phone}
                 onChange={handleChange}
                 margin="normal"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
+                  },
+                }}
               />
               <TextField
                 fullWidth
-                label={t('form.message')}
+                label={t("form.message")}
                 name="content"
                 value={formData.content}
                 onChange={handleChange}
                 required
                 multiline
-                rows={6}
+                rows={{ xs: 5, sm: 6 }}
                 margin="normal"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
+                  },
+                }}
               />
               {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -154,17 +197,22 @@ export const RequestsPage = () => {
               )}
               {success && (
                 <Alert severity="success" sx={{ mt: 2 }}>
-                  {t('form.success')}
+                  {t("form.success")}
                 </Alert>
               )}
               <Button
                 type="submit"
                 variant="contained"
                 fullWidth
-                sx={{ mt: 3 }}
+                sx={{
+                  mt: 3,
+                  py: { xs: 1.5, sm: 1.5 },
+                  fontSize: { xs: "16px", sm: "17px" },
+                  minHeight: "48px",
+                }}
                 disabled={loading}
               >
-                {loading ? t('form.submitting') : t('form.submit')}
+                {loading ? t("form.submitting") : t("form.submit")}
               </Button>
             </form>
           </Paper>
@@ -173,4 +221,3 @@ export const RequestsPage = () => {
     </>
   );
 };
-

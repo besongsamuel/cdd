@@ -23,6 +23,38 @@ code {
     monospace;
 }
 
+/* Mobile-first responsive typography */
+@media (max-width: 600px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+}
+
+/* Ensure touch targets are at least 44x44px for accessibility */
+button,
+a,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Improve tap highlighting on mobile */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth scrolling for better mobile experience */
+html {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* React Big Calendar Styles */
 .rbc-calendar {
   font-family: inherit;
@@ -36,6 +68,8 @@ code {
 .rbc-event {
   padding: 2px 5px;
   border-radius: 3px;
+  min-height: 20px;
+  font-size: 0.75rem;
 }
 
 .rbc-today {
@@ -44,4 +78,32 @@ code {
 
 .rbc-off-range-bg {
   background-color: #f5f5f5;
+}
+
+/* Mobile-specific calendar styles */
+@media (max-width: 768px) {
+  .rbc-header {
+    padding: 8px 2px;
+    font-size: 0.75rem;
+  }
+
+  .rbc-event {
+    padding: 1px 3px;
+    font-size: 0.7rem;
+    min-height: 16px;
+  }
+
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rbc-toolbar button {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+
+  .rbc-toolbar-label {
+    margin: 8px 0;
+  }
 }

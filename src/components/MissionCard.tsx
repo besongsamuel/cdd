@@ -1,5 +1,5 @@
-import { Box, Card, Typography } from '@mui/material';
-import type { ReactNode } from 'react';
+import { Box, Card, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 
 interface MissionCardProps {
   number: number;
@@ -8,29 +8,34 @@ interface MissionCardProps {
   icon: ReactNode;
 }
 
-export const MissionCard = ({ number, title, description, icon }: MissionCardProps) => {
+export const MissionCard = ({
+  number,
+  title,
+  description,
+  icon,
+}: MissionCardProps) => {
   return (
     <Card
       sx={{
-        height: '100%',
-        textAlign: 'center',
-        p: 4,
-        bgcolor: 'background.paper',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
+        height: "100%",
+        textAlign: "center",
+        p: { xs: 3, sm: 4 },
+        bgcolor: "background.paper",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          transform: { xs: "none", sm: "translateY(-4px)" },
         },
       }}
     >
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           mb: 3,
-          '& svg': {
+          "& svg": {
             fontSize: 48,
-            color: 'primary.main',
+            color: "primary.main",
           },
         }}
       >
@@ -40,9 +45,9 @@ export const MissionCard = ({ number, title, description, icon }: MissionCardPro
         variant="h3"
         component="div"
         sx={{
-          fontSize: '56px',
+          fontSize: { xs: "48px", md: "56px" },
           fontWeight: 600,
-          color: 'primary.main',
+          color: "primary.main",
           mb: 2,
           opacity: 0.15,
           lineHeight: 1,
@@ -56,8 +61,8 @@ export const MissionCard = ({ number, title, description, icon }: MissionCardPro
         sx={{
           fontWeight: 600,
           mb: 2,
-          fontSize: { xs: '22px', md: '24px' },
-          letterSpacing: '-0.01em',
+          fontSize: { xs: "22px", md: "24px" },
+          letterSpacing: "-0.01em",
         }}
       >
         {title}
@@ -65,10 +70,10 @@ export const MissionCard = ({ number, title, description, icon }: MissionCardPro
       <Typography
         variant="body1"
         sx={{
-          color: 'text.secondary',
-          fontSize: '17px',
+          color: "text.secondary",
+          fontSize: "17px",
           lineHeight: 1.6,
-          textAlign: 'left',
+          textAlign: "left",
         }}
       >
         {description}

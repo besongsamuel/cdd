@@ -58,3 +58,4 @@ You can update church info and add founders' images through the admin panel afte
 - **Image Uploads**: Ensure storage buckets are created and have proper policies
 
 
+
