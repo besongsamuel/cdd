@@ -4,6 +4,7 @@ import { YouTubeVideos } from '../components/YouTubeVideos';
 import { MissionCard } from '../components/MissionCard';
 import { CHURCH_LOGO_URL } from '../utils/constants';
 import foundersImage from '../assets/491100347_18079396636707663_2804182089416872660_n.jpg';
+import dancingImage from '../assets/dancing.jpg';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -14,50 +15,91 @@ export const LandingPage = () => {
     {
       number: 1,
       title: 'Form Disciples',
-      description: 'Form disciples and send them to serve the Kingdom',
+      description: 'We are committed to raising up passionate followers of Christ who are equipped, empowered, and sent out to transform their communities. Through intentional discipleship, we build leaders who carry the gospel with conviction and compassion, multiplying the impact of God\'s kingdom across the earth.',
       icon: <GroupsIcon />,
     },
     {
       number: 2,
       title: 'Discover Gifts',
-      description: 'Discover gifts, potential and capacities of Christians, encourage and direct them on their use and effectiveness',
+      description: 'Every believer carries unique gifts and divine potential. We create an environment where these talents are identified, nurtured, and strategically deployed. Our mission is to unlock the extraordinary within each person, guiding them to their God-given purpose and maximum effectiveness in ministry.',
       icon: <AutoAwesomeIcon />,
     },
     {
       number: 3,
       title: 'Win Souls',
-      description: 'Win souls for the Kingdom',
+      description: 'The heartbeat of our ministry is reaching the lost, the broken, and the forgotten. We passionately pursue every soul with the life-changing message of the gospel, believing that no one is beyond redemption. Through love, prayer, and unwavering faith, we bring hope to those who need it most.',
       icon: <FavoriteIcon />,
     },
   ];
 
   return (
     <Box sx={{ bgcolor: 'background.default' }}>
-      {/* Hero Section - Apple style */}
+      {/* Hero Section - Background Image with Overlay */}
       <Box
         sx={{
-          minHeight: { xs: '85vh', md: '90vh' },
+          position: 'relative',
+          minHeight: { xs: '85vh', md: '100vh' },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          px: 3,
-          py: { xs: 12, md: 16 },
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${dancingImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: 0,
+            animation: 'zoomIn 20s ease-in-out infinite alternate',
+            '@keyframes zoomIn': {
+              '0%': {
+                transform: 'scale(1)',
+              },
+              '100%': {
+                transform: 'scale(1.1)',
+              },
+            },
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(37, 99, 235, 0.75) 100%)',
+            zIndex: 1,
+          },
         }}
       >
-        <Container maxWidth="md">
+        <Container
+          maxWidth="md"
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+            px: 3,
+            py: { xs: 8, md: 12 },
+          }}
+        >
           <Box
             component="img"
             src={CHURCH_LOGO_URL}
             alt="City of David Logo"
             sx={{
-              width: { xs: 120, md: 160 },
+              width: { xs: 120, md: 180 },
               height: 'auto',
               mx: 'auto',
               mb: 5,
               objectFit: 'contain',
               opacity: 0,
               animation: 'fadeIn 1s ease-in-out 0.3s forwards',
+              filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3))',
               '@keyframes fadeIn': {
                 to: { opacity: 1 },
               },
@@ -73,8 +115,10 @@ export const LandingPage = () => {
             sx={{
               fontSize: { xs: '48px', sm: '64px', md: '80px' },
               fontWeight: 600,
-              mb: 2,
+              mb: 3,
               letterSpacing: '-0.02em',
+              color: 'white',
+              textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)',
               opacity: 0,
               animation: 'fadeInUp 0.8s ease-out 0.5s forwards',
               '@keyframes fadeInUp': {
@@ -97,11 +141,12 @@ export const LandingPage = () => {
             sx={{
               fontSize: { xs: '19px', md: '24px' },
               fontWeight: 400,
-              color: 'text.secondary',
+              color: 'rgba(255, 255, 255, 0.95)',
               mb: 6,
-              maxWidth: '600px',
+              maxWidth: '700px',
               mx: 'auto',
               lineHeight: 1.47059,
+              textShadow: '0 1px 10px rgba(0, 0, 0, 0.4)',
               opacity: 0,
               animation: 'fadeInUp 0.8s ease-out 0.7s forwards',
             }}
@@ -124,16 +169,19 @@ export const LandingPage = () => {
               variant="contained"
               size="large"
               sx={{
-                backgroundColor: 'primary.main',
-                color: 'white',
-                px: 4,
-                py: 1.5,
+                backgroundColor: 'white',
+                color: 'primary.main',
+                px: 5,
+                py: 1.8,
                 fontSize: '17px',
+                fontWeight: 500,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 '&:hover': {
-                  backgroundColor: 'primary.dark',
-                  transform: 'scale(1.02)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  transform: 'scale(1.05) translateY(-2px)',
+                  boxShadow: '0 6px 25px rgba(0, 0, 0, 0.4)',
                 },
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               Join Us
@@ -144,17 +192,22 @@ export const LandingPage = () => {
               variant="outlined"
               size="large"
               sx={{
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-                color: 'text.primary',
-                px: 4,
-                py: 1.5,
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 2,
+                color: 'white',
+                px: 5,
+                py: 1.8,
                 fontSize: '17px',
+                fontWeight: 500,
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
                 '&:hover': {
-                  borderColor: 'rgba(0, 0, 0, 0.5)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.02)',
-                  transform: 'scale(1.02)',
+                  borderColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'scale(1.05) translateY(-2px)',
+                  boxShadow: '0 6px 25px rgba(0, 0, 0, 0.3)',
                 },
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               Contact Us
@@ -173,7 +226,7 @@ export const LandingPage = () => {
               sx={{
                 fontSize: { xs: '40px', md: '56px' },
                 fontWeight: 600,
-                mb: 2,
+                mb: 3,
                 letterSpacing: '-0.02em',
               }}
             >
@@ -186,12 +239,27 @@ export const LandingPage = () => {
                 fontSize: { xs: '19px', md: '21px' },
                 fontWeight: 400,
                 color: 'text.secondary',
+                maxWidth: '800px',
+                mx: 'auto',
+                lineHeight: 1.47059,
+                mb: 2,
+              }}
+            >
+              We are called to transform lives, restore hope, and build a community where every believer discovers their purpose and walks in their God-given destiny.
+            </Typography>
+            <Typography
+              variant="body1"
+              component="p"
+              sx={{
+                fontSize: { xs: '17px', md: '19px' },
+                fontWeight: 400,
+                color: 'text.secondary',
                 maxWidth: '700px',
                 mx: 'auto',
                 lineHeight: 1.47059,
               }}
             >
-              The City of David church has a mission to transform lives through the power of God's word
+              Through uncompromising teaching, intense intercession, and compassionate care, we equip the body of Christ to impact our city and beyond.
             </Typography>
           </Box>
           <Box

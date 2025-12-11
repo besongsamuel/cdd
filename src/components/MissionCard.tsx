@@ -67,7 +67,8 @@ export const MissionCard = ({ number, title, description, icon }: MissionCardPro
         sx={{
           color: 'text.secondary',
           fontSize: '17px',
-          lineHeight: 1.47059,
+          lineHeight: 1.6,
+          textAlign: 'left',
         }}
       >
         {description}
