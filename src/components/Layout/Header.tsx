@@ -14,21 +14,24 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { CHURCH_LOGO_URL } from '../../utils/constants';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 export const Header = () => {
   const location = useLocation();
   const { isAdmin } = useAuth();
+  const { t } = useTranslation('navigation');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Our Members', path: '/members' },
-    { label: 'Events & Programs', path: '/events' },
-    { label: 'Gallery', path: '/gallery' },
-    { label: 'Requests', path: '/requests' },
-    { label: 'Contact Us', path: '/contact' },
+    { label: t('home'), path: '/' },
+    { label: t('ourMembers'), path: '/members' },
+    { label: t('eventsPrograms'), path: '/events' },
+    { label: t('gallery'), path: '/gallery' },
+    { label: t('requests'), path: '/requests' },
+    { label: t('contactUs'), path: '/contact' },
   ];
 
   const handleDrawerToggle = () => {
@@ -64,7 +67,7 @@ export const Header = () => {
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/admin/dashboard">
               <ListItemText
-                primary="Admin"
+                primary={t('admin')}
                 primaryTypographyProps={{ fontSize: '17px' }}
               />
             </ListItemButton>
@@ -131,11 +134,11 @@ export const Header = () => {
                 letterSpacing: '-0.01em',
               }}
             >
-              City of David
+              {t('appName', { ns: 'common' })}
             </Typography>
           </Box>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5 }}>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5, alignItems: 'center' }}>
             {navItems.map((item) => (
               <Button
                 key={item.path}
@@ -172,9 +175,10 @@ export const Header = () => {
                   },
                 }}
               >
-                Admin
+                {t('admin')}
               </Button>
             )}
+            <LanguageSwitcher />
           </Box>
         </Toolbar>
       </AppBar>
@@ -195,6 +199,9 @@ export const Header = () => {
         }}
       >
         {drawer}
+        <Box sx={{ px: 2, py: 2 }}>
+          <LanguageSwitcher />
+        </Box>
       </Drawer>
     </>
   );

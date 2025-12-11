@@ -1,0 +1,35 @@
+{
+  "title": "Cité de David",
+  "subtitle": "Une église chrétienne bilingue située à Montréal, fondée en 2004 par les Pasteurs Mireille et John BISOKA",
+  "joinUs": "Rejoignez-nous",
+  "contactUs": "Contactez-nous",
+  "ourMission": "Notre Mission",
+  "missionDescription": "Nous sommes appelés à transformer des vies, restaurer l'espoir et construire une communauté où chaque croyant découvre son but et marche dans sa destinée donnée par Dieu.",
+  "missionSubDescription": "À travers un enseignement sans compromis, une intercession intense et des soins compatissants, nous équipons le corps de Christ pour avoir un impact sur notre ville et au-delà.",
+  "mission1": {
+    "title": "Former des Disciples",
+    "description": "Nous nous engageons à élever des disciples passionnés du Christ qui sont équipés, habilités et envoyés pour transformer leurs communautés. À travers un discipulat intentionnel, nous construisons des leaders qui portent l'évangile avec conviction et compassion, multipliant l'impact du royaume de Dieu sur la terre."
+  },
+  "mission2": {
+    "title": "Découvrir les Dons",
+    "description": "Chaque croyant porte des dons uniques et un potentiel divin. Nous créons un environnement où ces talents sont identifiés, nourris et stratégiquement déployés. Notre mission est de débloquer l'extraordinaire en chaque personne, les guidant vers leur but donné par Dieu et leur efficacité maximale dans le ministère."
+  },
+  "mission3": {
+    "title": "Gagner des Âmes",
+    "description": "Le cœur battant de notre ministère est d'atteindre les perdus, les brisés et les oubliés. Nous poursuivons passionnément chaque âme avec le message transformateur de l'évangile, croyant que personne n'est au-delà de la rédemption. À travers l'amour, la prière et une foi inébranlable, nous apportons l'espoir à ceux qui en ont le plus besoin."
+  },
+  "ourFounders": "Nos Fondateurs",
+  "foundersSubtitle": "Les Pasteurs Mireille et John BISOKA ont reçu la vision de cette œuvre en 2004",
+  "apostleMireille": {
+    "name": "Apôtre Mireille Bisoka",
+    "bio": "L'Apôtre Mireille Bisoka est une servante dévouée de Dieu avec une passion pour le discipulat et la croissance spirituelle. Ensemble avec son mari, elle a été instrumentale dans la construction de la communauté de l'église Cité de David, se concentrant sur l'autonomisation des croyants pour découvrir et utiliser leurs dons et talents donnés par Dieu."
+  },
+  "pastorJohn": {
+    "name": "Pasteur John Bisoka",
+    "bio": "Le Pasteur John Bisoka est un leader visionnaire engagé à répandre l'évangile et à gagner des âmes pour le Royaume. Avec une foi inébranlable et un dévouement, il a dirigé l'église Cité de David depuis sa fondation en 2004, créant un lieu où les brisés, les rejetés et les perdus peuvent trouver l'espoir et la restauration en Christ."
+  },
+  "latestVideos": "Dernières Vidéos",
+  "videosSubtitle": "Regardez nos derniers enseignements et services",
+  "viewAllVideos": "Voir Toutes les Vidéos sur YouTube"
+}
+

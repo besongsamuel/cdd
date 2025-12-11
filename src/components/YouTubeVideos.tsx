@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Box, Container, Typography, Card, CardMedia, CardContent, Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { youtubeService, type YouTubeVideo } from '../services/youtubeService';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { SOCIAL_MEDIA_LINKS } from '../utils/constants';
 
 export const YouTubeVideos = () => {
+  const { t, i18n } = useTranslation('landing');
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export const YouTubeVideos = () => {
               letterSpacing: '-0.02em',
             }}
           >
-            Latest Videos
+            {t('latestVideos')}
           </Typography>
           <Typography
             variant="h6"
@@ -64,7 +66,7 @@ export const YouTubeVideos = () => {
               lineHeight: 1.47059,
             }}
           >
-            Watch our latest teachings and services
+            {t('videosSubtitle')}
           </Typography>
         </Box>
         <Box
@@ -150,7 +152,7 @@ export const YouTubeVideos = () => {
                     fontSize: '15px',
                   }}
                 >
-                  {new Date(video.publishedAt).toLocaleDateString('en-US', {
+                  {new Date(video.publishedAt).toLocaleDateString(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -178,7 +180,7 @@ export const YouTubeVideos = () => {
               },
             }}
           >
-            View All Videos on YouTube
+            {t('viewAllVideos')}
           </Button>
         </Box>
       </Container>

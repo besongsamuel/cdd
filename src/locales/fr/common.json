@@ -1,0 +1,27 @@
+{
+  "appName": "Cité de David",
+  "loading": "Chargement...",
+  "error": "Une erreur s'est produite",
+  "tryAgain": "Réessayer",
+  "close": "Fermer",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "add": "Ajouter",
+  "submit": "Soumettre",
+  "search": "Rechercher",
+  "filter": "Filtrer",
+  "all": "Tout",
+  "view": "Voir",
+  "actions": "Actions",
+  "name": "Nom",
+  "email": "Courriel",
+  "phone": "Téléphone",
+  "message": "Message",
+  "required": "Requis",
+  "optional": "Optionnel",
+  "allRightsReserved": "Tous droits réservés.",
+  "designedBy": "Conçu par AfermathTechnologies"
+}
+

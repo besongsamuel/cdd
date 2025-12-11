@@ -1,0 +1,35 @@
+{
+  "title": "City of David",
+  "subtitle": "A bilingual Christian church in Montreal, founded in 2004 by Pastors Mireille and John BISOKA",
+  "joinUs": "Join Us",
+  "contactUs": "Contact Us",
+  "ourMission": "Our Mission",
+  "missionDescription": "We are called to transform lives, restore hope, and build a community where every believer discovers their purpose and walks in their God-given destiny.",
+  "missionSubDescription": "Through uncompromising teaching, intense intercession, and compassionate care, we equip the body of Christ to impact our city and beyond.",
+  "mission1": {
+    "title": "Form Disciples",
+    "description": "We are committed to raising up passionate followers of Christ who are equipped, empowered, and sent out to transform their communities. Through intentional discipleship, we build leaders who carry the gospel with conviction and compassion, multiplying the impact of God's kingdom across the earth."
+  },
+  "mission2": {
+    "title": "Discover Gifts",
+    "description": "Every believer carries unique gifts and divine potential. We create an environment where these talents are identified, nurtured, and strategically deployed. Our mission is to unlock the extraordinary within each person, guiding them to their God-given purpose and maximum effectiveness in ministry."
+  },
+  "mission3": {
+    "title": "Win Souls",
+    "description": "The heartbeat of our ministry is reaching the lost, the broken, and the forgotten. We passionately pursue every soul with the life-changing message of the gospel, believing that no one is beyond redemption. Through love, prayer, and unwavering faith, we bring hope to those who need it most."
+  },
+  "ourFounders": "Our Founders",
+  "foundersSubtitle": "Pastors Mireille and John BISOKA received the vision for this work in 2004",
+  "apostleMireille": {
+    "name": "Apostle Mireille Bisoka",
+    "bio": "Apostle Mireille Bisoka is a dedicated servant of God with a passion for discipleship and spiritual growth. Together with her husband, she has been instrumental in building the City of David church community, focusing on empowering believers to discover and utilize their God-given gifts and talents."
+  },
+  "pastorJohn": {
+    "name": "Pastor John Bisoka",
+    "bio": "Pastor John Bisoka is a visionary leader committed to spreading the gospel and winning souls for the Kingdom. With unwavering faith and dedication, he has led the City of David church since its founding in 2004, creating a place where the broken, rejected, and lost can find hope and restoration in Christ."
+  },
+  "latestVideos": "Latest Videos",
+  "videosSubtitle": "Watch our latest teachings and services",
+  "viewAllVideos": "View All Videos on YouTube"
+}
+

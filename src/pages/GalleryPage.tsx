@@ -12,9 +12,11 @@ import {
   DialogContent,
   IconButton,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { galleryService } from '../services/galleryService';
 import { eventsService } from '../services/eventsService';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { SEO } from '../components/SEO';
 import type { GalleryPhoto, Event } from '../types';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
@@ -42,6 +44,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const GalleryPage = () => {
+  const { t } = useTranslation('gallery');
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,28 +117,30 @@ export const GalleryPage = () => {
   }
 
   return (
-    <Container sx={{ py: 6 }}>
-      <Typography variant="h3" component="h1" gutterBottom textAlign="center">
-        Gallery
-      </Typography>
-      <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
-        Memories from our events and gatherings
-      </Typography>
+    <>
+      <SEO title={t('title')} description={t('subtitle')} url="/gallery" />
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h3" component="h1" gutterBottom textAlign="center">
+          {t('title')}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
+          {t('subtitle')}
+        </Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={selectedTab} onChange={handleTabChange} centered>
-          <Tab label="All Photos" />
-          <Tab label="By Event" />
-          <Tab label="By Date" />
-        </Tabs>
-      </Box>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={selectedTab} onChange={handleTabChange} centered>
+            <Tab label={t('allPhotos')} />
+            <Tab label={t('byEvent')} />
+            <Tab label={t('byDate')} />
+          </Tabs>
+        </Box>
 
-      <TabPanel value={selectedTab} index={0}>
-        {photos.length === 0 ? (
-          <Typography color="text.secondary" textAlign="center">
-            No photos available yet.
-          </Typography>
-        ) : (
+        <TabPanel value={selectedTab} index={0}>
+          {photos.length === 0 ? (
+            <Typography color="text.secondary" textAlign="center">
+              {t('noPhotos')}
+            </Typography>
+          ) : (
           <ImageList variant="masonry" cols={3} gap={8}>
             {photos.map((photo) => (
               <ImageListItem key={photo.id}>
@@ -166,12 +171,12 @@ export const GalleryPage = () => {
         )}
       </TabPanel>
 
-      <TabPanel value={selectedTab} index={1}>
-        {events.length === 0 && photosWithoutEvent.length === 0 ? (
-          <Typography color="text.secondary" textAlign="center">
-            No event photos available yet.
-          </Typography>
-        ) : (
+        <TabPanel value={selectedTab} index={1}>
+          {events.length === 0 && photosWithoutEvent.length === 0 ? (
+            <Typography color="text.secondary" textAlign="center">
+              {t('noEventPhotos')}
+            </Typography>
+          ) : (
           <Box>
             {events.map((event) => {
               const eventPhotos = photosByEvent[event.id] || [];
@@ -217,7 +222,7 @@ export const GalleryPage = () => {
             {photosWithoutEvent.length > 0 && (
               <Box>
                 <Typography variant="h5" gutterBottom>
-                  Other Photos
+                  {t('otherPhotos')}
                 </Typography>
                 <ImageList variant="masonry" cols={3} gap={8}>
                   {photosWithoutEvent.map((photo) => (
@@ -251,12 +256,12 @@ export const GalleryPage = () => {
         )}
       </TabPanel>
 
-      <TabPanel value={selectedTab} index={2}>
-        {dateGroups.length === 0 ? (
-          <Typography color="text.secondary" textAlign="center">
-            No photos available yet.
-          </Typography>
-        ) : (
+        <TabPanel value={selectedTab} index={2}>
+          {dateGroups.length === 0 ? (
+            <Typography color="text.secondary" textAlign="center">
+              {t('noPhotos')}
+            </Typography>
+          ) : (
           <Box>
             {dateGroups.map((yearMonth) => {
               const [year, month] = yearMonth.split('-');
@@ -373,7 +378,8 @@ export const GalleryPage = () => {
           )}
         </DialogContent>
       </Dialog>
-    </Container>
+      </Container>
+    </>
   );
 };
 

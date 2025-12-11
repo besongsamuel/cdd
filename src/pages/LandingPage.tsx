@@ -1,7 +1,9 @@
 import { Box, Container, Typography, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { YouTubeVideos } from '../components/YouTubeVideos';
 import { MissionCard } from '../components/MissionCard';
+import { SEO } from '../components/SEO';
 import { CHURCH_LOGO_URL } from '../utils/constants';
 import foundersImage from '../assets/491100347_18079396636707663_2804182089416872660_n.jpg';
 import dancingImage from '../assets/dancing.jpg';
@@ -10,30 +12,53 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 export const LandingPage = () => {
+  const { t } = useTranslation('landing');
 
   const missions = [
     {
       number: 1,
-      title: 'Form Disciples',
-      description: 'We are committed to raising up passionate followers of Christ who are equipped, empowered, and sent out to transform their communities. Through intentional discipleship, we build leaders who carry the gospel with conviction and compassion, multiplying the impact of God\'s kingdom across the earth.',
+      title: t('mission1.title'),
+      description: t('mission1.description'),
       icon: <GroupsIcon />,
     },
     {
       number: 2,
-      title: 'Discover Gifts',
-      description: 'Every believer carries unique gifts and divine potential. We create an environment where these talents are identified, nurtured, and strategically deployed. Our mission is to unlock the extraordinary within each person, guiding them to their God-given purpose and maximum effectiveness in ministry.',
+      title: t('mission2.title'),
+      description: t('mission2.description'),
       icon: <AutoAwesomeIcon />,
     },
     {
       number: 3,
-      title: 'Win Souls',
-      description: 'The heartbeat of our ministry is reaching the lost, the broken, and the forgotten. We passionately pursue every soul with the life-changing message of the gospel, believing that no one is beyond redemption. Through love, prayer, and unwavering faith, we bring hope to those who need it most.',
+      title: t('mission3.title'),
+      description: t('mission3.description'),
       icon: <FavoriteIcon />,
     },
   ];
 
   return (
-    <Box sx={{ bgcolor: 'background.default' }}>
+    <>
+      <SEO
+        title={t('title')}
+        description={t('subtitle')}
+        url="/"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: t('title'),
+          description: t('subtitle'),
+          url: typeof window !== 'undefined' ? window.location.origin : '',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: '6506 Av. Papineau',
+            addressLocality: 'Montréal',
+            addressRegion: 'QC',
+            postalCode: 'H2G 2X2',
+            addressCountry: 'CA',
+          },
+          telephone: '+1-514-712-2927',
+        }}
+      />
+      <Box sx={{ bgcolor: 'background.default' }}>
       {/* Hero Section - Background Image with Overlay */}
       <Box
         sx={{
@@ -133,7 +158,7 @@ export const LandingPage = () => {
               },
             }}
           >
-            City of David
+            {t('title')}
           </Typography>
           <Typography
             variant="h5"
@@ -151,7 +176,7 @@ export const LandingPage = () => {
               animation: 'fadeInUp 0.8s ease-out 0.7s forwards',
             }}
           >
-            A bilingual Christian church in Montreal, founded in 2004 by Pastors Mireille and John BISOKA
+            {t('subtitle')}
           </Typography>
           <Box
             sx={{
@@ -184,7 +209,7 @@ export const LandingPage = () => {
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              Join Us
+              {t('joinUs')}
             </Button>
             <Button
               component={Link}
@@ -210,7 +235,7 @@ export const LandingPage = () => {
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              Contact Us
+              {t('contactUs')}
             </Button>
           </Box>
         </Container>
@@ -230,7 +255,7 @@ export const LandingPage = () => {
                 letterSpacing: '-0.02em',
               }}
             >
-              Our Mission
+              {t('ourMission')}
             </Typography>
             <Typography
               variant="h6"
@@ -245,7 +270,7 @@ export const LandingPage = () => {
                 mb: 2,
               }}
             >
-              We are called to transform lives, restore hope, and build a community where every believer discovers their purpose and walks in their God-given destiny.
+              {t('missionDescription')}
             </Typography>
             <Typography
               variant="body1"
@@ -259,7 +284,7 @@ export const LandingPage = () => {
                 lineHeight: 1.47059,
               }}
             >
-              Through uncompromising teaching, intense intercession, and compassionate care, we equip the body of Christ to impact our city and beyond.
+              {t('missionSubDescription')}
             </Typography>
           </Box>
           <Box
@@ -296,7 +321,7 @@ export const LandingPage = () => {
                 letterSpacing: '-0.02em',
               }}
             >
-              Our Founders
+              {t('ourFounders')}
             </Typography>
             <Typography
               variant="h6"
@@ -310,7 +335,7 @@ export const LandingPage = () => {
                 lineHeight: 1.47059,
               }}
             >
-              Pastors Mireille and John BISOKA received the vision for this work in 2004
+              {t('foundersSubtitle')}
             </Typography>
           </Box>
           
@@ -356,7 +381,7 @@ export const LandingPage = () => {
                     letterSpacing: '-0.01em',
                   }}
                 >
-                  Apostle Mireille Bisoka
+                  {t('apostleMireille.name')}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -366,9 +391,7 @@ export const LandingPage = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  Apostle Mireille Bisoka is a dedicated servant of God with a passion for discipleship and spiritual growth. 
-                  Together with her husband, she has been instrumental in building the City of David church community, 
-                  focusing on empowering believers to discover and utilize their God-given gifts and talents.
+                  {t('apostleMireille.bio')}
                 </Typography>
               </Box>
 
@@ -383,7 +406,7 @@ export const LandingPage = () => {
                     letterSpacing: '-0.01em',
                   }}
                 >
-                  Pastor John Bisoka
+                  {t('pastorJohn.name')}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -393,9 +416,7 @@ export const LandingPage = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  Pastor John Bisoka is a visionary leader committed to spreading the gospel and winning souls for the Kingdom. 
-                  With unwavering faith and dedication, he has led the City of David church since its founding in 2004, 
-                  creating a place where the broken, rejected, and lost can find hope and restoration in Christ.
+                  {t('pastorJohn.bio')}
                 </Typography>
               </Box>
             </Box>
@@ -406,5 +427,6 @@ export const LandingPage = () => {
       {/* YouTube Videos Section */}
       <YouTubeVideos />
     </Box>
+    </>
   );
 };

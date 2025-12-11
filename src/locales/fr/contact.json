@@ -1,0 +1,18 @@
+{
+  "title": "Nous Contacter",
+  "getInTouch": "Entrer en Contact",
+  "visitUs": "Nous Visiter",
+  "address": "Adresse",
+  "phone": "Téléphone",
+  "province": "Province",
+  "form": {
+    "name": "Nom",
+    "email": "Courriel",
+    "message": "Message",
+    "sendMessage": "Envoyer le Message",
+    "sending": "Envoi en cours...",
+    "success": "Merci pour votre message! Nous vous répondrons bientôt.",
+    "error": "Échec de l'envoi du message. Veuillez réessayer."
+  }
+}
+

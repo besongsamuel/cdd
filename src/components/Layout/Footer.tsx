@@ -2,9 +2,11 @@ import { Box, Container, Typography, IconButton, Link as MuiLink } from '@mui/ma
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import { useTranslation } from 'react-i18next';
 import { SOCIAL_MEDIA_LINKS } from '../../utils/constants';
 
 export const Footer = () => {
+  const { t } = useTranslation('common');
   const currentYear = new Date().getFullYear();
 
   return (
@@ -32,7 +34,7 @@ export const Footer = () => {
               fontSize: '13px',
             }}
           >
-            © {currentYear} City of David. All rights reserved.
+            © {currentYear} {t('appName')}. {t('allRightsReserved')}
           </Typography>
           <Typography
             variant="body2"
@@ -41,7 +43,7 @@ export const Footer = () => {
               fontSize: '13px',
             }}
           >
-            Designed by AfermathTechnologies
+            {t('designedBy')}
           </Typography>
           <Box display="flex" gap={1}>
             <IconButton

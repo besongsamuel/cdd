@@ -1,0 +1,19 @@
+{
+  "title": "Soumettre une Demande",
+  "subtitle": "Partagez vos demandes de prière, besoins de soutien ou témoignages avec nous",
+  "form": {
+    "type": "Type de Demande",
+    "prayer": "Demande de Prière",
+    "support": "Demande de Soutien",
+    "testimony": "Demande de Témoignage",
+    "name": "Nom",
+    "email": "Courriel",
+    "phone": "Téléphone (Optionnel)",
+    "message": "Message",
+    "submit": "Soumettre la Demande",
+    "submitting": "Soumission en cours...",
+    "success": "Merci pour votre demande! Nous vous contacterons bientôt.",
+    "error": "Échec de la soumission de la demande. Veuillez réessayer."
+  }
+}
+

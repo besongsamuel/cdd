@@ -10,10 +10,13 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { contactService } from '../services/contactService';
+import { SEO } from '../components/SEO';
 import { CHURCH_ADDRESS, CHURCH_PHONE, CHURCH_PROVINCE } from '../utils/constants';
 
 export const ContactPage = () => {
+  const { t } = useTranslation('contact');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,7 +34,7 @@ export const ContactPage = () => {
 
     // Basic validation
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      setError('Please fill in all required fields');
+      setError(t('form.error'));
       setLoading(false);
       return;
     }
@@ -39,7 +42,7 @@ export const ContactPage = () => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setError(t('form.error'));
       setLoading(false);
       return;
     }
@@ -49,7 +52,7 @@ export const ContactPage = () => {
       setSuccess(true);
       setFormData({ name: '', email: '', message: '' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+      setError(err instanceof Error ? err.message : t('form.error'));
     } finally {
       setLoading(false);
     }
@@ -63,10 +66,12 @@ export const ContactPage = () => {
   };
 
   return (
-    <Container sx={{ py: 6 }}>
-      <Typography variant="h3" component="h1" gutterBottom textAlign="center">
-        Contact Us
-      </Typography>
+    <>
+      <SEO title={t('title')} description={t('getInTouch')} url="/contact" />
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h3" component="h1" gutterBottom textAlign="center">
+          {t('title')}
+        </Typography>
 
       <Box
         sx={{
@@ -78,12 +83,12 @@ export const ContactPage = () => {
       >
         <Paper sx={{ p: 3 }}>
           <Typography variant="h5" gutterBottom>
-            Get in Touch
+            {t('getInTouch')}
           </Typography>
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Name"
+              label={t('form.name')}
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -92,7 +97,7 @@ export const ContactPage = () => {
             />
             <TextField
               fullWidth
-              label="Email"
+              label={t('form.email')}
               name="email"
               type="email"
               value={formData.email}
@@ -102,7 +107,7 @@ export const ContactPage = () => {
             />
             <TextField
               fullWidth
-              label="Message"
+              label={t('form.message')}
               name="message"
               value={formData.message}
               onChange={handleChange}
@@ -118,7 +123,7 @@ export const ContactPage = () => {
             )}
             {success && (
               <Alert severity="success" sx={{ mt: 2 }}>
-                Thank you for your message! We'll get back to you soon.
+                {t('form.success')}
               </Alert>
             )}
             <Button
@@ -128,7 +133,7 @@ export const ContactPage = () => {
               sx={{ mt: 3 }}
               disabled={loading}
             >
-              {loading ? 'Sending...' : 'Send Message'}
+              {loading ? t('form.sending') : t('form.sendMessage')}
             </Button>
           </form>
         </Paper>
@@ -136,25 +141,25 @@ export const ContactPage = () => {
         <Card>
           <CardContent>
             <Typography variant="h5" gutterBottom>
-              Visit Us
+              {t('visitUs')}
             </Typography>
             <Box sx={{ mt: 3 }}>
               <Typography variant="body1" gutterBottom>
-                <strong>Address:</strong>
+                <strong>{t('address')}:</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 {CHURCH_ADDRESS}
               </Typography>
 
               <Typography variant="body1" gutterBottom sx={{ mt: 2 }}>
-                <strong>Phone:</strong>
+                <strong>{t('phone')}:</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 {CHURCH_PHONE}
               </Typography>
 
               <Typography variant="body1" gutterBottom sx={{ mt: 2 }}>
-                <strong>Province:</strong>
+                <strong>{t('province')}:</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {CHURCH_PROVINCE}
@@ -164,6 +169,7 @@ export const ContactPage = () => {
         </Card>
       </Box>
     </Container>
+    </>
   );
 };
 

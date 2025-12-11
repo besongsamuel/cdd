@@ -1,0 +1,27 @@
+{
+  "appName": "City of David",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "tryAgain": "Try again",
+  "close": "Close",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "add": "Add",
+  "submit": "Submit",
+  "search": "Search",
+  "filter": "Filter",
+  "all": "All",
+  "view": "View",
+  "actions": "Actions",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "message": "Message",
+  "required": "Required",
+  "optional": "Optional",
+  "allRightsReserved": "All rights reserved.",
+  "designedBy": "Designed by AfermathTechnologies"
+}
+

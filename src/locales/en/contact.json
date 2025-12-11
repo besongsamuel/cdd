@@ -1,0 +1,18 @@
+{
+  "title": "Contact Us",
+  "getInTouch": "Get in Touch",
+  "visitUs": "Visit Us",
+  "address": "Address",
+  "phone": "Phone",
+  "province": "Province",
+  "form": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "sendMessage": "Send Message",
+    "sending": "Sending...",
+    "success": "Thank you for your message! We'll get back to you soon.",
+    "error": "Failed to send message. Please try again."
+  }
+}
+

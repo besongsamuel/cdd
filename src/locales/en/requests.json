@@ -1,0 +1,19 @@
+{
+  "title": "Submit a Request",
+  "subtitle": "Share your prayer requests, support needs, or testimonies with us",
+  "form": {
+    "type": "Request Type",
+    "prayer": "Prayer Request",
+    "support": "Support Request",
+    "testimony": "Testimony Request",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone (Optional)",
+    "message": "Message",
+    "submit": "Submit Request",
+    "submitting": "Submitting...",
+    "success": "Thank you for your request! We'll be in touch soon.",
+    "error": "Failed to submit request. Please try again."
+  }
+}
+

@@ -1,5 +1,6 @@
 import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissionsManager";
 import { EventsManager } from "./components/Admin/EventsManager";
@@ -18,6 +19,7 @@ import { MembersPage } from "./pages/MembersPage";
 import { RequestsPage } from "./pages/RequestsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
+import "./i18n/config";
 
 const theme = createTheme({
   palette: {
@@ -95,10 +97,11 @@ const theme = createTheme({
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <BrowserRouter>
+      <HelmetProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            <BrowserRouter>
             <Box
               sx={{
                 display: "flex",
@@ -209,6 +212,7 @@ function App() {
           </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }
