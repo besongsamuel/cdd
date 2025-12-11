@@ -192,6 +192,7 @@ export const DonationsPage = () => {
             component="h2"
             gutterBottom
             sx={{ fontSize: { xs: "24px", md: "32px" }, mb: 3 }}
+            textAlign="center"
           >
             {t("makeDonation")}
           </Typography>
