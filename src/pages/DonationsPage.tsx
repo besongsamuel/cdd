@@ -352,7 +352,7 @@ export const DonationsPage = () => {
                           }}
                         >
                           <Typography variant="body2" color="text.secondary">
-                            {t("budgetProgress")}
+                            {t("budgetProgress")} {currentYear}
                           </Typography>
                           <Typography variant="body2" fontWeight={600}>
                             ${budget.allocated_amount.toLocaleString()} / $
