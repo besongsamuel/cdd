@@ -12,6 +12,8 @@ import {
   Tab,
   Tabs,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +47,12 @@ function TabPanel(props: TabPanelProps) {
 
 export const GalleryPage = () => {
   const { t } = useTranslation("gallery");
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.only("xs"));
+  const isSm = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
+  const imageListCols = isXs ? 1 : isSm ? 2 : 3;
+
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,8 +195,8 @@ export const GalleryPage = () => {
           ) : (
             <ImageList
               variant="masonry"
-              cols={{ xs: 1, sm: 2, md: 3 }}
-              gap={{ xs: 4, sm: 6, md: 8 }}
+              cols={imageListCols}
+              gap={isXs ? 16 : isSm ? 24 : 32}
             >
               {photos.map((photo) => (
                 <ImageListItem key={photo.id}>
@@ -250,8 +258,8 @@ export const GalleryPage = () => {
                     </Typography>
                     <ImageList
                       variant="masonry"
-                      cols={{ xs: 1, sm: 2, md: 3 }}
-                      gap={{ xs: 4, sm: 6, md: 8 }}
+                      cols={imageListCols}
+                      gap={isXs ? 16 : isSm ? 24 : 32}
                     >
                       {eventPhotos.map((photo) => (
                         <ImageListItem key={photo.id}>
@@ -293,8 +301,8 @@ export const GalleryPage = () => {
                   </Typography>
                   <ImageList
                     variant="masonry"
-                    cols={{ xs: 1, sm: 2, md: 3 }}
-                    gap={{ xs: 4, sm: 6, md: 8 }}
+                    cols={imageListCols}
+                    gap={isXs ? 16 : isSm ? 24 : 32}
                   >
                     {photosWithoutEvent.map((photo) => (
                       <ImageListItem key={photo.id}>
@@ -357,8 +365,8 @@ export const GalleryPage = () => {
                     </Typography>
                     <ImageList
                       variant="masonry"
-                      cols={{ xs: 1, sm: 2, md: 3 }}
-                      gap={{ xs: 4, sm: 6, md: 8 }}
+                      cols={imageListCols}
+                      gap={isXs ? 16 : isSm ? 24 : 32}
                     >
                       {monthPhotos.map((photo) => (
                         <ImageListItem key={photo.id}>

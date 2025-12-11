@@ -182,7 +182,7 @@ export const RequestsPage = () => {
                 onChange={handleChange}
                 required
                 multiline
-                rows={{ xs: 5, sm: 6 }}
+                rows={6}
                 margin="normal"
                 sx={{
                   "& .MuiInputBase-input": {

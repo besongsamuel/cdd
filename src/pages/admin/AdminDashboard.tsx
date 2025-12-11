@@ -41,7 +41,10 @@ export const AdminDashboard = () => {
           contactSubmissions: contacts.length,
           totalDonations: donationStats.total || 0,
           totalDonationAmount: donationStats.totalAmount || 0,
-          pendingDonations: donationStats.byStatus?.pending || 0,
+          pendingDonations:
+            donationStats.byStatus && "pending" in donationStats.byStatus
+              ? donationStats.byStatus.pending
+              : 0,
         });
       } catch (error) {
         console.error("Error loading stats:", error);

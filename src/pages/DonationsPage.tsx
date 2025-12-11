@@ -263,7 +263,7 @@ export const DonationsPage = () => {
                 value={formData.notes}
                 onChange={handleChange}
                 multiline
-                rows={{ xs: 4, sm: 4 }}
+                rows={4}
                 margin="normal"
                 sx={{
                   "& .MuiInputBase-input": {

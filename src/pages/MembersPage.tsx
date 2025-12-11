@@ -85,10 +85,12 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
       ) : (
         <CardMedia
           component="img"
-          height={{ xs: 200, sm: 250 }}
           image={leader.picture_url}
           alt={leader.name}
-          sx={{ objectFit: "cover" }}
+          sx={{
+            objectFit: "cover",
+            height: { xs: 200, sm: 250 },
+          }}
           onError={handleImageError}
         />
       )}
