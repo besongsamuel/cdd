@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
@@ -13,6 +14,65 @@ import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { membersService } from "../services/membersService";
 import type { Member } from "../types";
+
+// Component for Leader Card with image error handling
+const LeaderCard = ({ leader }: { leader: Member }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  return (
+    <Card>
+      {imageError || !leader.picture_url ? (
+        <Box
+          sx={{
+            height: { xs: 200, sm: 250 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f5f5f7",
+          }}
+        >
+          <Avatar
+            sx={{
+              width: { xs: 120, sm: 150 },
+              height: { xs: 120, sm: 150 },
+              bgcolor: "primary.main",
+              fontSize: { xs: "60px", sm: "75px" },
+            }}
+          >
+            {leader.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()}
+          </Avatar>
+        </Box>
+      ) : (
+        <CardMedia
+          component="img"
+          height={{ xs: 200, sm: 250 }}
+          image={leader.picture_url}
+          alt={leader.name}
+          sx={{ objectFit: "cover" }}
+          onError={handleImageError}
+        />
+      )}
+      <CardContent>
+        <Typography variant="h6" component="h3" gutterBottom>
+          {leader.name}
+        </Typography>
+        {leader.bio && (
+          <Typography variant="body2" color="text.secondary">
+            {leader.bio}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export const MembersPage = () => {
   const { t } = useTranslation("members");
@@ -83,25 +143,7 @@ export const MembersPage = () => {
               <Typography color="text.secondary">{t("noLeaders")}</Typography>
             ) : (
               leaders.map((leader) => (
-                <Card key={leader.id}>
-                  <CardMedia
-                    component="img"
-                    height={{ xs: 200, sm: 250 }}
-                    image={leader.picture_url || "/placeholder-member.jpg"}
-                    alt={leader.name}
-                    sx={{ objectFit: "cover" }}
-                  />
-                  <CardContent>
-                    <Typography variant="h6" component="h3" gutterBottom>
-                      {leader.name}
-                    </Typography>
-                    {leader.bio && (
-                      <Typography variant="body2" color="text.secondary">
-                        {leader.bio}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
+                <LeaderCard key={leader.id} leader={leader} />
               ))
             )}
           </Box>

@@ -1,0 +1,23 @@
+# Cursor Rules for City of David Project
+
+## Database Migrations
+
+When adding new database migrations, follow this procedure:
+
+1. **Link your project** (if not already linked):
+
+   ```bash
+   supabase link --project-ref jcqeyomapnjpvbxobveo
+   ```
+
+2. **Create a new migration**:
+   ```bash
+   supabase migration new new-migration
+   ```
+   Replace `new-migration` with a descriptive name for your migration.
+
+## Notes
+
+- Migrations are stored in the `supabase/migrations/` directory
+- Migration files should be numbered sequentially (e.g., `004_new_feature.sql`)
+- Always test migrations in a development environment before applying to production
