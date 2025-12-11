@@ -1,8 +1,9 @@
 import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissionsManager";
+import { DonationsManager } from "./components/Admin/DonationsManager";
 import { EventsManager } from "./components/Admin/EventsManager";
 import { MembersManager } from "./components/Admin/MembersManager";
 import { RequestsManager } from "./components/Admin/RequestsManager";
@@ -11,7 +12,9 @@ import { Header } from "./components/Layout/Header";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import "./i18n/config";
 import { ContactPage } from "./pages/ContactPage";
+import { DonationsPage } from "./pages/DonationsPage";
 import { EventsPage } from "./pages/EventsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
@@ -19,11 +22,10 @@ import { MembersPage } from "./pages/MembersPage";
 import { RequestsPage } from "./pages/RequestsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
-import "./i18n/config";
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
       main: "#1e3a8a", // Deep blue - adjust to match your logo
       light: "#3b82f6",
@@ -41,18 +43,19 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     h1: {
       fontWeight: 600,
-      letterSpacing: '-0.02em',
+      letterSpacing: "-0.02em",
     },
     h2: {
       fontWeight: 600,
-      letterSpacing: '-0.01em',
+      letterSpacing: "-0.01em",
     },
     h3: {
       fontWeight: 600,
-      letterSpacing: '-0.01em',
+      letterSpacing: "-0.01em",
     },
     h4: {
       fontWeight: 600,
@@ -64,9 +67,9 @@ const theme = createTheme({
       fontWeight: 600,
     },
     button: {
-      textTransform: 'none',
+      textTransform: "none",
       fontWeight: 400,
-      letterSpacing: '0.01em',
+      letterSpacing: "0.01em",
     },
   },
   shape: {
@@ -77,8 +80,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 980,
-          padding: '8px 22px',
-          fontSize: '17px',
+          padding: "8px 22px",
+          fontSize: "17px",
           fontWeight: 400,
         },
       },
@@ -86,8 +89,8 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: 'none',
-          border: '1px solid rgba(0, 0, 0, 0.08)',
+          boxShadow: "none",
+          border: "1px solid rgba(0, 0, 0, 0.08)",
         },
       },
     },
@@ -102,116 +105,129 @@ function App() {
           <CssBaseline />
           <AuthProvider>
             <BrowserRouter>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh",
-              }}
-            >
-              <Routes>
-                {/* Public Routes */}
-                <Route
-                  path="/"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <LandingPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
-                <Route
-                  path="/contact"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <ContactPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
-                <Route
-                  path="/members"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <MembersPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
-                <Route
-                  path="/events"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <EventsPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
-                <Route
-                  path="/gallery"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <GalleryPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
-                <Route
-                  path="/requests"
-                  element={
-                    <>
-                      <Header />
-                      <Box component="main" sx={{ flexGrow: 1 }}>
-                        <RequestsPage />
-                      </Box>
-                      <Footer />
-                    </>
-                  }
-                />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100vh",
+                }}
+              >
+                <Routes>
+                  {/* Public Routes */}
+                  <Route
+                    path="/"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <LandingPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/contact"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <ContactPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/members"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <MembersPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/events"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <EventsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/gallery"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <GalleryPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/requests"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <RequestsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/donations"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <DonationsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
 
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="members" element={<MembersManager />} />
-                  <Route path="events" element={<EventsManager />} />
-                  <Route path="requests" element={<RequestsManager />} />
+                  {/* Admin Routes */}
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route
-                    path="contact"
-                    element={<ContactSubmissionsManager />}
-                  />
-                  <Route
-                    path=""
-                    element={<Navigate to="/admin/dashboard" replace />}
-                  />
-                </Route>
-              </Routes>
-            </Box>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="members" element={<MembersManager />} />
+                    <Route path="events" element={<EventsManager />} />
+                    <Route path="donations" element={<DonationsManager />} />
+                    <Route path="requests" element={<RequestsManager />} />
+                    <Route
+                      path="contact"
+                      element={<ContactSubmissionsManager />}
+                    />
+                    <Route
+                      path=""
+                      element={<Navigate to="/admin/dashboard" replace />}
+                    />
+                  </Route>
+                </Routes>
+              </Box>
+            </BrowserRouter>
+          </AuthProvider>
+        </ThemeProvider>
       </HelmetProvider>
     </ErrorBoundary>
   );

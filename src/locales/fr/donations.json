@@ -1,0 +1,22 @@
+{
+  "title": "Dons",
+  "subtitle": "Vos contributions généreuses nous aident à servir notre communauté et à propager l'évangile. Nous apprécions votre soutien!",
+  "etransferInstructions": "Veuillez envoyer votre don par virement électronique à:",
+  "makeDonation": "Faire un Don",
+  "partnersProjects": "Nos Partenaires et Projets",
+  "budgetProgress": "Progression 2025",
+  "complete": "complété",
+  "form": {
+    "amount": "Montant (CAD)",
+    "amountRequired": "Veuillez entrer un montant de don valide",
+    "donorName": "Votre Nom (Optionnel)",
+    "donorEmail": "Votre Courriel (Optionnel)",
+    "category": "Catégorie de Don",
+    "noCategory": "Don Général",
+    "notes": "Message (Optionnel)",
+    "submit": "Soumettre le Don",
+    "submitting": "Soumission en cours...",
+    "success": "Merci pour votre don! Veuillez envoyer votre virement électronique à info@eglisecitededavid.com",
+    "error": "Échec de la soumission du don. Veuillez réessayer."
+  }
+}

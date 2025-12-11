@@ -40,6 +40,7 @@ export const Header = () => {
     { label: t("ourMembers"), path: "/members" },
     { label: t("eventsPrograms"), path: "/events" },
     { label: t("gallery"), path: "/gallery" },
+    { label: t("donations"), path: "/donations" },
     { label: t("requests"), path: "/requests" },
     { label: t("contactUs"), path: "/contact" },
   ];

@@ -1,6 +1,17 @@
-import { Box, Drawer, AppBar, Toolbar, Typography, List, ListItem, ListItemButton, ListItemText, Button } from '@mui/material';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import {
+  AppBar,
+  Box,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const drawerWidth = 240;
 
@@ -10,20 +21,21 @@ export const AdminLayout = () => {
   const { signOut } = useAuth();
 
   const menuItems = [
-    { label: 'Dashboard', path: '/admin/dashboard' },
-    { label: 'Members', path: '/admin/members' },
-    { label: 'Events', path: '/admin/events' },
-    { label: 'Requests', path: '/admin/requests' },
-    { label: 'Contact Submissions', path: '/admin/contact' },
+    { label: "Dashboard", path: "/admin/dashboard" },
+    { label: "Members", path: "/admin/members" },
+    { label: "Events", path: "/admin/events" },
+    { label: "Donations", path: "/admin/donations" },
+    { label: "Requests", path: "/admin/requests" },
+    { label: "Contact Submissions", path: "/admin/contact" },
   ];
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/admin/login');
+    navigate("/admin/login");
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <AppBar
         position="fixed"
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -42,14 +54,14 @@ export const AdminLayout = () => {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          '& .MuiDrawer-paper': {
+          "& .MuiDrawer-paper": {
             width: drawerWidth,
-            boxSizing: 'border-box',
+            boxSizing: "border-box",
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ overflow: "auto" }}>
           <List>
             {menuItems.map((item) => (
               <ListItem key={item.path} disablePadding>
@@ -68,7 +80,7 @@ export const AdminLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: 'background.default',
+          bgcolor: "background.default",
           p: 3,
         }}
       >
@@ -78,6 +90,3 @@ export const AdminLayout = () => {
     </Box>
   );
 };
-
-
-

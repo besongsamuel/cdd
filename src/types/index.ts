@@ -1,8 +1,10 @@
-export type MemberType = 'leader' | 'regular';
+export type MemberType = "leader" | "regular";
 
-export type RequestType = 'prayer' | 'support' | 'testimony';
+export type RequestType = "prayer" | "support" | "testimony";
 
-export type RequestStatus = 'pending' | 'approved' | 'completed';
+export type RequestStatus = "pending" | "approved" | "completed";
+
+export type DonationStatus = "pending" | "received" | "verified";
 
 export interface Member {
   id: string;
@@ -76,4 +78,38 @@ export interface GalleryPhoto {
   created_at: string;
 }
 
+export interface DonationCategory {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
 
+export interface YearlyBudget {
+  id: string;
+  year: number;
+  category_id: string;
+  target_amount: number;
+  allocated_amount: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  category_name?: string; // Joined field
+}
+
+export interface Donation {
+  id: string;
+  amount: number;
+  donor_name?: string;
+  donor_email?: string;
+  category_id?: string;
+  status: DonationStatus;
+  etransfer_email?: string;
+  notes?: string;
+  received_at?: string;
+  created_at: string;
+  category_name?: string; // Joined field
+}

@@ -1,6 +1,7 @@
 export const CHURCH_ADDRESS = "6506 Av. Papineau, Montréal, QC H2G 2X2";
 export const CHURCH_PHONE = "(514) 712-2927";
 export const CHURCH_PROVINCE = "Quebec";
+export const DONATION_EMAIL = "info@eglisecitededavid.com";
 
 // Logo path - components should import directly from assets
 // export const CHURCH_LOGO_PATH = '/src/assets/cddLogo.png';
