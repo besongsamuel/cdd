@@ -3,7 +3,7 @@ CREATE TYPE donation_status AS ENUM ('pending', 'received', 'verified');
 
 -- Create donation_categories table
 CREATE TABLE donation_categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
   is_active BOOLEAN DEFAULT true,
@@ -14,7 +14,7 @@ CREATE TABLE donation_categories (
 
 -- Create yearly_budgets table
 CREATE TABLE yearly_budgets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   year INTEGER NOT NULL,
   category_id UUID REFERENCES donation_categories(id) ON DELETE CASCADE,
   target_amount DECIMAL(10,2) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE yearly_budgets (
 
 -- Create donations table
 CREATE TABLE donations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   amount DECIMAL(10,2) NOT NULL,
   donor_name TEXT,
   donor_email TEXT,

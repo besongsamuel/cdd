@@ -4,6 +4,7 @@ import { initReactI18next } from "react-i18next";
 
 import enCommon from "../locales/en/common.json";
 import enContact from "../locales/en/contact.json";
+import enDepartments from "../locales/en/departments.json";
 import enDonations from "../locales/en/donations.json";
 import enEvents from "../locales/en/events.json";
 import enGallery from "../locales/en/gallery.json";
@@ -14,6 +15,7 @@ import enRequests from "../locales/en/requests.json";
 
 import frCommon from "../locales/fr/common.json";
 import frContact from "../locales/fr/contact.json";
+import frDepartments from "../locales/fr/departments.json";
 import frDonations from "../locales/fr/donations.json";
 import frEvents from "../locales/fr/events.json";
 import frGallery from "../locales/fr/gallery.json";
@@ -37,6 +39,7 @@ i18n
         requests: enRequests,
         gallery: enGallery,
         donations: enDonations,
+        departments: enDepartments,
       },
       fr: {
         common: frCommon,
@@ -48,6 +51,7 @@ i18n
         requests: frRequests,
         gallery: frGallery,
         donations: frDonations,
+        departments: frDepartments,
       },
     },
     fallbackLng: "en",
@@ -62,6 +66,7 @@ i18n
       "requests",
       "gallery",
       "donations",
+      "departments",
     ],
     interpolation: {
       escapeValue: false,

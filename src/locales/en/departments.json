@@ -1,0 +1,26 @@
+{
+  "title": "Departments",
+  "subtitle": "Explore our church departments and find where you can serve and grow in ministry",
+  "mission": "Mission",
+  "members": "Members",
+  "departmentLeads": "Department Leads",
+  "otherMembers": "Members",
+  "joinDepartment": "Join Department",
+  "memberCount": "{{count}} member",
+  "memberCount_plural": "{{count}} members",
+  "noMembers": "No members yet",
+  "noDepartments": "No departments available",
+  "noDescription": "No description available",
+  "requestSubmitted": "Your join request has been submitted successfully. We will review it and get back to you soon.",
+  "viewDetails": "View Details",
+  "form": {
+    "name": "Name",
+    "nameRequired": "Name is required",
+    "email": "Email",
+    "phone": "Phone",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "error": "An error occurred. Please try again."
+  }
+}

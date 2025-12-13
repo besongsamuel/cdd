@@ -1,3 +1,4 @@
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
@@ -9,6 +10,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -35,15 +38,56 @@ export const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = [
-    { label: t("home"), path: "/" },
-    { label: t("ourMembers"), path: "/members" },
-    { label: t("eventsPrograms"), path: "/events" },
-    { label: t("gallery"), path: "/gallery" },
-    { label: t("donations"), path: "/donations" },
-    { label: t("requests"), path: "/requests" },
-    { label: t("contactUs"), path: "/contact" },
-  ];
+  const [aboutAnchor, setAboutAnchor] = useState<null | HTMLElement>(null);
+  const [activitiesAnchor, setActivitiesAnchor] = useState<null | HTMLElement>(
+    null
+  );
+  const [getInvolvedAnchor, setGetInvolvedAnchor] =
+    useState<null | HTMLElement>(null);
+
+  const navGroups = {
+    standalone: [
+      { label: t("home"), path: "/" },
+      { label: t("contactUs"), path: "/contact" },
+    ],
+    about: [
+      { label: t("ourMembers"), path: "/members" },
+      { label: t("departments"), path: "/departments" },
+    ],
+    activities: [
+      { label: t("eventsPrograms"), path: "/events" },
+      { label: t("gallery"), path: "/gallery" },
+    ],
+    getInvolved: [
+      { label: t("donations"), path: "/donations" },
+      { label: t("requests"), path: "/requests" },
+    ],
+  };
+
+  const handleMenuOpen =
+    (menu: "about" | "activities" | "getInvolved") =>
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (menu === "about") setAboutAnchor(event.currentTarget);
+      if (menu === "activities") setActivitiesAnchor(event.currentTarget);
+      if (menu === "getInvolved") setGetInvolvedAnchor(event.currentTarget);
+    };
+
+  const handleMenuClose =
+    (menu: "about" | "activities" | "getInvolved") => () => {
+      if (menu === "about") setAboutAnchor(null);
+      if (menu === "activities") setActivitiesAnchor(null);
+      if (menu === "getInvolved") setGetInvolvedAnchor(null);
+    };
+
+  const isPathActive = (path: string) => {
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
+  };
+
+  const isGroupActive = (items: typeof navGroups.about) => {
+    return items.some((item) => isPathActive(item.path));
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -52,12 +96,12 @@ export const Header = () => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", pt: 2 }}>
       <List>
-        {navItems.map((item) => (
+        {navGroups.standalone.map((item) => (
           <ListItem key={item.path} disablePadding>
             <ListItemButton
               component={Link}
               to={item.path}
-              selected={location.pathname === item.path}
+              selected={isPathActive(item.path)}
               sx={{
                 borderRadius: 2,
                 mx: 1,
@@ -89,12 +133,148 @@ export const Header = () => {
                 primary={item.label}
                 primaryTypographyProps={{
                   fontSize: "17px",
-                  fontWeight: location.pathname === item.path ? 600 : 400,
+                  fontWeight: isPathActive(item.path) ? 600 : 400,
                 }}
               />
             </ListItemButton>
           </ListItem>
         ))}
+
+        <ListItem disablePadding>
+          <ListItemText
+            primary={t("about")}
+            primaryTypographyProps={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "text.secondary",
+              px: 2,
+              pt: 2,
+            }}
+          />
+        </ListItem>
+        {navGroups.about.map((item) => (
+          <ListItem key={item.path} disablePadding>
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              selected={isPathActive(item.path)}
+              sx={{
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+                pl: 3,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(30, 58, 138, 0.08)",
+                  color: "primary.main",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateX(4px)",
+                },
+              }}
+            >
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontSize: "16px",
+                  fontWeight: isPathActive(item.path) ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+
+        <ListItem disablePadding>
+          <ListItemText
+            primary={t("activities")}
+            primaryTypographyProps={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "text.secondary",
+              px: 2,
+              pt: 2,
+            }}
+          />
+        </ListItem>
+        {navGroups.activities.map((item) => (
+          <ListItem key={item.path} disablePadding>
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              selected={isPathActive(item.path)}
+              sx={{
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+                pl: 3,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(30, 58, 138, 0.08)",
+                  color: "primary.main",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateX(4px)",
+                },
+              }}
+            >
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontSize: "16px",
+                  fontWeight: isPathActive(item.path) ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+
+        <ListItem disablePadding>
+          <ListItemText
+            primary={t("getInvolved")}
+            primaryTypographyProps={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "text.secondary",
+              px: 2,
+              pt: 2,
+            }}
+          />
+        </ListItem>
+        {navGroups.getInvolved.map((item) => (
+          <ListItem key={item.path} disablePadding>
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              selected={isPathActive(item.path)}
+              sx={{
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+                pl: 3,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(30, 58, 138, 0.08)",
+                  color: "primary.main",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateX(4px)",
+                },
+              }}
+            >
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontSize: "16px",
+                  fontWeight: isPathActive(item.path) ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+
         {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component={Link} to="/admin/dashboard">
@@ -198,7 +378,7 @@ export const Header = () => {
               alignItems: "center",
             }}
           >
-            {navItems.map((item, index) => (
+            {navGroups.standalone.map((item, index) => (
               <Button
                 key={item.path}
                 component={Link}
@@ -206,7 +386,7 @@ export const Header = () => {
                 sx={{
                   color: "text.primary",
                   fontSize: { xs: "16px", sm: "17px" },
-                  fontWeight: location.pathname === item.path ? 600 : 400,
+                  fontWeight: isPathActive(item.path) ? 600 : 400,
                   px: { xs: 2, sm: 2.5 },
                   py: { xs: 1, sm: 1.2 },
                   borderRadius: 2,
@@ -219,7 +399,7 @@ export const Header = () => {
                     position: "absolute",
                     bottom: 0,
                     left: "50%",
-                    width: location.pathname === item.path ? "80%" : "0%",
+                    width: isPathActive(item.path) ? "80%" : "0%",
                     height: "2px",
                     background:
                       "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
@@ -232,10 +412,9 @@ export const Header = () => {
                   "&:hover": {
                     backgroundColor: "rgba(30, 58, 138, 0.06)",
                     transform: "translateY(-2px)",
-                    color:
-                      location.pathname === item.path
-                        ? "primary.main"
-                        : "text.primary",
+                    color: isPathActive(item.path)
+                      ? "primary.main"
+                      : "text.primary",
                   },
                   "&:active": {
                     transform: "translateY(0)",
@@ -260,6 +439,210 @@ export const Header = () => {
                 {item.label}
               </Button>
             ))}
+
+            {/* About Dropdown */}
+            <Button
+              onClick={handleMenuOpen("about")}
+              endIcon={<ArrowDropDownIcon />}
+              sx={{
+                color: isGroupActive(navGroups.about)
+                  ? "primary.main"
+                  : "text.primary",
+                fontSize: { xs: "16px", sm: "17px" },
+                fontWeight: isGroupActive(navGroups.about) ? 600 : 400,
+                px: { xs: 2, sm: 2.5 },
+                py: { xs: 1, sm: 1.2 },
+                borderRadius: 2,
+                position: "relative",
+                minHeight: "44px",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  width: isGroupActive(navGroups.about) ? "80%" : "0%",
+                  height: "2px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  transform: "translateX(-50%)",
+                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {t("about")}
+            </Button>
+            <Menu
+              anchorEl={aboutAnchor}
+              open={Boolean(aboutAnchor)}
+              onClose={handleMenuClose("about")}
+              MenuListProps={{
+                "aria-labelledby": "about-button",
+              }}
+              sx={{ mt: 1 }}
+            >
+              {navGroups.about.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuClose("about")}
+                  selected={isPathActive(item.path)}
+                  sx={{
+                    minWidth: 180,
+                    color: isPathActive(item.path)
+                      ? "primary.main"
+                      : "text.primary",
+                    fontWeight: isPathActive(item.path) ? 600 : 400,
+                  }}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            {/* Activities Dropdown */}
+            <Button
+              onClick={handleMenuOpen("activities")}
+              endIcon={<ArrowDropDownIcon />}
+              sx={{
+                color: isGroupActive(navGroups.activities)
+                  ? "primary.main"
+                  : "text.primary",
+                fontSize: { xs: "16px", sm: "17px" },
+                fontWeight: isGroupActive(navGroups.activities) ? 600 : 400,
+                px: { xs: 2, sm: 2.5 },
+                py: { xs: 1, sm: 1.2 },
+                borderRadius: 2,
+                position: "relative",
+                minHeight: "44px",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  width: isGroupActive(navGroups.activities) ? "80%" : "0%",
+                  height: "2px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  transform: "translateX(-50%)",
+                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {t("activities")}
+            </Button>
+            <Menu
+              anchorEl={activitiesAnchor}
+              open={Boolean(activitiesAnchor)}
+              onClose={handleMenuClose("activities")}
+              MenuListProps={{
+                "aria-labelledby": "activities-button",
+              }}
+              sx={{ mt: 1 }}
+            >
+              {navGroups.activities.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuClose("activities")}
+                  selected={isPathActive(item.path)}
+                  sx={{
+                    minWidth: 180,
+                    color: isPathActive(item.path)
+                      ? "primary.main"
+                      : "text.primary",
+                    fontWeight: isPathActive(item.path) ? 600 : 400,
+                  }}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            {/* Get Involved Dropdown */}
+            <Button
+              onClick={handleMenuOpen("getInvolved")}
+              endIcon={<ArrowDropDownIcon />}
+              sx={{
+                color: isGroupActive(navGroups.getInvolved)
+                  ? "primary.main"
+                  : "text.primary",
+                fontSize: { xs: "16px", sm: "17px" },
+                fontWeight: isGroupActive(navGroups.getInvolved) ? 600 : 400,
+                px: { xs: 2, sm: 2.5 },
+                py: { xs: 1, sm: 1.2 },
+                borderRadius: 2,
+                position: "relative",
+                minHeight: "44px",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  width: isGroupActive(navGroups.getInvolved) ? "80%" : "0%",
+                  height: "2px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  transform: "translateX(-50%)",
+                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {t("getInvolved")}
+            </Button>
+            <Menu
+              anchorEl={getInvolvedAnchor}
+              open={Boolean(getInvolvedAnchor)}
+              onClose={handleMenuClose("getInvolved")}
+              MenuListProps={{
+                "aria-labelledby": "getInvolved-button",
+              }}
+              sx={{ mt: 1 }}
+            >
+              {navGroups.getInvolved.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuClose("getInvolved")}
+                  selected={isPathActive(item.path)}
+                  sx={{
+                    minWidth: 180,
+                    color: isPathActive(item.path)
+                      ? "primary.main"
+                      : "text.primary",
+                    fontWeight: isPathActive(item.path) ? 600 : 400,
+                  }}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
             {isAdmin && (
               <Button
                 component={Link}

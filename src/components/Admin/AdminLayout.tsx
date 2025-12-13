@@ -24,6 +24,7 @@ export const AdminLayout = () => {
     { label: "Dashboard", path: "/admin/dashboard" },
     { label: "Members", path: "/admin/members" },
     { label: "Events", path: "/admin/events" },
+    { label: "Departments", path: "/admin/departments" },
     { label: "Donations", path: "/admin/donations" },
     { label: "Requests", path: "/admin/requests" },
     { label: "Contact Submissions", path: "/admin/contact" },

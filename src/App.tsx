@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissionsManager";
+import { DepartmentsManager } from "./components/Admin/DepartmentsManager";
 import { DonationsManager } from "./components/Admin/DonationsManager";
 import { EventsManager } from "./components/Admin/EventsManager";
 import { MembersManager } from "./components/Admin/MembersManager";
@@ -14,6 +15,8 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./i18n/config";
 import { ContactPage } from "./pages/ContactPage";
+import { DepartmentDetailPage } from "./pages/DepartmentDetailPage";
+import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { DonationsPage } from "./pages/DonationsPage";
 import { EventsPage } from "./pages/EventsPage";
 import { GalleryPage } from "./pages/GalleryPage";
@@ -198,6 +201,30 @@ function App() {
                       </>
                     }
                   />
+                  <Route
+                    path="/departments"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <DepartmentsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/departments/:id"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <DepartmentDetailPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -213,6 +240,10 @@ function App() {
                     <Route path="members" element={<MembersManager />} />
                     <Route path="events" element={<EventsManager />} />
                     <Route path="donations" element={<DonationsManager />} />
+                    <Route
+                      path="departments"
+                      element={<DepartmentsManager />}
+                    />
                     <Route path="requests" element={<RequestsManager />} />
                     <Route
                       path="contact"

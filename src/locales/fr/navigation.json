@@ -1,8 +1,12 @@
 {
   "home": "Accueil",
+  "about": "À Propos",
   "ourMembers": "Nos Membres",
+  "departments": "Départements",
+  "activities": "Activités",
   "eventsPrograms": "Événements et Programmes",
   "gallery": "Galerie",
+  "getInvolved": "S'Impliquer",
   "donations": "Dons",
   "requests": "Demandes",
   "contactUs": "Nous Contacter",

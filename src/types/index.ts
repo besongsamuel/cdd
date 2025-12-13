@@ -6,6 +6,8 @@ export type RequestStatus = "pending" | "approved" | "completed";
 
 export type DonationStatus = "pending" | "received" | "verified";
 
+export type DepartmentRequestStatus = "pending" | "approved" | "rejected";
+
 export interface Member {
   id: string;
   name: string;
@@ -13,6 +15,8 @@ export interface Member {
   bio?: string;
   picture_url?: string;
   passions?: string[];
+  email?: string;
+  phone?: string;
   created_at: string;
   updated_at: string;
 }
@@ -112,4 +116,40 @@ export interface Donation {
   received_at?: string;
   created_at: string;
   category_name?: string; // Joined field
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  description?: string; // markdown
+  image_url?: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DepartmentMember {
+  id: string;
+  department_id: string;
+  member_id: string;
+  is_lead: boolean;
+  joined_at: string;
+  member_name?: string; // joined from members
+  member_picture_url?: string; // joined from members
+  member_email?: string; // joined from members
+  member_phone?: string; // joined from members
+}
+
+export interface DepartmentJoinRequest {
+  id: string;
+  department_id: string;
+  member_name: string;
+  member_email?: string;
+  member_phone?: string;
+  status: DepartmentRequestStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  department_name?: string; // joined from departments
 }

@@ -99,9 +99,25 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
           {leader.name}
         </Typography>
         {leader.bio && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {leader.bio}
           </Typography>
+        )}
+        {(leader.email || leader.phone) && (
+          <Box
+            sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
+          >
+            {leader.email && (
+              <Typography variant="caption" color="text.secondary">
+                📧 {leader.email}
+              </Typography>
+            )}
+            {leader.phone && (
+              <Typography variant="caption" color="text.secondary">
+                📞 {leader.phone}
+              </Typography>
+            )}
+          </Box>
         )}
       </CardContent>
     </Card>
@@ -275,6 +291,28 @@ export const MembersPage = () => {
                     <Typography variant="h6" component="h3" gutterBottom>
                       {member.name}
                     </Typography>
+                    {(member.email || member.phone) && (
+                      <Box
+                        sx={{
+                          mt: 0.5,
+                          mb: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 0.5,
+                        }}
+                      >
+                        {member.email && (
+                          <Typography variant="caption" color="text.secondary">
+                            📧 {member.email}
+                          </Typography>
+                        )}
+                        {member.phone && (
+                          <Typography variant="caption" color="text.secondary">
+                            📞 {member.phone}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
                     {member.passions && member.passions.length > 0 && (
                       <Box
                         sx={{

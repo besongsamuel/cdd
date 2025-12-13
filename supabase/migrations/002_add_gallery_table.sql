@@ -1,6 +1,6 @@
 -- Create gallery_photos table
 CREATE TABLE gallery_photos (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   image_url TEXT NOT NULL,
   event_id UUID REFERENCES events(id) ON DELETE SET NULL,
   caption TEXT,

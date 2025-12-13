@@ -1,6 +1,3 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Create enum types
 CREATE TYPE member_type AS ENUM ('leader', 'regular');
 CREATE TYPE request_type AS ENUM ('prayer', 'support', 'testimony');
@@ -8,7 +5,7 @@ CREATE TYPE request_status AS ENUM ('pending', 'approved', 'completed');
 
 -- Create members table
 CREATE TABLE members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   type member_type NOT NULL,
   bio TEXT,
@@ -20,7 +17,7 @@ CREATE TABLE members (
 
 -- Create events table
 CREATE TABLE events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
   event_date DATE NOT NULL,
@@ -32,7 +29,7 @@ CREATE TABLE events (
 
 -- Create regular_programs table
 CREATE TABLE regular_programs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   day TEXT NOT NULL,
   time TEXT NOT NULL,
   location TEXT NOT NULL,
@@ -44,7 +41,7 @@ CREATE TABLE regular_programs (
 
 -- Create requests table
 CREATE TABLE requests (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type request_type NOT NULL,
   content TEXT NOT NULL,
   name TEXT,
@@ -56,7 +53,7 @@ CREATE TABLE requests (
 
 -- Create contact_submissions table
 CREATE TABLE contact_submissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -65,7 +62,7 @@ CREATE TABLE contact_submissions (
 
 -- Create church_info table
 CREATE TABLE church_info (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   founder_1_name TEXT NOT NULL DEFAULT 'Apostle Mireille Bisoka',
   founder_1_image_url TEXT,
   founder_2_name TEXT NOT NULL DEFAULT 'Pastor John Bisoka',

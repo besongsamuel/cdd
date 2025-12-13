@@ -1,8 +1,12 @@
 {
   "home": "Home",
+  "about": "About",
   "ourMembers": "Our Members",
+  "departments": "Departments",
+  "activities": "Activities",
   "eventsPrograms": "Events & Programs",
   "gallery": "Gallery",
+  "getInvolved": "Get Involved",
   "donations": "Donations",
   "requests": "Requests",
   "contactUs": "Contact Us",

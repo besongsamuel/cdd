@@ -1,0 +1,26 @@
+{
+  "title": "Départements",
+  "subtitle": "Explorez nos départements d'église et trouvez où vous pouvez servir et grandir dans le ministère",
+  "mission": "Mission",
+  "members": "Membres",
+  "departmentLeads": "Responsables de Département",
+  "otherMembers": "Membres",
+  "joinDepartment": "Rejoindre le Département",
+  "memberCount": "{{count}} membre",
+  "memberCount_plural": "{{count}} membres",
+  "noMembers": "Aucun membre pour le moment",
+  "noDepartments": "Aucun département disponible",
+  "noDescription": "Aucune description disponible",
+  "requestSubmitted": "Votre demande d'adhésion a été soumise avec succès. Nous l'examinerons et vous répondrons bientôt.",
+  "viewDetails": "Voir les Détails",
+  "form": {
+    "name": "Nom",
+    "nameRequired": "Le nom est requis",
+    "email": "Email",
+    "phone": "Téléphone",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "submitting": "Soumission...",
+    "error": "Une erreur s'est produite. Veuillez réessayer."
+  }
+}
