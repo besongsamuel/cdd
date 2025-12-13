@@ -5,7 +5,6 @@ import {
   CardContent,
   CardMedia,
   Container,
-  Grid,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -91,9 +90,19 @@ export const DepartmentsPage = () => {
             {t("noDepartments")}
           </Typography>
         ) : (
-          <Grid container spacing={3}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 3,
+            }}
+          >
             {departments.map((department) => (
-              <Grid item xs={12} sm={6} md={4} key={department.id}>
+              <Box key={department.id}>
                 <Card
                   sx={{
                     height: "100%",
@@ -192,9 +201,9 @@ export const DepartmentsPage = () => {
                     </CardContent>
                   </CardActionArea>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
       </Container>
     </>

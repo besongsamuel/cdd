@@ -9,7 +9,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   TextField,
   Typography,
 } from "@mui/material";
@@ -166,9 +165,16 @@ export const DepartmentDetailPage = () => {
         </Typography>
 
         {/* Content Grid */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 4,
+            mb: 4,
+          }}
+        >
           {/* Left: Mission/Description */}
-          <Grid item xs={12} md={6}>
+          <Box>
             <Typography
               variant="h5"
               component="h2"
@@ -188,10 +194,10 @@ export const DepartmentDetailPage = () => {
                 {t("noDescription")}
               </Typography>
             )}
-          </Grid>
+          </Box>
 
           {/* Right: Members */}
-          <Grid item xs={12} md={6}>
+          <Box>
             <Typography
               variant="h5"
               component="h2"
@@ -303,8 +309,8 @@ export const DepartmentDetailPage = () => {
                 )}
               </Box>
             )}
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Join Button */}
         <Box sx={{ textAlign: "center", mt: 4 }}>
