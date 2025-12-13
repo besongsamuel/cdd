@@ -1,0 +1,54 @@
+{
+  "title": "Financial Transparency",
+  "intro": {
+    "heading": "Our Commitment to Financial Transparency",
+    "paragraph1": "At City of David, we believe that financial transparency is not just a best practice—it's a biblical principle. As stewards of the resources entrusted to us by God and our generous community, we are committed to operating with integrity, accountability, and openness.",
+    "paragraph2": "We understand that trust is built through transparency. That's why we share how your contributions are used to advance God's kingdom, support our community, and fulfill our mission. Every dollar given is a sacred trust, and we honor that trust by being good stewards of what has been entrusted to us."
+  },
+  "howFundsAreUsed": {
+    "heading": "How Funds Are Used",
+    "description": "Your generous contributions support the mission and ministry of City of David. Here's how we allocate the resources God has entrusted to us:",
+    "ministryPrograms": "Ministry & Programs",
+    "ministryProgramsDesc": "Supporting our various ministries, programs, and activities that help people grow in faith and build community.",
+    "communityOutreach": "Community Outreach & Missions",
+    "communityOutreachDesc": "Reaching out to our local community and supporting missions work locally and globally.",
+    "staffAdministration": "Staff & Administration",
+    "staffAdministrationDesc": "Supporting our pastoral staff and essential administrative functions that keep our church running smoothly.",
+    "facilitiesOperations": "Facilities & Operations",
+    "facilitiesOperationsDesc": "Maintaining our church facilities, utilities, and day-to-day operational expenses."
+  },
+  "annualSnapshot": {
+    "heading": "Annual Financial Snapshot",
+    "donationsReceived": "Total Donations Received",
+    "totalExpenses": "Total Expenses",
+    "surplus": "Surplus",
+    "deficit": "Deficit",
+    "reinvestment": "Any surplus is reinvested into ministry and community programs. Any deficit is carefully managed through our financial planning process."
+  },
+  "governance": {
+    "heading": "Governance & Oversight",
+    "description": "We take financial accountability seriously. Our financial practices are guided by:",
+    "budgetApproval": "Budget Approval",
+    "budgetApprovalDesc": "Our annual budget is reviewed and approved by our church board and elders, ensuring alignment with our mission and values.",
+    "financeCommittee": "Finance Committee",
+    "financeCommitteeDesc": "A dedicated finance committee provides ongoing oversight, reviewing financial reports and ensuring proper stewardship of resources.",
+    "externalReview": "External Review",
+    "externalReviewDesc": "Our financial records are reviewed annually by an independent accountant to ensure accuracy and compliance with all regulations."
+  },
+  "charitableStatus": {
+    "heading": "Charitable Status",
+    "description": "City of David is registered as a Canadian charity with the Canada Revenue Agency (CRA).",
+    "registrationNumber": "CRA Registration Number",
+    "registrationPlaceholder": "To be provided"
+  },
+  "commitment": {
+    "heading": "Our Commitment to Stewardship",
+    "paragraph1": "We are committed to using every resource wisely and for the glory of God. Our financial decisions are made prayerfully, with careful consideration of how best to serve our community and advance God's kingdom.",
+    "paragraph2": "We believe that financial transparency builds trust, demonstrates integrity, and honors both God and our generous supporters. Thank you for entrusting us with your financial support as we work together to fulfill the mission God has given us."
+  },
+  "cta": {
+    "viewReport": "View Annual Report",
+    "learnMore": "Learn How to Give"
+  }
+}
+

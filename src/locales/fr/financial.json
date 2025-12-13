@@ -1,0 +1,54 @@
+{
+  "title": "Transparence Financière",
+  "intro": {
+    "heading": "Notre Engagement envers la Transparence Financière",
+    "paragraph1": "À la Cité de David, nous croyons que la transparence financière n'est pas seulement une meilleure pratique—c'est un principe biblique. En tant qu'intendants des ressources qui nous sont confiées par Dieu et notre communauté généreuse, nous nous engageons à fonctionner avec intégrité, responsabilité et ouverture.",
+    "paragraph2": "Nous comprenons que la confiance se construit par la transparence. C'est pourquoi nous partageons comment vos contributions sont utilisées pour faire avancer le royaume de Dieu, soutenir notre communauté et accomplir notre mission. Chaque dollar donné est une confiance sacrée, et nous honorons cette confiance en étant de bons intendants de ce qui nous a été confié."
+  },
+  "howFundsAreUsed": {
+    "heading": "Comment les Fonds Sont Utilisés",
+    "description": "Vos contributions généreuses soutiennent la mission et le ministère de la Cité de David. Voici comment nous allouons les ressources que Dieu nous a confiées :",
+    "ministryPrograms": "Ministères et Programmes",
+    "ministryProgramsDesc": "Soutenir nos divers ministères, programmes et activités qui aident les gens à grandir dans la foi et à construire la communauté.",
+    "communityOutreach": "Outreach Communautaire et Missions",
+    "communityOutreachDesc": "Atteindre notre communauté locale et soutenir le travail missionnaire localement et mondialement.",
+    "staffAdministration": "Personnel et Administration",
+    "staffAdministrationDesc": "Soutenir notre personnel pastoral et les fonctions administratives essentielles qui maintiennent notre église en fonctionnement.",
+    "facilitiesOperations": "Installations et Opérations",
+    "facilitiesOperationsDesc": "Maintenir nos installations d'église, les services publics et les dépenses opérationnelles quotidiennes."
+  },
+  "annualSnapshot": {
+    "heading": "Aperçu Financier Annuel",
+    "donationsReceived": "Total des Dons Reçus",
+    "totalExpenses": "Total des Dépenses",
+    "surplus": "Excédent",
+    "deficit": "Déficit",
+    "reinvestment": "Tout excédent est réinvesti dans le ministère et les programmes communautaires. Tout déficit est soigneusement géré grâce à notre processus de planification financière."
+  },
+  "governance": {
+    "heading": "Gouvernance et Supervision",
+    "description": "Nous prenons la responsabilité financière au sérieux. Nos pratiques financières sont guidées par :",
+    "budgetApproval": "Approbation du Budget",
+    "budgetApprovalDesc": "Notre budget annuel est examiné et approuvé par notre conseil d'église et nos anciens, garantissant l'alignement avec notre mission et nos valeurs.",
+    "financeCommittee": "Comité Financier",
+    "financeCommitteeDesc": "Un comité financier dédié assure une supervision continue, examinant les rapports financiers et garantissant une bonne intendance des ressources.",
+    "externalReview": "Examen Externe",
+    "externalReviewDesc": "Nos registres financiers sont examinés annuellement par un comptable indépendant pour assurer l'exactitude et la conformité à toutes les réglementations."
+  },
+  "charitableStatus": {
+    "heading": "Statut de Bienfaisance",
+    "description": "La Cité de David est enregistrée comme organisme de bienfaisance canadien auprès de l'Agence du revenu du Canada (ARC).",
+    "registrationNumber": "Numéro d'Enregistrement ARC",
+    "registrationPlaceholder": "À fournir"
+  },
+  "commitment": {
+    "heading": "Notre Engagement envers l'Intendance",
+    "paragraph1": "Nous nous engageons à utiliser chaque ressource avec sagesse et pour la gloire de Dieu. Nos décisions financières sont prises dans la prière, avec une considération attentive de la meilleure façon de servir notre communauté et de faire avancer le royaume de Dieu.",
+    "paragraph2": "Nous croyons que la transparence financière construit la confiance, démontre l'intégrité et honore à la fois Dieu et nos généreux partisans. Merci de nous faire confiance avec votre soutien financier alors que nous travaillons ensemble pour accomplir la mission que Dieu nous a donnée."
+  },
+  "cta": {
+    "viewReport": "Voir le Rapport Annuel",
+    "learnMore": "Apprendre à Donner"
+  }
+}
+

@@ -7,6 +7,7 @@ import enContact from "../locales/en/contact.json";
 import enDepartments from "../locales/en/departments.json";
 import enDonations from "../locales/en/donations.json";
 import enEvents from "../locales/en/events.json";
+import enFinancial from "../locales/en/financial.json";
 import enGallery from "../locales/en/gallery.json";
 import enLanding from "../locales/en/landing.json";
 import enLegal from "../locales/en/legal.json";
@@ -22,6 +23,7 @@ import frContact from "../locales/fr/contact.json";
 import frDepartments from "../locales/fr/departments.json";
 import frDonations from "../locales/fr/donations.json";
 import frEvents from "../locales/fr/events.json";
+import frFinancial from "../locales/fr/financial.json";
 import frGallery from "../locales/fr/gallery.json";
 import frLanding from "../locales/fr/landing.json";
 import frLegal from "../locales/fr/legal.json";
@@ -47,6 +49,7 @@ i18n
         contact: enContact,
         requests: enRequests,
         suggestions: enSuggestions,
+        financial: enFinancial,
         gallery: enGallery,
         donations: enDonations,
         departments: enDepartments,
@@ -63,6 +66,7 @@ i18n
         contact: frContact,
         requests: frRequests,
         suggestions: frSuggestions,
+        financial: frFinancial,
         gallery: frGallery,
         donations: frDonations,
         departments: frDepartments,
@@ -82,6 +86,7 @@ i18n
       "contact",
       "requests",
       "suggestions",
+      "financial",
       "gallery",
       "donations",
       "departments",

@@ -64,6 +64,7 @@ export const Header = () => {
       { label: t("donations"), path: "/donations" },
       { label: t("requests"), path: "/requests" },
       { label: t("suggestions"), path: "/suggestions" },
+      { label: t("financialTransparency"), path: "/financial-transparency" },
     ],
   };
 

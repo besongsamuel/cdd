@@ -19,6 +19,7 @@ import { DepartmentDetailPage } from "./pages/DepartmentDetailPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { DonationsPage } from "./pages/DonationsPage";
 import { EventsPage } from "./pages/EventsPage";
+import { FinancialTransparencyPage } from "./pages/FinancialTransparencyPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
 import { MembersPage } from "./pages/MembersPage";
@@ -226,6 +227,18 @@ function App() {
                         <Header />
                         <Box component="main" sx={{ flexGrow: 1 }}>
                           <DonationsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/financial-transparency"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <FinancialTransparencyPage />
                         </Box>
                         <Footer />
                       </>

@@ -217,6 +217,25 @@ export interface SuggestionCategory {
   updated_at: string;
 }
 
+export interface BudgetBreakdown {
+  ministry_programs: number;
+  community_outreach: number;
+  staff_administration: number;
+  facilities_operations: number;
+}
+
+export interface FinancialYear {
+  id: string;
+  year: number;
+  total_donations?: number;
+  total_expenses?: number;
+  budget_breakdown?: BudgetBreakdown;
+  notes?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Suggestion {
   id: string;
   category_id?: string;
