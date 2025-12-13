@@ -1,7 +1,17 @@
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { Box, Button, Container, Typography } from "@mui/material";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PhoneIcon from "@mui/icons-material/Phone";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Typography,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import foundersImage from "../assets/491100347_18079396636707663_2804182089416872660_n.jpg";
@@ -10,6 +20,7 @@ import dancingImage from "../assets/dancing.jpg";
 import { MissionCard } from "../components/MissionCard";
 import { SEO } from "../components/SEO";
 import { YouTubeVideos } from "../components/YouTubeVideos";
+import { CHURCH_PHONE } from "../utils/constants";
 
 export const LandingPage = () => {
   const { t } = useTranslation("landing");
@@ -186,6 +197,131 @@ export const LandingPage = () => {
             >
               {t("subtitle")}
             </Typography>
+            {/* Service Info Banner */}
+            <Box
+              sx={{
+                mb: 4,
+                opacity: 0,
+                animation: "fadeInUp 0.8s ease-out 0.9s forwards",
+              }}
+            >
+              <Card
+                sx={{
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 3,
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+                  maxWidth: "600px",
+                  mx: "auto",
+                }}
+              >
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        gap: 2,
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                          justifyContent: { xs: "center", sm: "flex-start" },
+                        }}
+                      >
+                        <AccessTimeIcon
+                          sx={{
+                            color: "primary.main",
+                            fontSize: { xs: 20, sm: 24 },
+                          }}
+                        />
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: "15px", sm: "17px" },
+                            color: "text.primary",
+                          }}
+                        >
+                          {t("serviceTime")}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                          justifyContent: { xs: "center", sm: "flex-start" },
+                        }}
+                      >
+                        <LocationOnIcon
+                          sx={{
+                            color: "primary.main",
+                            fontSize: { xs: 20, sm: 24 },
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: { xs: "14px", sm: "16px" },
+                            color: "text.secondary",
+                          }}
+                        >
+                          {t("address")}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                          justifyContent: { xs: "center", sm: "flex-start" },
+                        }}
+                      >
+                        <PhoneIcon
+                          sx={{
+                            color: "primary.main",
+                            fontSize: { xs: 20, sm: 24 },
+                          }}
+                        />
+                        <Typography
+                          component="a"
+                          href={`tel:${CHURCH_PHONE.replace(/\s/g, "")}`}
+                          variant="body2"
+                          sx={{
+                            fontSize: { xs: "14px", sm: "16px" },
+                            color: "text.secondary",
+                            textDecoration: "none",
+                            "&:hover": {
+                              color: "primary.main",
+                              textDecoration: "underline",
+                            },
+                          }}
+                        >
+                          {CHURCH_PHONE}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+
             <Box
               sx={{
                 display: "flex",
@@ -193,7 +329,7 @@ export const LandingPage = () => {
                 justifyContent: "center",
                 flexWrap: "wrap",
                 opacity: 0,
-                animation: "fadeInUp 0.8s ease-out 0.9s forwards",
+                animation: "fadeInUp 0.8s ease-out 1.1s forwards",
               }}
             >
               <Button

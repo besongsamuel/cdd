@@ -9,9 +9,11 @@ import enDonations from "../locales/en/donations.json";
 import enEvents from "../locales/en/events.json";
 import enGallery from "../locales/en/gallery.json";
 import enLanding from "../locales/en/landing.json";
+import enLegal from "../locales/en/legal.json";
 import enMembers from "../locales/en/members.json";
 import enNavigation from "../locales/en/navigation.json";
 import enRequests from "../locales/en/requests.json";
+import enServices from "../locales/en/services.json";
 
 import frCommon from "../locales/fr/common.json";
 import frContact from "../locales/fr/contact.json";
@@ -20,9 +22,11 @@ import frDonations from "../locales/fr/donations.json";
 import frEvents from "../locales/fr/events.json";
 import frGallery from "../locales/fr/gallery.json";
 import frLanding from "../locales/fr/landing.json";
+import frLegal from "../locales/fr/legal.json";
 import frMembers from "../locales/fr/members.json";
 import frNavigation from "../locales/fr/navigation.json";
 import frRequests from "../locales/fr/requests.json";
+import frServices from "../locales/fr/services.json";
 
 i18n
   .use(LanguageDetector)
@@ -40,6 +44,8 @@ i18n
         gallery: enGallery,
         donations: enDonations,
         departments: enDepartments,
+        legal: enLegal,
+        services: enServices,
       },
       fr: {
         common: frCommon,
@@ -52,6 +58,8 @@ i18n
         gallery: frGallery,
         donations: frDonations,
         departments: frDepartments,
+        legal: frLegal,
+        services: frServices,
       },
     },
     fallbackLng: "en",
@@ -67,6 +75,8 @@ i18n
       "gallery",
       "donations",
       "departments",
+      "legal",
+      "services",
     ],
     interpolation: {
       escapeValue: false,

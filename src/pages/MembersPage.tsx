@@ -217,212 +217,386 @@ export const MembersPage = () => {
   return (
     <>
       <SEO title={t("title")} description={t("title")} url="/members" />
-      <Container sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3 } }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          textAlign="center"
-          sx={{ fontSize: { xs: "32px", md: "40px" } }}
+      <Box
+        sx={{
+          position: "relative",
+          bgcolor: "background.default",
+          overflow: "hidden",
+          minHeight: "100vh",
+        }}
+      >
+        {/* Decorative Background Illustration */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
+            opacity: 0.06,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
         >
-          {t("title")}
-        </Typography>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 1200 1200"
+            preserveAspectRatio="xMidYMid slice"
+            style={{ width: "100%", height: "100%" }}
+          >
+            {/* People silhouettes in community */}
+            <g transform="translate(150, 200)">
+              <circle cx="0" cy="0" r="30" fill="#2563eb" opacity="0.4" />
+              <path
+                d="M -20 40 Q -20 55 0 60 Q 20 55 20 40 L 20 70 Q 20 85 0 90 Q -20 85 -20 70 Z"
+                fill="#3b82f6"
+                opacity="0.4"
+              />
+            </g>
+            <g transform="translate(300, 180)">
+              <circle cx="0" cy="0" r="32" fill="#3b82f6" opacity="0.4" />
+              <path
+                d="M -22 42 Q -22 57 0 62 Q 22 57 22 42 L 22 72 Q 22 87 0 92 Q -22 87 -22 72 Z"
+                fill="#60a5fa"
+                opacity="0.4"
+              />
+            </g>
+            <g transform="translate(450, 200)">
+              <circle cx="0" cy="0" r="28" fill="#60a5fa" opacity="0.4" />
+              <path
+                d="M -18 38 Q -18 53 0 58 Q 18 53 18 38 L 18 68 Q 18 83 0 88 Q -18 83 -18 68 Z"
+                fill="#2563eb"
+                opacity="0.4"
+              />
+            </g>
 
-        {/* Leaders Section */}
-        <Box sx={{ mt: { xs: 4, md: 6 } }}>
-          <Typography
-            variant="h4"
-            component="h2"
-            gutterBottom
-            sx={{ fontSize: { xs: "24px", md: "32px" } }}
-          >
-            {t("leaders")}
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-              },
-              gap: 3,
-              mt: 2,
-            }}
-          >
-            {leaders.length === 0 ? (
-              <Typography color="text.secondary">{t("noLeaders")}</Typography>
-            ) : (
-              leaders.map((leader) => (
-                <LeaderCard key={leader.id} leader={leader} />
-              ))
-            )}
-          </Box>
+            {/* More people in different positions */}
+            <g transform="translate(850, 250)">
+              <circle cx="0" cy="0" r="30" fill="#3b82f6" opacity="0.35" />
+              <path
+                d="M -20 40 Q -20 55 0 60 Q 20 55 20 40 L 20 70 Q 20 85 0 90 Q -20 85 -20 70 Z"
+                fill="#2563eb"
+                opacity="0.35"
+              />
+            </g>
+            <g transform="translate(1000, 230)">
+              <circle cx="0" cy="0" r="28" fill="#2563eb" opacity="0.35" />
+              <path
+                d="M -18 38 Q -18 53 0 58 Q 18 53 18 38 L 18 68 Q 18 83 0 88 Q -18 83 -18 68 Z"
+                fill="#60a5fa"
+                opacity="0.35"
+              />
+            </g>
+
+            {/* Hearts representing love/community */}
+            <g transform="translate(600, 150)">
+              <path
+                d="M 0 20 C -15 -10 -30 -20 -20 -35 C -10 -30 0 -20 0 -10 C 0 -20 10 -30 20 -35 C 30 -20 15 -10 0 20 Z"
+                fill="#ec4899"
+                opacity="0.3"
+              />
+            </g>
+            <g transform="translate(750, 400)">
+              <path
+                d="M 0 18 C -12 -8 -25 -18 -18 -32 C -8 -27 0 -18 0 -9 C 0 -18 8 -27 18 -32 C 25 -18 12 -8 0 18 Z"
+                fill="#f472b6"
+                opacity="0.25"
+              />
+            </g>
+
+            {/* Connected dots representing relationships */}
+            <g>
+              <circle cx="200" cy="500" r="12" fill="#2563eb" opacity="0.4" />
+              <circle cx="350" cy="520" r="10" fill="#3b82f6" opacity="0.4" />
+              <circle cx="500" cy="500" r="14" fill="#60a5fa" opacity="0.4" />
+              <circle cx="650" cy="515" r="11" fill="#2563eb" opacity="0.4" />
+              <circle cx="800" cy="500" r="13" fill="#3b82f6" opacity="0.4" />
+              <line
+                x1="212"
+                y1="500"
+                x2="340"
+                y2="518"
+                stroke="#2563eb"
+                strokeWidth="2"
+                opacity="0.3"
+              />
+              <line
+                x1="360"
+                y1="520"
+                x2="490"
+                y2="508"
+                stroke="#3b82f6"
+                strokeWidth="2"
+                opacity="0.3"
+              />
+              <line
+                x1="514"
+                y1="500"
+                x2="639"
+                y2="513"
+                stroke="#60a5fa"
+                strokeWidth="2"
+                opacity="0.3"
+              />
+              <line
+                x1="661"
+                y1="515"
+                x2="787"
+                y2="508"
+                stroke="#2563eb"
+                strokeWidth="2"
+                opacity="0.3"
+              />
+            </g>
+
+            {/* Abstract community shapes */}
+            <g transform="translate(400, 700)">
+              <circle cx="0" cy="0" r="80" fill="#2563eb" opacity="0.15" />
+              <circle cx="0" cy="0" r="50" fill="#3b82f6" opacity="0.2" />
+              <circle cx="0" cy="0" r="25" fill="#60a5fa" opacity="0.3" />
+            </g>
+
+            {/* Sparkle effects */}
+            <g transform="translate(250, 600)">
+              <path
+                d="M 0 -10 L 3 -3 L 10 -3 L 4 2 L 6 9 L 0 5 L -6 9 L -4 2 L -10 -3 L -3 -3 Z"
+                fill="#fbbf24"
+                opacity="0.4"
+              />
+            </g>
+            <g transform="translate(900, 700)">
+              <path
+                d="M 0 -8 L 2.5 -2.5 L 8 -2.5 L 3 1.5 L 5 7.5 L 0 4 L -5 7.5 L -3 1.5 L -8 -2.5 L -2.5 -2.5 Z"
+                fill="#f59e0b"
+                opacity="0.35"
+              />
+            </g>
+          </svg>
         </Box>
 
-        {/* Regular Members Section */}
-        <Box sx={{ mt: { xs: 6, md: 8 } }}>
+        <Container
+          sx={{
+            py: { xs: 4, md: 6 },
+            px: { xs: 2, sm: 3 },
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <Typography
-            variant="h4"
-            component="h2"
+            variant="h3"
+            component="h1"
             gutterBottom
-            sx={{ fontSize: { xs: "24px", md: "32px" } }}
+            textAlign="center"
+            sx={{ fontSize: { xs: "32px", md: "40px" } }}
           >
-            {t("members")}
+            {t("title")}
           </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-              },
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            {regularMembers.length === 0 ? (
-              <Typography color="text.secondary">{t("noMembers")}</Typography>
-            ) : (
-              regularMembers.map((member) => (
-                <Card key={member.id}>
-                  <CardContent>
-                    <Typography variant="h6" component="h3" gutterBottom>
-                      {member.name}
-                    </Typography>
-                    {(member.email || member.phone) && (
-                      <Box
-                        sx={{
-                          mt: 0.5,
-                          mb: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 0.5,
-                        }}
-                      >
-                        {member.email && (
-                          <Typography variant="caption" color="text.secondary">
-                            📧 {member.email}
-                          </Typography>
-                        )}
-                        {member.phone && (
-                          <Typography variant="caption" color="text.secondary">
-                            📞 {member.phone}
-                          </Typography>
-                        )}
-                      </Box>
-                    )}
-                    {member.passions && member.passions.length > 0 && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 1,
-                          mt: 1,
-                        }}
-                      >
-                        {member.passions.map((passion, index) => (
-                          <Chip
-                            key={index}
-                            label={passion}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </Box>
-        </Box>
 
-        {/* Word Cloud Section */}
-        {sortedPassions.length > 0 && (
-          <Box sx={{ mt: { xs: 8, md: 12 } }}>
+          {/* Leaders Section */}
+          <Box sx={{ mt: { xs: 4, md: 6 } }}>
             <Typography
               variant="h4"
               component="h2"
               gutterBottom
-              textAlign="center"
-              sx={{
-                fontSize: { xs: "24px", md: "32px" },
-                mb: 4,
-                fontWeight: 600,
-                letterSpacing: "-0.01em",
-              }}
+              sx={{ fontSize: { xs: "24px", md: "32px" } }}
             >
-              {t("passionWordCloud")}
+              {t("leaders")}
             </Typography>
             <Box
               sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: { xs: 2, sm: 2.5, md: 3 },
-                justifyContent: "center",
-                alignItems: "center",
-                py: { xs: 4, md: 6 },
-                px: { xs: 3, sm: 4, md: 5 },
-                background: "linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%)",
-                borderRadius: 3,
-                boxShadow: "0 2px 20px rgba(0, 0, 0, 0.04)",
-                border: "1px solid rgba(0, 0, 0, 0.06)",
-                position: "relative",
-                overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg, transparent 0%, rgba(30, 58, 138, 0.3) 50%, transparent 100%)",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
                 },
+                gap: 3,
+                mt: 2,
               }}
             >
-              {sortedPassions.map(({ passion, count }, index) => (
-                <Box
-                  key={passion}
-                  component="span"
-                  sx={{
-                    display: "inline-block",
-                    fontSize: `${getFontSize(count, maxFrequency)}px`,
-                    fontWeight:
-                      count >= maxFrequency * 0.7
-                        ? 700
-                        : count >= maxFrequency * 0.4
-                        ? 600
-                        : 500,
-                    color: getColor(index),
-                    opacity: 0.9 + (count / maxFrequency) * 0.1,
-                    transform: `rotate(${getRotation(index)}deg)`,
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    cursor: "default",
-                    lineHeight: 1.2,
-                    textShadow:
-                      count >= maxFrequency * 0.5
-                        ? "0 1px 3px rgba(0, 0, 0, 0.1)"
-                        : "none",
-                    px: { xs: 0.5, sm: 1 },
-                    py: 0.5,
-                    "&:hover": {
-                      opacity: 1,
-                      transform: `rotate(0deg) scale(1.12)`,
-                      textShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                      zIndex: 1,
-                    },
-                  }}
-                >
-                  {passion}
-                </Box>
-              ))}
+              {leaders.length === 0 ? (
+                <Typography color="text.secondary">{t("noLeaders")}</Typography>
+              ) : (
+                leaders.map((leader) => (
+                  <LeaderCard key={leader.id} leader={leader} />
+                ))
+              )}
             </Box>
           </Box>
-        )}
-      </Container>
+
+          {/* Regular Members Section */}
+          <Box sx={{ mt: { xs: 6, md: 8 } }}>
+            <Typography
+              variant="h4"
+              component="h2"
+              gutterBottom
+              sx={{ fontSize: { xs: "24px", md: "32px" } }}
+            >
+              {t("members")}
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {regularMembers.length === 0 ? (
+                <Typography color="text.secondary">{t("noMembers")}</Typography>
+              ) : (
+                regularMembers.map((member) => (
+                  <Card key={member.id}>
+                    <CardContent>
+                      <Typography variant="h6" component="h3" gutterBottom>
+                        {member.name}
+                      </Typography>
+                      {(member.email || member.phone) && (
+                        <Box
+                          sx={{
+                            mt: 0.5,
+                            mb: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.5,
+                          }}
+                        >
+                          {member.email && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              📧 {member.email}
+                            </Typography>
+                          )}
+                          {member.phone && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              📞 {member.phone}
+                            </Typography>
+                          )}
+                        </Box>
+                      )}
+                      {member.passions && member.passions.length > 0 && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 1,
+                            mt: 1,
+                          }}
+                        >
+                          {member.passions.map((passion, index) => (
+                            <Chip
+                              key={index}
+                              label={passion}
+                              size="small"
+                              variant="outlined"
+                            />
+                          ))}
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </Box>
+          </Box>
+
+          {/* Word Cloud Section */}
+          {sortedPassions.length > 0 && (
+            <Box sx={{ mt: { xs: 8, md: 12 } }}>
+              <Typography
+                variant="h4"
+                component="h2"
+                gutterBottom
+                textAlign="center"
+                sx={{
+                  fontSize: { xs: "24px", md: "32px" },
+                  mb: 4,
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {t("passionWordCloud")}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: { xs: 2, sm: 2.5, md: 3 },
+                  justifyContent: "center",
+                  alignItems: "center",
+                  py: { xs: 4, md: 6 },
+                  px: { xs: 3, sm: 4, md: 5 },
+                  background:
+                    "linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%)",
+                  borderRadius: 3,
+                  boxShadow: "0 2px 20px rgba(0, 0, 0, 0.04)",
+                  border: "1px solid rgba(0, 0, 0, 0.06)",
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "2px",
+                    background:
+                      "linear-gradient(90deg, transparent 0%, rgba(30, 58, 138, 0.3) 50%, transparent 100%)",
+                  },
+                }}
+              >
+                {sortedPassions.map(({ passion, count }, index) => (
+                  <Box
+                    key={passion}
+                    component="span"
+                    sx={{
+                      display: "inline-block",
+                      fontSize: `${getFontSize(count, maxFrequency)}px`,
+                      fontWeight:
+                        count >= maxFrequency * 0.7
+                          ? 700
+                          : count >= maxFrequency * 0.4
+                          ? 600
+                          : 500,
+                      color: getColor(index),
+                      opacity: 0.9 + (count / maxFrequency) * 0.1,
+                      transform: `rotate(${getRotation(index)}deg)`,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      cursor: "default",
+                      lineHeight: 1.2,
+                      textShadow:
+                        count >= maxFrequency * 0.5
+                          ? "0 1px 3px rgba(0, 0, 0, 0.1)"
+                          : "none",
+                      px: { xs: 0.5, sm: 1 },
+                      py: 0.5,
+                      "&:hover": {
+                        opacity: 1,
+                        transform: `rotate(0deg) scale(1.12)`,
+                        textShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                        zIndex: 1,
+                      },
+                    }}
+                  >
+                    {passion}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </Container>
+      </Box>
     </>
   );
 };

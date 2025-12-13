@@ -1,0 +1,70 @@
+{
+  "title": "Nos Services",
+  "subtitle": "Rejoignez-nous tous les dimanches pour un temps puissant d'adoration, de prière et d'enseignement alors que nous nous rassemblons dans la présence de Dieu.",
+  "worshipStyle": {
+    "title": "Style d'Adoration",
+    "description": "La Cité de David est une église pentecôtiste conduite par l'Esprit de Dieu. Nos services sont caractérisés par une louange et une adoration vibrantes, une prière passionnée et un enseignement conduit par l'Esprit. Nous croyons en l'opération actuelle des dons du Saint-Esprit, et nos services offrent une atmosphère où les croyants peuvent expérimenter la présence de Dieu, être transformés par Sa Parole et être habilités par Son Esprit."
+  },
+  "schedule": {
+    "title": "Horaire du Service",
+    "openingPrayer": {
+      "time": "9h30 - 10h00",
+      "title": "Prière d'Ouverture et Intercession",
+      "description": "Nous commençons notre service par un temps de prière et d'intercession ciblées. C'est un moment sacré où nous cherchons la présence de Dieu, prions pour notre ville, notre nation et les besoins de notre assemblée. Tous sont invités à participer alors que nous élevons nos cœurs vers le Seigneur."
+    },
+    "praiseWorship": {
+      "time": "10h00 - 10h45",
+      "title": "Louange et Adoration",
+      "description": "Dirigés par notre équipe de louange ointe, nous entrons dans un temps de louange passionnée et d'adoration intime. C'est un temps pour célébrer la bonté de Dieu, élever Son nom au plus haut et expérimenter Sa présence à travers le chant, la prière et la manifestation du Saint-Esprit."
+    },
+    "moderation": {
+      "time": "10h45 - 11h00",
+      "title": "Modération / Témoignages",
+      "description": "Nous prenons un moment pour partager des témoignages de la fidélité de Dieu, annoncer les événements à venir et nous connecter en tant que famille. C'est un temps d'encouragement, de célébration et de communion alors que nous entendons ce que Dieu fait dans la vie de nos membres."
+    },
+    "preaching": {
+      "time": "11h00 - 12h00",
+      "title": "Prédication de la Parole - Fin du Service",
+      "description": "Le point central de notre service est la prédication de la Parole de Dieu. Nos pasteurs livrent des messages oints par l'Esprit qui sont pratiques, pertinents et transformateurs. À travers l'enseignement biblique, nous cherchons à équiper les croyants, à défier les cœurs et à voir des vies changées par la puissance de l'évangile. Le service se termine à 12h00."
+    }
+  },
+  "newMembers": {
+    "title": "Accueil des Nouveaux Membres",
+    "description": "Après la fin du service, s'il y a de nouveaux membres ou des visiteurs pour la première fois qui ont pris la décision de rejoindre notre famille d'église, nos pasteurs prennent le temps de les accueillir personnellement. C'est un moment spécial de connexion et de communion alors que nous célébrons ceux qui franchissent leur prochaine étape dans leur parcours spirituel avec nous."
+  },
+  "firstTimeVisitors": {
+    "title": "À Quoi S'Attendre en Tant Que Visiteur Pour La Première Fois",
+    "whatToExpect": {
+      "title": "À Quoi S'Attendre",
+      "items": [
+        "Une atmosphère chaleureuse et accueillante où vous vous sentirez chez vous",
+        "Une adoration authentique et passionnée dirigée par notre équipe de louange",
+        "Un enseignement puissant et pratique de la Parole de Dieu",
+        "Une communauté diverse et bilingue (anglais et français)",
+        "Un temps de prière et de ministère où vous pouvez recevoir une prière personnelle",
+        "Des opportunités de communion pour vous connecter avec d'autres croyants"
+      ]
+    },
+    "whatToBring": {
+      "title": "Quoi Apporter",
+      "items": [
+        "Une Bible (bien que nous affichions souvent les versets à l'écran)",
+        "Un cœur ouvert prêt à recevoir de Dieu",
+        "Un carnet si vous souhaitez prendre des notes pendant le message",
+        "Votre famille - nous accueillons les personnes de tous âges"
+      ]
+    },
+    "dressCode": {
+      "title": "Code Vestimentaire",
+      "description": "À la Cité de David, nous voulons que vous veniez comme vous êtes. Il n'y a pas de code vestimentaire formel - portez ce qui vous met à l'aise. Vous verrez des personnes dans tout, de la tenue décontractée aux vêtements plus formels. Ce qui compte le plus, c'est votre cœur, pas vos vêtements."
+    },
+    "children": {
+      "title": "Enfants",
+      "description": "Les enfants sont les bienvenus dans nos services ! Bien que nous encourageions les familles à adorer ensemble, nous comprenons que les jeunes enfants peuvent avoir besoin de bouger. Nous avons un environnement accueillant pour les familles, et nous croyons que les enfants font partie intégrante de notre famille d'église."
+    }
+  },
+  "closing": {
+    "title": "Nous Avons Hâte de Vous Accueillir !",
+    "message": "Que vous soyez un croyant de longue date, quelqu'un qui explore la foi, ou quelque part entre les deux, vous trouverez une place à la Cité de David. Nos portes sont ouvertes, nos cœurs sont prêts, et nous croyons que Dieu a quelque chose de spécial pour vous. Rejoignez-nous ce dimanche et expérimentez ce que Dieu fait dans notre communauté !"
+  }
+}

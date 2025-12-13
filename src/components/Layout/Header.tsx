@@ -51,6 +51,7 @@ export const Header = () => {
       { label: t("contactUs"), path: "/contact" },
     ],
     about: [
+      { label: t("services"), path: "/services" },
       { label: t("ourMembers"), path: "/members" },
       { label: t("departments"), path: "/departments" },
     ],

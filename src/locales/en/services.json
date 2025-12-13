@@ -1,0 +1,70 @@
+{
+  "title": "Our Services",
+  "subtitle": "Join us every Sunday for a powerful time of worship, prayer, and teaching as we gather together in the presence of God.",
+  "worshipStyle": {
+    "title": "Worship Style",
+    "description": "City of David is a Pentecostal church led by the Spirit of God. Our services are characterized by vibrant praise and worship, passionate prayer, and Spirit-led teaching. We believe in the present-day operation of the gifts of the Holy Spirit, and our services provide an atmosphere where believers can experience God's presence, be transformed by His Word, and be empowered by His Spirit."
+  },
+  "schedule": {
+    "title": "Service Schedule",
+    "openingPrayer": {
+      "time": "9:30 - 10:00",
+      "title": "Opening Prayer and Intercession",
+      "description": "We begin our service with a time of focused prayer and intercession. This is a sacred moment where we seek God's presence, pray for our city, our nation, and the needs of our congregation. All are welcome to participate as we lift up our hearts to the Lord."
+    },
+    "praiseWorship": {
+      "time": "10:00 - 10:45",
+      "title": "Praise and Worship",
+      "description": "Led by our anointed worship team, we enter into a time of passionate praise and intimate worship. This is a time to celebrate God's goodness, to lift His name on high, and to experience His presence through song, prayer, and the moving of the Holy Spirit."
+    },
+    "moderation": {
+      "time": "10:45 - 11:00",
+      "title": "Moderation / Testimonies",
+      "description": "We take a moment to share testimonies of God's faithfulness, announce upcoming events, and connect as a family. This is a time for encouragement, celebration, and fellowship as we hear what God is doing in the lives of our members."
+    },
+    "preaching": {
+      "time": "11:00 - 12:00",
+      "title": "Preaching of the Word - End of Service",
+      "description": "The centerpiece of our service is the preaching of God's Word. Our pastors deliver Spirit-anointed messages that are practical, relevant, and transformative. Through biblical teaching, we seek to equip believers, challenge hearts, and see lives changed by the power of the gospel. Service concludes at 12:00 PM."
+    }
+  },
+  "newMembers": {
+    "title": "Welcome for New Members",
+    "description": "After the service concludes, if there are new members or first-time visitors who have made a decision to join our church family, our pastors take time to personally welcome them. This is a special moment of connection and fellowship as we celebrate those who are taking their next step in their spiritual journey with us."
+  },
+  "firstTimeVisitors": {
+    "title": "What to Expect as a First-Time Visitor",
+    "whatToExpect": {
+      "title": "What to Expect",
+      "items": [
+        "A warm and welcoming atmosphere where you'll feel at home",
+        "Authentic, passionate worship led by our worship team",
+        "Powerful, practical teaching from God's Word",
+        "A diverse, bilingual community (English and French)",
+        "Prayer and ministry time where you can receive personal prayer",
+        "Fellowship opportunities to connect with other believers"
+      ]
+    },
+    "whatToBring": {
+      "title": "What to Bring",
+      "items": [
+        "A Bible (though we often display verses on screen)",
+        "An open heart ready to receive from God",
+        "A notebook if you'd like to take notes during the message",
+        "Your family - we welcome people of all ages"
+      ]
+    },
+    "dressCode": {
+      "title": "Dress Code",
+      "description": "At City of David, we want you to come as you are. There's no formal dress code - wear whatever makes you feel comfortable. You'll see people in everything from casual attire to more formal wear. What matters most is your heart, not your clothing."
+    },
+    "children": {
+      "title": "Children",
+      "description": "Children are welcome in our services! While we encourage families to worship together, we understand that young children may need to move around. We have a welcoming environment for families, and we believe that children are an important part of our church family."
+    }
+  },
+  "closing": {
+    "title": "We Can't Wait to Welcome You!",
+    "message": "Whether you're a long-time believer, someone exploring faith, or somewhere in between, you'll find a place at City of David. Our doors are open, our hearts are ready, and we believe God has something special in store for you. Join us this Sunday and experience what God is doing in our community!"
+  }
+}

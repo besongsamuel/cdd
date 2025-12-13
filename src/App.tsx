@@ -22,7 +22,10 @@ import { EventsPage } from "./pages/EventsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
 import { MembersPage } from "./pages/MembersPage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { RequestsPage } from "./pages/RequestsPage";
+import { ServicesPage } from "./pages/ServicesPage";
+import { TermsAndConditionsPage } from "./pages/TermsAndConditionsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
 
@@ -154,6 +157,18 @@ function App() {
                     }
                   />
                   <Route
+                    path="/services"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <ServicesPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
                     path="/events"
                     element={
                       <>
@@ -220,6 +235,30 @@ function App() {
                         <Header />
                         <Box component="main" sx={{ flexGrow: 1 }}>
                           <DepartmentDetailPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/privacy-policy"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <PrivacyPolicyPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/terms-and-conditions"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <TermsAndConditionsPage />
                         </Box>
                         <Footer />
                       </>
