@@ -1,0 +1,30 @@
+{
+  "title": "Envoyer une Suggestion",
+  "subtitle": "Nous apprécions vos commentaires ! Partagez vos idées, commentaires et suggestions pour nous aider à améliorer notre communauté d'église.",
+  "form": {
+    "category": "Catégorie",
+    "categoryRequired": "Veuillez sélectionner une catégorie",
+    "customCategory": "Spécifier la Catégorie",
+    "customCategoryPlaceholder": "Veuillez spécifier la catégorie",
+    "customCategoryRequired": "Veuillez spécifier la catégorie",
+    "suggestion": "Votre Suggestion",
+    "suggestionRequired": "Veuillez entrer votre suggestion",
+    "suggestionPlaceholder": "Partagez vos idées, commentaires ou suggestions...",
+    "name": "Votre Nom (Optionnel)",
+    "namePlaceholder": "Laissez vide pour soumettre anonymement",
+    "nameNote": "Votre nom nous aide à vous contacter pour plus d'informations si nécessaire.",
+    "phone": "Numéro de Téléphone (Optionnel)",
+    "phonePlaceholder": "ex. +1 (514) 123-4567",
+    "anonymous": "Soumettre Anonymement",
+    "submit": "Soumettre la Suggestion",
+    "submitting": "Soumission...",
+    "cancel": "Annuler",
+    "error": "Une erreur s'est produite. Veuillez réessayer."
+  },
+  "success": {
+    "title": "Merci !",
+    "message": "Votre suggestion a été soumise avec succès. Nous apprécions vos commentaires et l'examinerons attentivement."
+  },
+  "other": "Autre"
+}
+

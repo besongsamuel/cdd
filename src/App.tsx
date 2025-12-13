@@ -27,6 +27,7 @@ import { MinistryDetailPage } from "./pages/MinistryDetailPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { RequestsPage } from "./pages/RequestsPage";
 import { ServicesPage } from "./pages/ServicesPage";
+import { SuggestionsPage } from "./pages/SuggestionsPage";
 import { TermsAndConditionsPage } from "./pages/TermsAndConditionsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -201,6 +202,18 @@ function App() {
                         <Header />
                         <Box component="main" sx={{ flexGrow: 1 }}>
                           <RequestsPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/suggestions"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <SuggestionsPage />
                         </Box>
                         <Footer />
                       </>

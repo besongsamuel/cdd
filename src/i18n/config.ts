@@ -15,6 +15,7 @@ import enMinistries from "../locales/en/ministries.json";
 import enNavigation from "../locales/en/navigation.json";
 import enRequests from "../locales/en/requests.json";
 import enServices from "../locales/en/services.json";
+import enSuggestions from "../locales/en/suggestions.json";
 
 import frCommon from "../locales/fr/common.json";
 import frContact from "../locales/fr/contact.json";
@@ -29,6 +30,7 @@ import frMinistries from "../locales/fr/ministries.json";
 import frNavigation from "../locales/fr/navigation.json";
 import frRequests from "../locales/fr/requests.json";
 import frServices from "../locales/fr/services.json";
+import frSuggestions from "../locales/fr/suggestions.json";
 
 i18n
   .use(LanguageDetector)
@@ -44,6 +46,7 @@ i18n
         events: enEvents,
         contact: enContact,
         requests: enRequests,
+        suggestions: enSuggestions,
         gallery: enGallery,
         donations: enDonations,
         departments: enDepartments,
@@ -59,6 +62,7 @@ i18n
         events: frEvents,
         contact: frContact,
         requests: frRequests,
+        suggestions: frSuggestions,
         gallery: frGallery,
         donations: frDonations,
         departments: frDepartments,
@@ -77,6 +81,7 @@ i18n
       "events",
       "contact",
       "requests",
+      "suggestions",
       "gallery",
       "donations",
       "departments",

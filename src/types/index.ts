@@ -206,3 +206,27 @@ export interface MinistryJoinRequest {
   updated_at: string;
   ministry_name?: string; // joined from ministries
 }
+
+export interface SuggestionCategory {
+  id: string;
+  name: string;
+  description?: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Suggestion {
+  id: string;
+  category_id?: string;
+  custom_category?: string;
+  suggestion_text: string;
+  submitter_name?: string;
+  submitter_phone?: string;
+  status: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  category_name?: string; // joined from suggestion_categories
+}

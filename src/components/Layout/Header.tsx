@@ -63,6 +63,7 @@ export const Header = () => {
     getInvolved: [
       { label: t("donations"), path: "/donations" },
       { label: t("requests"), path: "/requests" },
+      { label: t("suggestions"), path: "/suggestions" },
     ],
   };
 

@@ -1,0 +1,30 @@
+{
+  "title": "Send a Suggestion",
+  "subtitle": "We value your input! Share your ideas, feedback, and suggestions to help us improve our church community.",
+  "form": {
+    "category": "Category",
+    "categoryRequired": "Please select a category",
+    "customCategory": "Specify Category",
+    "customCategoryPlaceholder": "Please specify the category",
+    "customCategoryRequired": "Please specify the category",
+    "suggestion": "Your Suggestion",
+    "suggestionRequired": "Please enter your suggestion",
+    "suggestionPlaceholder": "Share your ideas, feedback, or suggestions...",
+    "name": "Your Name (Optional)",
+    "namePlaceholder": "Leave blank to submit anonymously",
+    "nameNote": "Your name helps us reach out for more information if needed.",
+    "phone": "Phone Number (Optional)",
+    "phonePlaceholder": "e.g., +1 (514) 123-4567",
+    "anonymous": "Submit Anonymously",
+    "submit": "Submit Suggestion",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "error": "An error occurred. Please try again."
+  },
+  "success": {
+    "title": "Thank You!",
+    "message": "Your suggestion has been submitted successfully. We appreciate your input and will review it carefully."
+  },
+  "other": "Other"
+}
+
