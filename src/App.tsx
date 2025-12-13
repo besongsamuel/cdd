@@ -22,6 +22,8 @@ import { EventsPage } from "./pages/EventsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
 import { MembersPage } from "./pages/MembersPage";
+import { MinistriesPage } from "./pages/MinistriesPage";
+import { MinistryDetailPage } from "./pages/MinistryDetailPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { RequestsPage } from "./pages/RequestsPage";
 import { ServicesPage } from "./pages/ServicesPage";
@@ -235,6 +237,30 @@ function App() {
                         <Header />
                         <Box component="main" sx={{ flexGrow: 1 }}>
                           <DepartmentDetailPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/ministries"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <MinistriesPage />
+                        </Box>
+                        <Footer />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/ministries/:id"
+                    element={
+                      <>
+                        <Header />
+                        <Box component="main" sx={{ flexGrow: 1 }}>
+                          <MinistryDetailPage />
                         </Box>
                         <Footer />
                       </>

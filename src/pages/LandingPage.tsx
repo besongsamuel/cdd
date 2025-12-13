@@ -362,6 +362,34 @@ export const LandingPage = () => {
               </Button>
               <Button
                 component={Link}
+                to="/ministries"
+                variant="contained"
+                size="large"
+                sx={{
+                  backgroundColor: "white",
+                  color: "primary.main",
+                  px: { xs: 4, sm: 5 },
+                  py: { xs: 1.5, sm: 1.8 },
+                  fontSize: { xs: "16px", sm: "17px" },
+                  fontWeight: 500,
+                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                  minHeight: "48px",
+                  minWidth: { xs: "140px", sm: "auto" },
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    transform: "scale(1.05) translateY(-2px)",
+                    boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
+                  },
+                  "&:active": {
+                    transform: "scale(0.98) translateY(0)",
+                  },
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                {t("viewMinistries")}
+              </Button>
+              <Button
+                component={Link}
                 to="/contact"
                 variant="outlined"
                 size="large"

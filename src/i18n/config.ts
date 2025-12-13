@@ -11,6 +11,7 @@ import enGallery from "../locales/en/gallery.json";
 import enLanding from "../locales/en/landing.json";
 import enLegal from "../locales/en/legal.json";
 import enMembers from "../locales/en/members.json";
+import enMinistries from "../locales/en/ministries.json";
 import enNavigation from "../locales/en/navigation.json";
 import enRequests from "../locales/en/requests.json";
 import enServices from "../locales/en/services.json";
@@ -24,6 +25,7 @@ import frGallery from "../locales/fr/gallery.json";
 import frLanding from "../locales/fr/landing.json";
 import frLegal from "../locales/fr/legal.json";
 import frMembers from "../locales/fr/members.json";
+import frMinistries from "../locales/fr/ministries.json";
 import frNavigation from "../locales/fr/navigation.json";
 import frRequests from "../locales/fr/requests.json";
 import frServices from "../locales/fr/services.json";
@@ -38,6 +40,7 @@ i18n
         landing: enLanding,
         navigation: enNavigation,
         members: enMembers,
+        ministries: enMinistries,
         events: enEvents,
         contact: enContact,
         requests: enRequests,
@@ -52,6 +55,7 @@ i18n
         landing: frLanding,
         navigation: frNavigation,
         members: frMembers,
+        ministries: frMinistries,
         events: frEvents,
         contact: frContact,
         requests: frRequests,
@@ -69,6 +73,7 @@ i18n
       "landing",
       "navigation",
       "members",
+      "ministries",
       "events",
       "contact",
       "requests",

@@ -153,3 +153,56 @@ export interface DepartmentJoinRequest {
   updated_at: string;
   department_name?: string; // joined from departments
 }
+
+export interface MinistryDetails {
+  meeting_day?: string;
+  meeting_time?: string;
+  meeting_location?: string;
+  meeting_frequency?: string;
+  who_can_join?: {
+    age_range_min?: number;
+    age_range_max?: number | null;
+    gender?: string;
+    open_to_visitors?: boolean;
+  };
+  activities?: string[];
+  cta_type?: string;
+  cta_value?: string;
+}
+
+export interface Ministry {
+  id: string;
+  name: string;
+  description?: string; // markdown
+  image_url?: string;
+  display_order: number;
+  is_active: boolean;
+  details?: MinistryDetails;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MinistryMember {
+  id: string;
+  ministry_id: string;
+  member_id: string;
+  is_lead: boolean;
+  joined_at: string;
+  member_name?: string; // joined from members
+  member_picture_url?: string; // joined from members
+  member_email?: string; // joined from members
+  member_phone?: string; // joined from members
+}
+
+export interface MinistryJoinRequest {
+  id: string;
+  ministry_id: string;
+  member_name: string;
+  member_email?: string;
+  member_phone?: string;
+  status: DepartmentRequestStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  ministry_name?: string; // joined from ministries
+}

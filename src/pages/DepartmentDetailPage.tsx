@@ -1,3 +1,4 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Alert,
   Avatar,
@@ -126,15 +127,50 @@ export const DepartmentDetailPage = () => {
         url={`/departments/${department.id}`}
       />
       <Container sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3 } }}>
+        {/* Back Button */}
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/departments")}
+          sx={{
+            mb: 4,
+            color: "text.secondary",
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            "&:hover": {
+              backgroundColor: "rgba(30, 58, 138, 0.08)",
+              color: "primary.main",
+              transform: "translateX(-4px)",
+            },
+          }}
+        >
+          Back to Departments
+        </Button>
+
         {/* Department Image */}
         {department.image_url && (
           <Box
             sx={{
               width: "100%",
-              height: { xs: 250, sm: 350, md: 400 },
-              mb: 4,
-              borderRadius: 2,
+              height: { xs: 250, sm: 350, md: 450 },
+              mb: 5,
+              borderRadius: 3,
               overflow: "hidden",
+              position: "relative",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+              opacity: 0,
+              animation: "fadeInUp 0.8s ease-out 0.2s forwards",
+              "@keyframes fadeInUp": {
+                from: {
+                  opacity: 0,
+                  transform: "translateY(30px)",
+                },
+                to: {
+                  opacity: 1,
+                  transform: "translateY(0)",
+                },
+              },
             }}
           >
             <Box
@@ -145,6 +181,22 @@ export const DepartmentDetailPage = () => {
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
+                transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "100px",
+                background:
+                  "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
+                pointerEvents: "none",
               }}
             />
           </Box>
@@ -156,9 +208,27 @@ export const DepartmentDetailPage = () => {
           component="h1"
           gutterBottom
           sx={{
-            fontSize: { xs: "32px", md: "40px" },
-            fontWeight: 600,
+            fontSize: { xs: "32px", md: "48px" },
+            fontWeight: 700,
             mb: 3,
+            background:
+              "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            letterSpacing: "-0.02em",
+            opacity: 0,
+            animation: "fadeInUp 0.8s ease-out 0.4s forwards",
+            "@keyframes fadeInUp": {
+              from: {
+                opacity: 0,
+                transform: "translateY(20px)",
+              },
+              to: {
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+            },
           }}
         >
           {department.name}
@@ -174,15 +244,44 @@ export const DepartmentDetailPage = () => {
           }}
         >
           {/* Left: Mission/Description */}
-          <Box>
+          <Box
+            sx={{
+              opacity: 0,
+              animation: "fadeInUp 0.8s ease-out 0.6s forwards",
+              "@keyframes fadeInUp": {
+                from: {
+                  opacity: 0,
+                  transform: "translateY(20px)",
+                },
+                to: {
+                  opacity: 1,
+                  transform: "translateY(0)",
+                },
+              },
+            }}
+          >
             <Typography
               variant="h5"
               component="h2"
               gutterBottom
               sx={{
-                fontSize: { xs: "24px", md: "28px" },
-                fontWeight: 600,
-                mb: 2,
+                fontSize: { xs: "24px", md: "32px" },
+                fontWeight: 700,
+                mb: 3,
+                color: "primary.main",
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "60px",
+                  height: "4px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  borderRadius: 2,
+                },
               }}
             >
               {t("mission")}
@@ -197,15 +296,44 @@ export const DepartmentDetailPage = () => {
           </Box>
 
           {/* Right: Members */}
-          <Box>
+          <Box
+            sx={{
+              opacity: 0,
+              animation: "fadeInUp 0.8s ease-out 0.8s forwards",
+              "@keyframes fadeInUp": {
+                from: {
+                  opacity: 0,
+                  transform: "translateY(20px)",
+                },
+                to: {
+                  opacity: 1,
+                  transform: "translateY(0)",
+                },
+              },
+            }}
+          >
             <Typography
               variant="h5"
               component="h2"
               gutterBottom
               sx={{
-                fontSize: { xs: "24px", md: "28px" },
-                fontWeight: 600,
-                mb: 2,
+                fontSize: { xs: "24px", md: "32px" },
+                fontWeight: 700,
+                mb: 3,
+                color: "primary.main",
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "60px",
+                  height: "4px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  borderRadius: 2,
+                },
               }}
             >
               {t("members")}
@@ -225,7 +353,23 @@ export const DepartmentDetailPage = () => {
                       {t("departmentLeads")}
                     </Typography>
                     {leads.map((member) => (
-                      <Card key={member.id} sx={{ mb: 1, p: 2 }}>
+                      <Card
+                        key={member.id}
+                        sx={{
+                          mb: 2,
+                          p: 2.5,
+                          background:
+                            "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                          border: "1px solid rgba(30, 58, 138, 0.1)",
+                          borderRadius: 2,
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0 4px 16px rgba(30, 58, 138, 0.12)",
+                            transform: "translateX(4px)",
+                            borderColor: "rgba(30, 58, 138, 0.2)",
+                          },
+                        }}
+                      >
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: 2 }}
                         >
@@ -286,7 +430,22 @@ export const DepartmentDetailPage = () => {
                       </Typography>
                     )}
                     {regularMembers.map((member) => (
-                      <Card key={member.id} sx={{ mb: 1, p: 2 }}>
+                      <Card
+                        key={member.id}
+                        sx={{
+                          mb: 2,
+                          p: 2.5,
+                          background:
+                            "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                          border: "1px solid rgba(0, 0, 0, 0.08)",
+                          borderRadius: 2,
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+                            transform: "translateX(4px)",
+                          },
+                        }}
+                      >
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: 2 }}
                         >
@@ -313,16 +472,46 @@ export const DepartmentDetailPage = () => {
         </Box>
 
         {/* Join Button */}
-        <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            mt: 6,
+            mb: 4,
+            opacity: 0,
+            animation: "fadeInUp 0.8s ease-out 1s forwards",
+            "@keyframes fadeInUp": {
+              from: {
+                opacity: 0,
+                transform: "translateY(20px)",
+              },
+              to: {
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+            },
+          }}
+        >
           <Button
             variant="contained"
             size="large"
             onClick={() => setJoinDialogOpen(true)}
             sx={{
-              px: 4,
-              py: 1.5,
-              fontSize: { xs: "16px", md: "17px" },
-              minHeight: "48px",
+              px: 5,
+              py: 1.8,
+              fontSize: { xs: "16px", md: "18px" },
+              minHeight: "56px",
+              fontWeight: 600,
+              background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+              boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                transform: "translateY(-2px) scale(1.02)",
+                boxShadow: "0 8px 30px rgba(30, 58, 138, 0.4)",
+                background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+              },
+              "&:active": {
+                transform: "translateY(0) scale(0.98)",
+              },
             }}
           >
             {t("joinDepartment")}
