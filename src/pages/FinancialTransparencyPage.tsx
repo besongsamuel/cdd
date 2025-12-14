@@ -8,10 +8,8 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Container,
   LinearProgress,
-  Link,
   Paper,
   Table,
   TableBody,
@@ -354,7 +352,7 @@ export const FinancialTransparencyPage = () => {
                 mb: 4,
               }}
             >
-              {breakdownItems.map((item, index) => {
+              {breakdownItems.map((item) => {
                 const percentage =
                   breakdown[item.key as keyof typeof breakdown] || 0;
                 return (
