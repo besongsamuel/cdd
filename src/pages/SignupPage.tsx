@@ -1,9 +1,11 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Alert,
   Box,
   Button,
   Container,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -160,7 +162,23 @@ export const SignupPage = () => {
           </Paper>
 
           {/* Signup Form */}
-          <Paper sx={{ p: 4, width: "100%" }}>
+          <Paper sx={{ p: 4, width: "100%", position: "relative" }}>
+            <IconButton
+              component={Link}
+              to="/"
+              sx={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+              aria-label="Back to home"
+            >
+              <ArrowBackIcon />
+            </IconButton>
             {/* Logo for Mobile */}
             <Box
               sx={{

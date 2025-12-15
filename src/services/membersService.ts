@@ -37,6 +37,25 @@ export const membersService = {
   async create(
     member: Omit<Member, "id" | "created_at" | "updated_at">
   ): Promise<Member> {
+    // Try using the database function first (if it exists)
+    // This bypasses RLS restrictions while still ensuring security
+    try {
+      const { data, error } = await supabase.rpc("create_member_for_user", {
+        p_name: member.name,
+        p_type: member.type,
+        p_user_id: member.user_id,
+        p_is_admin: member.is_admin || false,
+      });
+
+      if (!error && data) {
+        return data;
+      }
+    } catch {
+      // RPC function might not exist yet, fall through to direct insert
+      console.log("RPC function not available, using direct insert");
+    }
+
+    // Fall back to direct insert (will use updated RLS policy)
     const { data, error } = await supabase
       .from("members")
       .insert(member)
@@ -91,7 +110,7 @@ export const membersService = {
         .single();
 
       if (titleData) {
-        (data as any).title_name = titleData.name;
+        (data as Member).title_name = titleData.name;
       }
     }
 

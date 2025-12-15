@@ -1,8 +1,10 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Alert,
   Box,
   Button,
   Container,
+  IconButton,
   Paper,
   TextField,
   Typography,
@@ -68,7 +70,23 @@ export const LoginPage = () => {
           justifyContent: "center",
         }}
       >
-        <Paper sx={{ p: 4, width: "100%" }}>
+        <Paper sx={{ p: 4, width: "100%", position: "relative" }}>
+          <IconButton
+            component={Link}
+            to="/"
+            sx={{
+              position: "absolute",
+              top: 16,
+              left: 16,
+              color: "text.secondary",
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+            }}
+            aria-label="Back to home"
+          >
+            <ArrowBackIcon />
+          </IconButton>
           <Typography
             variant="h4"
             component="h1"
