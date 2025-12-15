@@ -1,3 +1,4 @@
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Card,
@@ -5,6 +6,8 @@ import {
   CardMedia,
   Chip,
   Container,
+  InputAdornment,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -129,6 +132,8 @@ export const MembersPage = () => {
   const [leaders, setLeaders] = useState<Member[]>([]);
   const [regularMembers, setRegularMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPassion, setSelectedPassion] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMembers = async () => {
@@ -209,6 +214,47 @@ export const MembersPage = () => {
   };
 
   const maxFrequency = sortedPassions[0]?.count || 0;
+
+  // Filter members based on search query and selected passion
+  const filterMembers = (members: Member[]) => {
+    return members.filter((member) => {
+      // Filter by selected passion
+      if (selectedPassion) {
+        const hasPassion =
+          member.passions &&
+          member.passions.some(
+            (p) => p.toLowerCase() === selectedPassion.toLowerCase()
+          );
+        if (!hasPassion) return false;
+      }
+
+      // Filter by search query (name, email, or passion)
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const nameMatch = member.name?.toLowerCase().includes(query);
+        const emailMatch = member.email?.toLowerCase().includes(query);
+        const passionMatch =
+          member.passions &&
+          member.passions.some((p) => p.toLowerCase().includes(query));
+        return nameMatch || emailMatch || passionMatch;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredLeaders = filterMembers(leaders);
+  const filteredRegularMembers = filterMembers(regularMembers);
+
+  const handlePassionClick = (passion: string) => {
+    if (selectedPassion === passion) {
+      // If clicking the same passion, clear the filter
+      setSelectedPassion(null);
+    } else {
+      // Set the selected passion
+      setSelectedPassion(passion);
+    }
+  };
 
   if (loading) {
     return <LoadingSpinner />;
@@ -394,6 +440,45 @@ export const MembersPage = () => {
             {t("title")}
           </Typography>
 
+          {/* Search Section */}
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Search by name, email, or passion..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ maxWidth: 600, mx: "auto", display: "block" }}
+            />
+            {selectedPassion && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Filtered by:
+                </Typography>
+                <Chip
+                  label={selectedPassion}
+                  onDelete={() => setSelectedPassion(null)}
+                  color="primary"
+                  variant="outlined"
+                />
+              </Box>
+            )}
+          </Box>
+
           {/* Leaders Section */}
           <Box sx={{ mt: { xs: 4, md: 6 } }}>
             <Typography
@@ -416,10 +501,14 @@ export const MembersPage = () => {
                 mt: 2,
               }}
             >
-              {leaders.length === 0 ? (
-                <Typography color="text.secondary">{t("noLeaders")}</Typography>
+              {filteredLeaders.length === 0 ? (
+                <Typography color="text.secondary">
+                  {leaders.length === 0
+                    ? t("noLeaders")
+                    : "No leaders match your search"}
+                </Typography>
               ) : (
-                leaders.map((leader) => (
+                filteredLeaders.map((leader) => (
                   <LeaderCard key={leader.id} leader={leader} />
                 ))
               )}
@@ -448,10 +537,14 @@ export const MembersPage = () => {
                 mt: 2,
               }}
             >
-              {regularMembers.length === 0 ? (
-                <Typography color="text.secondary">{t("noMembers")}</Typography>
+              {filteredRegularMembers.length === 0 ? (
+                <Typography color="text.secondary">
+                  {regularMembers.length === 0
+                    ? t("noMembers")
+                    : "No members match your search"}
+                </Typography>
               ) : (
-                regularMembers.map((member) => (
+                filteredRegularMembers.map((member) => (
                   <Card key={member.id}>
                     <CardContent>
                       <Typography variant="h6" component="h3" gutterBottom>
@@ -556,42 +649,59 @@ export const MembersPage = () => {
                   },
                 }}
               >
-                {sortedPassions.map(({ passion, count }, index) => (
-                  <Box
-                    key={passion}
-                    component="span"
-                    sx={{
-                      display: "inline-block",
-                      fontSize: `${getFontSize(count, maxFrequency)}px`,
-                      fontWeight:
-                        count >= maxFrequency * 0.7
-                          ? 700
-                          : count >= maxFrequency * 0.4
-                          ? 600
-                          : 500,
-                      color: getColor(index),
-                      opacity: 0.9 + (count / maxFrequency) * 0.1,
-                      transform: `rotate(${getRotation(index)}deg)`,
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      cursor: "default",
-                      lineHeight: 1.2,
-                      textShadow:
-                        count >= maxFrequency * 0.5
+                {sortedPassions.map(({ passion, count }, index) => {
+                  const isSelected = selectedPassion === passion;
+                  return (
+                    <Box
+                      key={passion}
+                      component="span"
+                      onClick={() => handlePassionClick(passion)}
+                      sx={{
+                        display: "inline-block",
+                        fontSize: `${getFontSize(count, maxFrequency)}px`,
+                        fontWeight:
+                          count >= maxFrequency * 0.7
+                            ? 700
+                            : count >= maxFrequency * 0.4
+                            ? 600
+                            : 500,
+                        color: isSelected ? "#1e3a8a" : getColor(index),
+                        opacity: isSelected
+                          ? 1
+                          : 0.9 + (count / maxFrequency) * 0.1,
+                        transform: isSelected
+                          ? "rotate(0deg) scale(1.15)"
+                          : `rotate(${getRotation(index)}deg)`,
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        cursor: "pointer",
+                        lineHeight: 1.2,
+                        textShadow: isSelected
+                          ? "0 2px 8px rgba(30, 58, 138, 0.3)"
+                          : count >= maxFrequency * 0.5
                           ? "0 1px 3px rgba(0, 0, 0, 0.1)"
                           : "none",
-                      px: { xs: 0.5, sm: 1 },
-                      py: 0.5,
-                      "&:hover": {
-                        opacity: 1,
-                        transform: `rotate(0deg) scale(1.12)`,
-                        textShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                        zIndex: 1,
-                      },
-                    }}
-                  >
-                    {passion}
-                  </Box>
-                ))}
+                        px: { xs: 0.5, sm: 1 },
+                        py: 0.5,
+                        backgroundColor: isSelected
+                          ? "rgba(30, 58, 138, 0.1)"
+                          : "transparent",
+                        borderRadius: 1,
+                        border: isSelected
+                          ? "2px solid #1e3a8a"
+                          : "2px solid transparent",
+                        "&:hover": {
+                          opacity: 1,
+                          transform: "rotate(0deg) scale(1.12)",
+                          textShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                          zIndex: 1,
+                          backgroundColor: "rgba(30, 58, 138, 0.08)",
+                        },
+                      }}
+                    >
+                      {passion}
+                    </Box>
+                  );
+                })}
               </Box>
             </Box>
           )}

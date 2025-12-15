@@ -1,3 +1,7 @@
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import {
   Box,
   Container,
@@ -8,24 +12,22 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import moment from "moment";
 import { useEffect, useState } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useTranslation } from "react-i18next";
+import { EventDetailDialog } from "../components/common/EventDetailDialog";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { eventsService } from "../services/eventsService";
 import { regularProgramsService } from "../services/regularProgramsService";
 import type { Event, RegularProgram } from "../types";
 
-const localizer = momentLocalizer(moment);
-
 export const EventsPage = () => {
   const { t } = useTranslation("events");
   const [regularPrograms, setRegularPrograms] = useState<RegularProgram[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,13 +53,32 @@ export const EventsPage = () => {
   }
 
   // Convert events to calendar format
-  const calendarEvents = events.map((event) => ({
-    id: event.id,
-    title: event.title,
-    start: new Date(`${event.event_date}T${event.event_time || "00:00"}`),
-    end: new Date(`${event.event_date}T${event.event_time || "23:59"}`),
-    resource: event,
-  }));
+  const calendarEvents = events.map((event) => {
+    const eventDate = new Date(event.event_date);
+    const [hours, minutes] = event.event_time
+      ? event.event_time.split(":").map(Number)
+      : [0, 0];
+    eventDate.setHours(hours, minutes, 0, 0);
+
+    // Set end time (default to 1 hour if no time specified)
+    const endDate = new Date(eventDate);
+    if (!event.event_time) {
+      endDate.setHours(endDate.getHours() + 1);
+    } else {
+      endDate.setHours(endDate.getHours() + 1);
+    }
+
+    return {
+      id: event.id,
+      title: event.title,
+      start: eventDate.toISOString(),
+      end: endDate.toISOString(),
+      extendedProps: {
+        description: event.description,
+        location: event.location,
+      },
+    };
+  });
 
   return (
     <>
@@ -325,36 +346,67 @@ export const EventsPage = () => {
             >
               {t("upcomingEvents")}
             </Typography>
-            <Paper
+            <Box
               sx={{
                 mt: 2,
-                p: { xs: 1, sm: 2 },
-                height: { xs: "400px", sm: "500px", md: "600px" },
-                overflow: "hidden",
+                "& .fc": {
+                  fontFamily: "inherit",
+                },
+                "& .fc-header-toolbar": {
+                  padding: "1rem",
+                },
+                "& .fc-button": {
+                  backgroundColor: "#1e3a8a",
+                  borderColor: "#1e3a8a",
+                  "&:hover": {
+                    backgroundColor: "#2563eb",
+                    borderColor: "#2563eb",
+                  },
+                },
+                "& .fc-button-active": {
+                  backgroundColor: "#1e40af",
+                  borderColor: "#1e40af",
+                },
+                "& .fc-today-button": {
+                  backgroundColor: "#2563eb",
+                  borderColor: "#2563eb",
+                },
               }}
             >
-              <Calendar
-                localizer={localizer}
-                events={calendarEvents}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: "100%" }}
-                defaultView="month"
-                views={["month", "week", "day", "agenda"]}
-                onSelectEvent={(event) => {
-                  const eventData = event.resource as Event;
-                  alert(
-                    `${eventData.title}\n${eventData.description || ""}\n${
-                      eventData.location || ""
-                    }`
-                  );
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay",
                 }}
-                popup
+                events={calendarEvents}
+                eventClick={(info) => {
+                  const eventData = events.find((e) => e.id === info.event.id);
+                  if (eventData) {
+                    setSelectedEvent(eventData);
+                    setDialogOpen(true);
+                  }
+                }}
+                height="auto"
+                eventDisplay="block"
+                editable={false}
+                selectable={false}
               />
-            </Paper>
+            </Box>
           </Box>
         </Container>
       </Box>
+
+      <EventDetailDialog
+        open={dialogOpen}
+        event={selectedEvent}
+        onClose={() => {
+          setDialogOpen(false);
+          setSelectedEvent(null);
+        }}
+      />
     </>
   );
 };

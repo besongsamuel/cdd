@@ -137,55 +137,67 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
-/* React Big Calendar Styles */
-.rbc-calendar {
+/* FullCalendar Styles */
+.fc {
   font-family: inherit;
 }
 
-.rbc-header {
-  padding: 10px 3px;
-  font-weight: 600;
+.fc-header-toolbar {
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
-.rbc-event {
-  padding: 2px 5px;
-  border-radius: 3px;
-  min-height: 20px;
-  font-size: 0.75rem;
+.fc-button {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.rbc-today {
-  background-color: rgba(102, 126, 234, 0.1);
+.fc-button:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
-.rbc-off-range-bg {
-  background-color: #f5f5f5;
+.fc-button-active {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+.fc-today-button {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.fc-event {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.fc-daygrid-event {
+  border-radius: 4px;
 }
 
 /* Mobile-specific calendar styles */
 @media (max-width: 768px) {
-  .rbc-header {
-    padding: 8px 2px;
-    font-size: 0.75rem;
-  }
-
-  .rbc-event {
-    padding: 1px 3px;
-    font-size: 0.7rem;
-    min-height: 16px;
-  }
-
-  .rbc-toolbar {
+  .fc-header-toolbar {
     flex-direction: column;
-    gap: 8px;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
 
-  .rbc-toolbar button {
-    padding: 8px 12px;
+  .fc-toolbar-chunk {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .fc-button {
+    padding: 0.375rem 0.75rem;
     font-size: 0.875rem;
-  }
-
-  .rbc-toolbar-label {
-    margin: 8px 0;
   }
 }

@@ -1,3 +1,4 @@
+import HomeIcon from "@mui/icons-material/Home";
 import {
   AppBar,
   Box,
@@ -49,6 +50,14 @@ export const AdminLayout = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Admin Panel
           </Typography>
+          <Button
+            color="inherit"
+            startIcon={<HomeIcon />}
+            onClick={() => navigate("/")}
+            sx={{ mr: 2 }}
+          >
+            Back to Website
+          </Button>
           <Button color="inherit" onClick={handleLogout}>
             Logout
           </Button>

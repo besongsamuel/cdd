@@ -74,6 +74,8 @@ export const EventsManager = () => {
     location: '',
     description: '',
     order: 0,
+    start_date: '',
+    end_date: '',
   });
 
   useEffect(() => {
@@ -145,6 +147,8 @@ export const EventsManager = () => {
         location: program.location,
         description: program.description,
         order: program.order,
+        start_date: program.start_date || '',
+        end_date: program.end_date || '',
       });
     } else {
       setEditingProgram(null);
@@ -154,6 +158,8 @@ export const EventsManager = () => {
         location: '',
         description: '',
         order: programs.length,
+        start_date: '',
+        end_date: '',
       });
     }
     setDialogOpen(true);
@@ -182,10 +188,15 @@ export const EventsManager = () => {
 
   const handleSubmitProgram = async () => {
     try {
+      const programData = {
+        ...programFormData,
+        start_date: programFormData.start_date || undefined,
+        end_date: programFormData.end_date || undefined,
+      };
       if (editingProgram) {
-        await regularProgramsService.update(editingProgram.id, programFormData);
+        await regularProgramsService.update(editingProgram.id, programData);
       } else {
-        await regularProgramsService.create(programFormData);
+        await regularProgramsService.create(programData);
       }
       handleCloseDialog();
       loadPrograms();
@@ -305,6 +316,8 @@ export const EventsManager = () => {
                 <TableCell>Time</TableCell>
                 <TableCell>Location</TableCell>
                 <TableCell>Description</TableCell>
+                <TableCell>Start Date</TableCell>
+                <TableCell>End Date</TableCell>
                 <TableCell>Order</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -319,6 +332,16 @@ export const EventsManager = () => {
                     {program.description.length > 50
                       ? program.description.substring(0, 50) + "..."
                       : program.description}
+                  </TableCell>
+                  <TableCell>
+                    {program.start_date
+                      ? new Date(program.start_date).toLocaleDateString()
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {program.end_date
+                      ? new Date(program.end_date).toLocaleDateString()
+                      : 'Indefinite'}
                   </TableCell>
                   <TableCell>{program.order}</TableCell>
                   <TableCell>
@@ -497,6 +520,36 @@ export const EventsManager = () => {
             required
             multiline
             rows={3}
+          />
+          <TextField
+            fullWidth
+            label="Start Date (Optional)"
+            type="date"
+            value={programFormData.start_date}
+            onChange={(e) =>
+              setProgramFormData({
+                ...programFormData,
+                start_date: e.target.value,
+              })
+            }
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            helperText="If not specified, program starts immediately"
+          />
+          <TextField
+            fullWidth
+            label="End Date (Optional)"
+            type="date"
+            value={programFormData.end_date}
+            onChange={(e) =>
+              setProgramFormData({
+                ...programFormData,
+                end_date: e.target.value,
+              })
+            }
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            helperText="If not specified, program repeats indefinitely"
           />
           <TextField
             fullWidth

@@ -51,6 +51,8 @@ export interface RegularProgram {
   location: string;
   description: string;
   order: number;
+  start_date?: string;
+  end_date?: string;
   created_at: string;
   updated_at: string;
 }
