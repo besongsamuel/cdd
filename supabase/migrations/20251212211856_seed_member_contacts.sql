@@ -163,3 +163,4 @@ WHERE name = 'Martine Bélanger';
 UPDATE members SET 
   email = 'luc.dubois@example.com'
 WHERE name = 'Luc Dubois';
+

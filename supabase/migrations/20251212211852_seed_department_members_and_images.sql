@@ -102,3 +102,4 @@ WHERE d.name = 'Media'
     'Emmanuel Ntumba'
   )
 ON CONFLICT (department_id, member_id) DO NOTHING;
+

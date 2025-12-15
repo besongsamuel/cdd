@@ -144,9 +144,12 @@ export const ImageUpload = ({
     }
   };
 
-  const currentUrls = mode === 'single' 
-    ? (value ? [value] : [])
-    : (Array.isArray(value) ? value : []);
+  const currentUrls: string[] =
+    mode === 'single'
+      ? (typeof value === 'string' && value ? [value] : [])
+      : Array.isArray(value)
+      ? value
+      : [];
 
   return (
     <Box>
@@ -265,4 +268,5 @@ export const ImageUpload = ({
     </Box>
   );
 };
+
 

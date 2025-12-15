@@ -40,3 +40,4 @@ export const ProfileRedirect = ({
 
   return <>{children}</>;
 };
+

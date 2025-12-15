@@ -9,18 +9,11 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
-  Grid,
   IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -201,85 +194,95 @@ export const GalleryManager = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={2}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(1, minmax(0, 1fr))",
+            sm: "repeat(2, minmax(0, 1fr))",
+            md: "repeat(3, minmax(0, 1fr))",
+            lg: "repeat(4, minmax(0, 1fr))",
+          },
+          gap: 2,
+        }}
+      >
         {filteredPhotos.map((photo) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={photo.id}>
-            <Paper
+          <Paper
+            key={photo.id}
+            sx={{
+              p: 1,
+              position: "relative",
+              "&:hover .photo-actions": {
+                opacity: 1,
+              },
+            }}
+          >
+            <Box
               sx={{
-                p: 1,
                 position: "relative",
-                "&:hover .photo-actions": {
-                  opacity: 1,
-                },
+                width: "100%",
+                paddingTop: "75%", // 4:3 aspect ratio
+                bgcolor: "grey.100",
+                borderRadius: 1,
+                overflow: "hidden",
+                mb: 1,
               }}
             >
-              <Box
-                sx={{
-                  position: "relative",
+              <img
+                src={photo.image_url}
+                alt={photo.caption || "Gallery photo"}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
                   width: "100%",
-                  paddingTop: "75%", // 4:3 aspect ratio
-                  bgcolor: "grey.100",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <Box
+                className="photo-actions"
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  opacity: 0,
+                  transition: "opacity 0.2s",
+                  display: "flex",
+                  gap: 0.5,
+                  bgcolor: "rgba(0,0,0,0.5)",
                   borderRadius: 1,
-                  overflow: "hidden",
-                  mb: 1,
                 }}
               >
-                <img
-                  src={photo.image_url}
-                  alt={photo.caption || "Gallery photo"}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-                <Box
-                  className="photo-actions"
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    opacity: 0,
-                    transition: "opacity 0.2s",
-                    display: "flex",
-                    gap: 0.5,
-                    bgcolor: "rgba(0,0,0,0.5)",
-                    borderRadius: 1,
-                  }}
+                <IconButton
+                  size="small"
+                  onClick={() => handleOpenDialog(photo)}
+                  sx={{ color: "white" }}
                 >
-                  <IconButton
-                    size="small"
-                    onClick={() => handleOpenDialog(photo)}
-                    sx={{ color: "white" }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDelete(photo.id)}
-                    sx={{ color: "white" }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDelete(photo.id)}
+                  sx={{ color: "white" }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               </Box>
-              {photo.caption && (
-                <Typography variant="caption" noWrap>
-                  {photo.caption}
-                </Typography>
-              )}
-              {photo.event_name && (
-                <Typography variant="caption" color="text.secondary" display="block">
-                  {photo.event_name}
-                </Typography>
-              )}
-            </Paper>
-          </Grid>
+            </Box>
+            {photo.caption && (
+              <Typography variant="caption" noWrap>
+                {photo.caption}
+              </Typography>
+            )}
+            {photo.event_name && (
+              <Typography variant="caption" color="text.secondary" display="block">
+                {photo.event_name}
+              </Typography>
+            )}
+          </Paper>
         ))}
-      </Grid>
+      </Box>
 
       {filteredPhotos.length === 0 && (
         <Box sx={{ textAlign: "center", py: 4 }}>
@@ -377,4 +380,5 @@ export const GalleryManager = () => {
     </Box>
   );
 };
+
 

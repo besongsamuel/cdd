@@ -62,3 +62,4 @@ export const donationCategoryService = {
     if (error) throw error;
   },
 };
+

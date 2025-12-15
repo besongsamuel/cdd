@@ -530,3 +530,4 @@ export const CompleteProfilePage = () => {
     </Container>
   );
 };
+

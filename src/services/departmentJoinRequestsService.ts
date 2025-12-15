@@ -138,3 +138,4 @@ export const departmentJoinRequestsService = {
     if (error) throw error;
   },
 };
+

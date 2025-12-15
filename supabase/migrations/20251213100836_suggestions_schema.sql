@@ -67,3 +67,4 @@ CREATE POLICY "Authenticated users can update suggestions" ON suggestions
 CREATE POLICY "Authenticated users can delete suggestions" ON suggestions
   FOR DELETE USING (auth.role() = 'authenticated');
 
+

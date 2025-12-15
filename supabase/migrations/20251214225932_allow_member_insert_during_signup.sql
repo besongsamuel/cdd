@@ -33,3 +33,4 @@ CREATE POLICY "Users can insert own member" ON members
     (auth.uid() IS NULL AND user_exists_in_auth(user_id))
   );
 
+

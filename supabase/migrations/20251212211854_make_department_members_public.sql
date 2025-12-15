@@ -5,3 +5,4 @@ DROP POLICY IF EXISTS "Authenticated users can read department_members" ON depar
 -- Create a new public read policy
 CREATE POLICY "Public can read department_members" ON department_members
   FOR SELECT USING (true);
+

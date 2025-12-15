@@ -14,3 +14,4 @@ INSERT INTO suggestion_categories (name, description, display_order, is_active) 
   ('Communication', 'Suggestions about church communication, announcements, and media', 12, true),
   ('Other', 'Other suggestions that don''t fit into the above categories', 99, true);
 
+

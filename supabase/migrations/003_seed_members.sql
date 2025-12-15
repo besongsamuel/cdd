@@ -68,3 +68,4 @@ INSERT INTO members (name, type, passions) VALUES
   ('Luc Dubois', 'regular', ARRAY['Men''s Ministry', 'Accountability', 'Discipleship']);
 
 
+

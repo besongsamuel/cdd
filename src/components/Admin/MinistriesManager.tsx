@@ -373,7 +373,6 @@ export const MinistriesManager = () => {
   );
 
   const canManageAll = isAdmin;
-  const canEditMinistry = isAdmin;
 
   if (loading && ministries.length === 0) {
     return <LoadingSpinner />;

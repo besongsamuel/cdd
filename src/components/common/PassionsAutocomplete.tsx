@@ -120,3 +120,4 @@ export const PassionsAutocomplete: React.FC<PassionsAutocompleteProps> = ({
     />
   );
 };
+

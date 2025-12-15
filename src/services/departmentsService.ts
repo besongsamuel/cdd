@@ -70,3 +70,4 @@ export const departmentsService = {
     if (error) throw error;
   },
 };
+

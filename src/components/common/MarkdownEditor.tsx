@@ -39,7 +39,7 @@ export const MarkdownEditor = ({
           onChange={onChange}
           preview="edit"
           hideToolbar={false}
-          visibleDragBar={false}
+          visibleDragbar={false}
           data-color-mode="light"
         />
       </Box>

@@ -36,3 +36,4 @@ CREATE POLICY "Authenticated users can update financial years" ON financial_year
 CREATE POLICY "Authenticated users can delete financial years" ON financial_years
   FOR DELETE USING (auth.role() = 'authenticated');
 
+

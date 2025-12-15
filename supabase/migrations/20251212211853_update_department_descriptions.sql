@@ -169,3 +169,4 @@ Our team culture emphasizes:
 
 We welcome individuals with skills in photography, videography, video editing, graphic design, social media management, or those willing to learn. We provide training and opportunities to develop media skills while serving the church.' 
 WHERE name = 'Media';
+
