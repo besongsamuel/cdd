@@ -174,70 +174,98 @@ export const ContactPage = () => {
             </form>
           </Paper>
 
-          <Card sx={{ height: "fit-content" }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                sx={{ fontSize: { xs: "20px", md: "24px" } }}
-              >
-                {t("visitUs")}
-              </Typography>
-              <Box sx={{ mt: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Card sx={{ height: "fit-content" }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Typography
-                  variant="body1"
+                  variant="h5"
                   gutterBottom
-                  sx={{ fontSize: { xs: "15px", md: "16px" } }}
+                  sx={{ fontSize: { xs: "20px", md: "24px" } }}
                 >
-                  <strong>{t("address")}:</strong>
+                  {t("visitUs")}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  paragraph
-                  sx={{ fontSize: { xs: "14px", md: "15px" } }}
-                >
-                  {CHURCH_ADDRESS}
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  sx={{ mt: 2, fontSize: { xs: "15px", md: "16px" } }}
-                >
-                  <strong>{t("phone")}:</strong>
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  paragraph
-                  sx={{ fontSize: { xs: "14px", md: "15px" } }}
-                >
-                  <a
-                    href={`tel:${CHURCH_PHONE.replace(/\s/g, "")}`}
-                    style={{ color: "inherit", textDecoration: "none" }}
+                <Box sx={{ mt: { xs: 2, sm: 3 } }}>
+                  <Typography
+                    variant="body1"
+                    gutterBottom
+                    sx={{ fontSize: { xs: "15px", md: "16px" } }}
                   >
-                    {CHURCH_PHONE}
-                  </a>
-                </Typography>
+                    <strong>{t("address")}:</strong>
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    paragraph
+                    sx={{ fontSize: { xs: "14px", md: "15px" } }}
+                  >
+                    {CHURCH_ADDRESS}
+                  </Typography>
 
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  sx={{ mt: 2, fontSize: { xs: "15px", md: "16px" } }}
-                >
-                  <strong>{t("province")}:</strong>
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: { xs: "14px", md: "15px" } }}
-                >
-                  {CHURCH_PROVINCE}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+                  <Typography
+                    variant="body1"
+                    gutterBottom
+                    sx={{ mt: 2, fontSize: { xs: "15px", md: "16px" } }}
+                  >
+                    <strong>{t("phone")}:</strong>
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    paragraph
+                    sx={{ fontSize: { xs: "14px", md: "15px" } }}
+                  >
+                    <a
+                      href={`tel:${CHURCH_PHONE.replace(/\s/g, "")}`}
+                      style={{ color: "inherit", textDecoration: "none" }}
+                    >
+                      {CHURCH_PHONE}
+                    </a>
+                  </Typography>
+
+                  <Typography
+                    variant="body1"
+                    gutterBottom
+                    sx={{ mt: 2, fontSize: { xs: "15px", md: "16px" } }}
+                  >
+                    <strong>{t("province")}:</strong>
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: { xs: "14px", md: "15px" } }}
+                  >
+                    {CHURCH_PROVINCE}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* Google Maps Embed */}
+            <Box
+              sx={{
+                width: "100%",
+                height: { xs: 300, sm: 400, md: 450 },
+                borderRadius: 2,
+                overflow: "hidden",
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: 2,
+              }}
+            >
+              <iframe
+                src={`https://www.google.com/maps?q=${encodeURIComponent(
+                  CHURCH_ADDRESS
+                )}&output=embed`}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Church Location"
+              />
+            </Box>
+          </Box>
         </Box>
       </Container>
     </>

@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SEO } from "../components/SEO";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
+import { useAuth } from "../hooks/useAuth";
 import { budgetService } from "../services/budgetService";
 import { donationCategoryService } from "../services/donationCategoryService";
 import { donationsService } from "../services/donationsService";
@@ -26,6 +27,7 @@ import { DONATION_EMAIL } from "../utils/constants";
 
 export const DonationsPage = () => {
   const { t } = useTranslation("donations");
+  const { user, currentMember } = useAuth();
   const [categories, setCategories] = useState<DonationCategory[]>([]);
   const [budgets, setBudgets] = useState<YearlyBudget[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +42,17 @@ export const DonationsPage = () => {
     category_id: "",
     notes: "",
   });
+
+  // Pre-fill form with member info when authenticated
+  useEffect(() => {
+    if (currentMember) {
+      setFormData((prev) => ({
+        ...prev,
+        donor_name: currentMember.name || "",
+        donor_email: currentMember.email || "",
+      }));
+    }
+  }, [currentMember]);
 
   const currentYear = new Date().getFullYear();
 
@@ -81,6 +94,7 @@ export const DonationsPage = () => {
         donor_email: formData.donor_email || undefined,
         category_id: formData.category_id || undefined,
         notes: formData.notes || undefined,
+        member_id: currentMember?.id || undefined,
         etransfer_email: DONATION_EMAIL,
         status: "pending",
       });
@@ -88,8 +102,8 @@ export const DonationsPage = () => {
       setSuccess(true);
       setFormData({
         amount: "",
-        donor_name: "",
-        donor_email: "",
+        donor_name: currentMember?.name || "",
+        donor_email: currentMember?.email || "",
         category_id: "",
         notes: "",
       });
@@ -196,7 +210,28 @@ export const DonationsPage = () => {
           >
             {t("makeDonation")}
           </Typography>
+          <Box sx={{ maxWidth: "600px", mx: "auto", mb: 2 }}>
+            <Alert severity="info" icon={false}>
+              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                {t("form.submitAfterTransfer") ||
+                  "Important: Please submit this form after you have successfully sent your e-transfer."}
+              </Typography>
+              <Typography variant="body2">
+                {t("form.submitAfterTransferDescription") ||
+                  "This helps us track and process your donation. Fill out the form below and submit it once your e-transfer has been sent."}
+              </Typography>
+            </Alert>
+          </Box>
           <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: "600px", mx: "auto" }}>
+            {user && currentMember && (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  {`Submitting as ${currentMember.name}${
+                    currentMember.email ? ` (${currentMember.email})` : ""
+                  }`}
+                </Typography>
+              </Alert>
+            )}
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth

@@ -16,6 +16,7 @@
     "phone": "Phone Number (Optional)",
     "phonePlaceholder": "e.g., +1 (514) 123-4567",
     "anonymous": "Submit Anonymously",
+    "memberInfoNotice": "Your suggestion will be submitted using your member information. Uncheck 'Submit Anonymously' to use your member info, or check it to submit anonymously.",
     "submit": "Submit Suggestion",
     "submitting": "Submitting...",
     "cancel": "Cancel",

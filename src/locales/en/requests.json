@@ -13,7 +13,12 @@
     "submit": "Submit Request",
     "submitting": "Submitting...",
     "success": "Thank you for your request! We'll be in touch soon.",
-    "error": "Failed to submit request. Please try again."
+    "error": "Failed to submit request. Please try again.",
+    "loginRequired": "You must be logged in to submit a request",
+    "loginRequiredMessage": "You need to be logged in to submit a request.",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "memberInfoNotice": "Submitting with your member information"
   }
 }
 

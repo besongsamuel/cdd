@@ -17,6 +17,8 @@
     "submit": "Submit Donation",
     "submitting": "Submitting...",
     "success": "Thank you for your donation! Please send your eTransfer to info@eglisecitededavid.com",
-    "error": "Failed to submit donation. Please try again."
+    "error": "Failed to submit donation. Please try again.",
+    "submitAfterTransfer": "Important: Please submit this form after you have successfully sent your e-transfer.",
+    "submitAfterTransferDescription": "This helps us track and process your donation. Fill out the form below and submit it once your e-transfer has been sent."
   }
 }

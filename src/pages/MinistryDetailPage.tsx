@@ -20,6 +20,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
@@ -32,6 +33,7 @@ export const MinistryDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("ministries");
   const navigate = useNavigate();
+  const { user, currentMember } = useAuth();
   const [ministry, setMinistry] = useState<Ministry | null>(null);
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ export const MinistryDetailPage = () => {
 
   const handleJoinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !ministry) return;
+    if (!id || !ministry || !user) return;
 
     setSubmitting(true);
     setError(null);
@@ -123,6 +125,10 @@ export const MinistryDetailPage = () => {
   const leads = members.filter((m) => m.is_lead);
   const regularMembers = members.filter((m) => !m.is_lead);
   const details = ministry.details;
+  const isMember = currentMember
+    ? members.some((m) => m.member_id === currentMember.id)
+    : false;
+  const showJoinButton = !isMember;
 
   return (
     <>
@@ -711,67 +717,83 @@ export const MinistryDetailPage = () => {
         </Box>
 
         {/* How to Get Involved Section */}
-        <Box
-          sx={{
-            textAlign: "center",
-            mt: 6,
-            mb: 4,
-            opacity: 0,
-            animation: "fadeInUp 0.8s ease-out 1.6s forwards",
-            "@keyframes fadeInUp": {
-              from: {
-                opacity: 0,
-                transform: "translateY(20px)",
-              },
-              to: {
-                opacity: 1,
-                transform: "translateY(0)",
-              },
-            },
-          }}
-        >
-          <Typography
-            variant="h5"
-            component="h2"
-            gutterBottom
+        {showJoinButton && (
+          <Box
             sx={{
-              fontSize: { xs: "24px", md: "32px" },
-              fontWeight: 700,
-              mb: 3,
-              background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            {t("getInvolved")}
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => setJoinDialogOpen(true)}
-            sx={{
-              px: 5,
-              py: 1.8,
-              fontSize: { xs: "16px", md: "18px" },
-              minHeight: "56px",
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
-              boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                transform: "translateY(-2px) scale(1.02)",
-                boxShadow: "0 8px 30px rgba(30, 58, 138, 0.4)",
-                background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
-              },
-              "&:active": {
-                transform: "translateY(0) scale(0.98)",
+              textAlign: "center",
+              mt: 6,
+              mb: 4,
+              opacity: 0,
+              animation: "fadeInUp 0.8s ease-out 1.6s forwards",
+              "@keyframes fadeInUp": {
+                from: {
+                  opacity: 0,
+                  transform: "translateY(20px)",
+                },
+                to: {
+                  opacity: 1,
+                  transform: "translateY(0)",
+                },
               },
             }}
           >
-            {t("joinMinistry")}
-          </Button>
-        </Box>
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              sx={{
+                fontSize: { xs: "24px", md: "32px" },
+                fontWeight: 700,
+                mb: 3,
+                background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              {t("getInvolved")}
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => setJoinDialogOpen(true)}
+              disabled={!user}
+              sx={{
+                px: 5,
+                py: 1.8,
+                fontSize: { xs: "16px", md: "18px" },
+                minHeight: "56px",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+                boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  transform: user ? "translateY(-2px) scale(1.02)" : "none",
+                  boxShadow: user
+                    ? "0 8px 30px rgba(30, 58, 138, 0.4)"
+                    : "0 4px 20px rgba(30, 58, 138, 0.3)",
+                  background: user
+                    ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)"
+                    : "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+                },
+                "&:active": {
+                  transform: user ? "translateY(0) scale(0.98)" : "none",
+                },
+              }}
+            >
+              {t("joinMinistry")}
+            </Button>
+            {!user && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 2 }}
+              >
+                {t("loginRequired") || "Please log in to join this ministry"}
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {/* Join Dialog */}
         <Dialog
@@ -783,6 +805,11 @@ export const MinistryDetailPage = () => {
           <form onSubmit={handleJoinSubmit}>
             <DialogTitle>{t("joinMinistry")}</DialogTitle>
             <DialogContent>
+              {!user && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  {t("loginRequired") || "You must be logged in to submit a join request"}
+                </Alert>
+              )}
               {success && (
                 <Alert severity="success" sx={{ mb: 2 }}>
                   {t("requestSubmitted")}
@@ -845,7 +872,11 @@ export const MinistryDetailPage = () => {
               <Button onClick={() => setJoinDialogOpen(false)}>
                 {t("form.cancel")}
               </Button>
-              <Button type="submit" variant="contained" disabled={submitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={submitting || !user}
+              >
                 {submitting ? t("form.submitting") : t("form.submit")}
               </Button>
             </DialogActions>

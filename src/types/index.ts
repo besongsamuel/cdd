@@ -124,6 +124,7 @@ export interface Donation {
   donor_name?: string;
   donor_email?: string;
   category_id?: string;
+  member_id?: string;
   status: DonationStatus;
   etransfer_email?: string;
   notes?: string;
@@ -257,6 +258,7 @@ export interface Suggestion {
   suggestion_text: string;
   submitter_name?: string;
   submitter_phone?: string;
+  member_id?: string;
   status: string;
   notes?: string;
   created_at: string;

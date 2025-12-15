@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../hooks/useAuth";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { suggestionCategoriesService } from "../services/suggestionCategoriesService";
@@ -23,6 +24,7 @@ import type { SuggestionCategory } from "../types";
 
 export const SuggestionsPage = () => {
   const { t } = useTranslation("suggestions");
+  const { currentMember, user } = useAuth();
   const [categories, setCategories] = useState<SuggestionCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -36,6 +38,17 @@ export const SuggestionsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-fill form with member info when authenticated
+  useEffect(() => {
+    if (currentMember && !formData.is_anonymous) {
+      setFormData((prev) => ({
+        ...prev,
+        submitter_name: currentMember.name || "",
+        submitter_phone: currentMember.phone || "",
+      }));
+    }
+  }, [currentMember, formData.is_anonymous]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -98,6 +111,9 @@ export const SuggestionsPage = () => {
         submitter_phone: formData.is_anonymous
           ? undefined
           : formData.submitter_phone || undefined,
+        member_id: formData.is_anonymous || !currentMember
+          ? undefined
+          : currentMember.id,
       });
 
       setSuccess(true);
@@ -135,11 +151,16 @@ export const SuggestionsPage = () => {
   };
 
   const handleAnonymousChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isAnonymous = e.target.checked;
     setFormData({
       ...formData,
-      is_anonymous: e.target.checked,
-      submitter_name: e.target.checked ? "" : formData.submitter_name,
-      submitter_phone: e.target.checked ? "" : formData.submitter_phone,
+      is_anonymous: isAnonymous,
+      submitter_name: isAnonymous
+        ? ""
+        : currentMember?.name || "",
+      submitter_phone: isAnonymous
+        ? ""
+        : currentMember?.phone || "",
     });
   };
 
@@ -601,9 +622,15 @@ export const SuggestionsPage = () => {
                   label={t("form.anonymous")}
                   sx={{ mb: 2 }}
                 />
-
                 {!formData.is_anonymous && (
                   <>
+                    {user && currentMember && (
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          {`Submitting as ${currentMember.name}${currentMember.email ? ` (${currentMember.email})` : ""}`}
+                        </Typography>
+                      </Alert>
+                    )}
                     <TextField
                       fullWidth
                       label={t("form.name")}
@@ -619,18 +646,20 @@ export const SuggestionsPage = () => {
                         },
                       }}
                     />
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 2,
-                        fontSize: "14px",
-                        fontStyle: "italic",
-                        px: 1,
-                      }}
-                    >
-                      {t("form.nameNote")}
-                    </Typography>
+                    {!user && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          mb: 2,
+                          fontSize: "14px",
+                          fontStyle: "italic",
+                          px: 1,
+                        }}
+                      >
+                        {t("form.nameNote")}
+                      </Typography>
+                    )}
                     <TextField
                       fullWidth
                       label={t("form.phone")}

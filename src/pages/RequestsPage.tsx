@@ -11,14 +11,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { SEO } from "../components/SEO";
+import { useAuth } from "../hooks/useAuth";
 import { requestsService } from "../services/requestsService";
 import type { RequestType } from "../types";
 
 export const RequestsPage = () => {
   const { t } = useTranslation("requests");
+  const navigate = useNavigate();
+  const { user, currentMember } = useAuth();
   const [formData, setFormData] = useState({
     type: "prayer" as RequestType,
     name: "",
@@ -30,8 +34,27 @@ export const RequestsPage = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pre-fill form with member info when authenticated
+  useEffect(() => {
+    if (currentMember) {
+      setFormData((prev) => ({
+        ...prev,
+        name: currentMember.name || "",
+        email: currentMember.email || "",
+        phone: currentMember.phone || "",
+      }));
+    }
+  }, [currentMember]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setError(
+        t("form.loginRequired") || "You must be logged in to submit a request"
+      );
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -58,9 +81,9 @@ export const RequestsPage = () => {
       setSuccess(true);
       setFormData({
         type: "prayer",
-        name: "",
-        email: "",
-        phone: "",
+        name: currentMember?.name || "",
+        email: currentMember?.email || "",
+        phone: currentMember?.phone || "",
         content: "",
       });
     } catch (err) {
@@ -110,11 +133,36 @@ export const RequestsPage = () => {
 
         <Box sx={{ maxWidth: "600px", mx: "auto" }}>
           <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+            {!user && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {t("form.loginRequiredMessage") ||
+                    "You need to be logged in to submit a request."}
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate("/login")}
+                  >
+                    {t("form.login") || "Log In"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate("/signup")}
+                  >
+                    {t("form.signup") || "Sign Up"}
+                  </Button>
+                </Box>
+              </Alert>
+            )}
             <form onSubmit={handleSubmit}>
               <FormControl
                 fullWidth
                 margin="normal"
                 required
+                disabled={!user}
                 sx={{
                   "& .MuiInputBase-input": {
                     fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
@@ -126,6 +174,7 @@ export const RequestsPage = () => {
                   value={formData.type}
                   onChange={handleTypeChange}
                   label={t("form.type")}
+                  disabled={!user}
                 >
                   <MenuItem value="prayer">{t("form.prayer")}</MenuItem>
                   <MenuItem value="support">{t("form.support")}</MenuItem>
@@ -133,6 +182,15 @@ export const RequestsPage = () => {
                 </Select>
               </FormControl>
 
+              {user && currentMember && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    {`Submitting as ${currentMember.name}${
+                      currentMember.email ? ` (${currentMember.email})` : ""
+                    }`}
+                  </Typography>
+                </Alert>
+              )}
               <TextField
                 fullWidth
                 label={t("form.name")}
@@ -140,6 +198,7 @@ export const RequestsPage = () => {
                 value={formData.name}
                 onChange={handleChange}
                 margin="normal"
+                disabled={!user}
                 sx={{
                   "& .MuiInputBase-input": {
                     fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
@@ -154,6 +213,7 @@ export const RequestsPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 margin="normal"
+                disabled={!user}
                 sx={{
                   "& .MuiInputBase-input": {
                     fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
@@ -168,6 +228,7 @@ export const RequestsPage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 margin="normal"
+                disabled={!user}
                 sx={{
                   "& .MuiInputBase-input": {
                     fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
@@ -184,6 +245,7 @@ export const RequestsPage = () => {
                 multiline
                 rows={6}
                 margin="normal"
+                disabled={!user}
                 sx={{
                   "& .MuiInputBase-input": {
                     fontSize: { xs: "16px", sm: "16px" }, // Prevents zoom on iOS
@@ -210,7 +272,7 @@ export const RequestsPage = () => {
                   fontSize: { xs: "16px", sm: "17px" },
                   minHeight: "48px",
                 }}
-                disabled={loading}
+                disabled={loading || !user}
               >
                 {loading ? t("form.submitting") : t("form.submit")}
               </Button>

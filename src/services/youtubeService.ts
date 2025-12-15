@@ -13,8 +13,10 @@ export const youtubeService = {
   async getLatestVideos(count: number = 3): Promise<YouTubeVideo[]> {
     try {
       // Use YouTube RSS feed (no API key required)
+      // Using CORS proxy to bypass CORS restrictions
       const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
-      const response = await fetch(rssUrl);
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+      const response = await fetch(proxyUrl);
       const text = await response.text();
       
       // Parse RSS XML

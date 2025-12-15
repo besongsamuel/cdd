@@ -19,6 +19,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
+import { useAuth } from "../hooks/useAuth";
 import { departmentJoinRequestsService } from "../services/departmentJoinRequestsService";
 import { departmentMembersService } from "../services/departmentMembersService";
 import { departmentsService } from "../services/departmentsService";
@@ -28,6 +29,7 @@ export const DepartmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("departments");
   const navigate = useNavigate();
+  const { user, currentMember } = useAuth();
   const [department, setDepartment] = useState<Department | null>(null);
   const [members, setMembers] = useState<DepartmentMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ export const DepartmentDetailPage = () => {
 
   const handleJoinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !department) return;
+    if (!id || !department || !user) return;
 
     setSubmitting(true);
     setError(null);
@@ -118,6 +120,10 @@ export const DepartmentDetailPage = () => {
 
   const leads = members.filter((m) => m.is_lead);
   const regularMembers = members.filter((m) => !m.is_lead);
+  const isMember = currentMember
+    ? members.some((m) => m.member_id === currentMember.id)
+    : false;
+  const showJoinButton = !isMember;
 
   return (
     <>
@@ -472,51 +478,63 @@ export const DepartmentDetailPage = () => {
         </Box>
 
         {/* Join Button */}
-        <Box
-          sx={{
-            textAlign: "center",
-            mt: 6,
-            mb: 4,
-            opacity: 0,
-            animation: "fadeInUp 0.8s ease-out 1s forwards",
-            "@keyframes fadeInUp": {
-              from: {
-                opacity: 0,
-                transform: "translateY(20px)",
-              },
-              to: {
-                opacity: 1,
-                transform: "translateY(0)",
-              },
-            },
-          }}
-        >
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => setJoinDialogOpen(true)}
+        {showJoinButton && (
+          <Box
             sx={{
-              px: 5,
-              py: 1.8,
-              fontSize: { xs: "16px", md: "18px" },
-              minHeight: "56px",
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
-              boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                transform: "translateY(-2px) scale(1.02)",
-                boxShadow: "0 8px 30px rgba(30, 58, 138, 0.4)",
-                background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
-              },
-              "&:active": {
-                transform: "translateY(0) scale(0.98)",
+              textAlign: "center",
+              mt: 6,
+              mb: 4,
+              opacity: 0,
+              animation: "fadeInUp 0.8s ease-out 1s forwards",
+              "@keyframes fadeInUp": {
+                from: {
+                  opacity: 0,
+                  transform: "translateY(20px)",
+                },
+                to: {
+                  opacity: 1,
+                  transform: "translateY(0)",
+                },
               },
             }}
           >
-            {t("joinDepartment")}
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => setJoinDialogOpen(true)}
+              disabled={!user}
+              sx={{
+                px: 5,
+                py: 1.8,
+                fontSize: { xs: "16px", md: "18px" },
+                minHeight: "56px",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+                boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  transform: user ? "translateY(-2px) scale(1.02)" : "none",
+                  boxShadow: user
+                    ? "0 8px 30px rgba(30, 58, 138, 0.4)"
+                    : "0 4px 20px rgba(30, 58, 138, 0.3)",
+                  background: user
+                    ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)"
+                    : "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+                },
+                "&:active": {
+                  transform: user ? "translateY(0) scale(0.98)" : "none",
+                },
+              }}
+            >
+              {t("joinDepartment")}
+            </Button>
+            {!user && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                {t("loginRequired") || "Please log in to join this department"}
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {/* Join Dialog */}
         <Dialog
@@ -528,6 +546,12 @@ export const DepartmentDetailPage = () => {
           <form onSubmit={handleJoinSubmit}>
             <DialogTitle>{t("joinDepartment")}</DialogTitle>
             <DialogContent>
+              {!user && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  {t("loginRequired") ||
+                    "You must be logged in to submit a join request"}
+                </Alert>
+              )}
               {success && (
                 <Alert severity="success" sx={{ mb: 2 }}>
                   {t("requestSubmitted")}
@@ -590,7 +614,11 @@ export const DepartmentDetailPage = () => {
               <Button onClick={() => setJoinDialogOpen(false)}>
                 {t("form.cancel")}
               </Button>
-              <Button type="submit" variant="contained" disabled={submitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={submitting || !user}
+              >
                 {submitting ? t("form.submitting") : t("form.submit")}
               </Button>
             </DialogActions>
