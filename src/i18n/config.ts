@@ -15,6 +15,7 @@ import enMembers from "../locales/en/members.json";
 import enMinistries from "../locales/en/ministries.json";
 import enNavigation from "../locales/en/navigation.json";
 import enRequests from "../locales/en/requests.json";
+import enSermons from "../locales/en/sermons.json";
 import enServices from "../locales/en/services.json";
 import enSuggestions from "../locales/en/suggestions.json";
 
@@ -31,6 +32,7 @@ import frMembers from "../locales/fr/members.json";
 import frMinistries from "../locales/fr/ministries.json";
 import frNavigation from "../locales/fr/navigation.json";
 import frRequests from "../locales/fr/requests.json";
+import frSermons from "../locales/fr/sermons.json";
 import frServices from "../locales/fr/services.json";
 import frSuggestions from "../locales/fr/suggestions.json";
 
@@ -55,6 +57,7 @@ i18n
         departments: enDepartments,
         legal: enLegal,
         services: enServices,
+        sermons: enSermons,
       },
       fr: {
         common: frCommon,
@@ -72,6 +75,7 @@ i18n
         departments: frDepartments,
         legal: frLegal,
         services: frServices,
+        sermons: frSermons,
       },
     },
     fallbackLng: "en",
@@ -92,6 +96,7 @@ i18n
       "departments",
       "legal",
       "services",
+      "sermons",
     ],
     interpolation: {
       escapeValue: false,

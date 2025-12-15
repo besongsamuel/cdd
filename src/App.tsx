@@ -35,6 +35,7 @@ import { MinistriesPage } from "./pages/MinistriesPage";
 import { MinistryDetailPage } from "./pages/MinistryDetailPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { RequestsPage } from "./pages/RequestsPage";
+import { SermonsPage } from "./pages/SermonsPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { SignupPage } from "./pages/SignupPage";
 import { SuggestionsPage } from "./pages/SuggestionsPage";
@@ -201,6 +202,18 @@ function App() {
                           <Header />
                           <Box component="main" sx={{ flexGrow: 1 }}>
                             <GalleryPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/sermons"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <SermonsPage />
                           </Box>
                           <Footer />
                         </>

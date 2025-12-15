@@ -108,10 +108,10 @@ export const MinistriesManager = () => {
   }, []);
 
   useEffect(() => {
-    if (currentMember) {
+    if (currentMember && ministries.length > 0) {
       checkUserPermissions();
     }
-  }, [currentMember, isAdmin]);
+  }, [currentMember, isAdmin, ministries]);
 
   useEffect(() => {
     if (tabValue === 1) {
@@ -123,7 +123,7 @@ export const MinistriesManager = () => {
   }, [tabValue, selectedMinistryId]);
 
   const checkUserPermissions = async () => {
-    if (!currentMember) return;
+    if (!currentMember || ministries.length === 0) return;
 
     if (isAdmin) {
       // Admin sees all ministries
@@ -160,13 +160,11 @@ export const MinistriesManager = () => {
     try {
       const data = await ministriesService.getAll();
       setMinistries(data);
-      if (currentMember) {
-        await checkUserPermissions();
-      } else {
-        setFilteredMinistries(data);
-      }
+      // Set filtered ministries immediately - checkUserPermissions will update if needed
+      setFilteredMinistries(data);
     } catch (error) {
       console.error("Error loading ministries:", error);
+      setFilteredMinistries([]);
     }
   };
 

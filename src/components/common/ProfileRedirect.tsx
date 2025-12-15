@@ -11,7 +11,7 @@ export const ProfileRedirect = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { user, currentMember, loading } = useAuth();
+  const { user, currentMember, loading, memberLoading } = useAuth();
   const location = useLocation();
 
   // Routes that should be accessible even without a member profile
@@ -27,7 +27,8 @@ export const ProfileRedirect = ({
     location.pathname.startsWith(path)
   );
 
-  if (loading) {
+  // Wait for both auth and member to finish loading
+  if (loading || (user && memberLoading)) {
     return <LoadingSpinner />;
   }
 

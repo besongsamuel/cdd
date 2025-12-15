@@ -14,7 +14,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -38,13 +37,7 @@ export const MinistryDetailPage = () => {
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,33 +62,22 @@ export const MinistryDetailPage = () => {
     loadMinistry();
   }, [id, navigate]);
 
-  const handleJoinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!id || !ministry || !user) return;
+  const handleJoinConfirm = async () => {
+    if (!id || !ministry || !user || !currentMember) return;
 
     setSubmitting(true);
     setError(null);
-    setSuccess(false);
-
-    if (!formData.name.trim()) {
-      setError(t("form.nameRequired"));
-      setSubmitting(false);
-      return;
-    }
 
     try {
       await ministryJoinRequestsService.create({
         ministry_id: id,
-        member_name: formData.name,
-        member_email: formData.email || undefined,
-        member_phone: formData.phone || undefined,
+        member_name: currentMember.name,
+        member_email: currentMember.email || undefined,
+        member_phone: currentMember.phone || undefined,
       });
-      setSuccess(true);
-      setFormData({ name: "", email: "", phone: "" });
-      setTimeout(() => {
-        setJoinDialogOpen(false);
-        setSuccess(false);
-      }, 2000);
+      setJoinDialogOpen(false);
+      // Optionally show a success message or reload the page
+      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("form.error"));
     } finally {
@@ -795,92 +777,59 @@ export const MinistryDetailPage = () => {
           </Box>
         )}
 
-        {/* Join Dialog */}
+        {/* Join Confirmation Dialog */}
         <Dialog
           open={joinDialogOpen}
-          onClose={() => setJoinDialogOpen(false)}
+          onClose={() => !submitting && setJoinDialogOpen(false)}
           maxWidth="sm"
           fullWidth
         >
-          <form onSubmit={handleJoinSubmit}>
-            <DialogTitle>{t("joinMinistry")}</DialogTitle>
-            <DialogContent>
-              {!user && (
-                <Alert severity="warning" sx={{ mb: 2 }}>
-                  {t("loginRequired") || "You must be logged in to submit a join request"}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  {t("requestSubmitted")}
-                </Alert>
-              )}
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
-              )}
-              <TextField
-                fullWidth
-                label={t("form.name")}
-                name="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                margin="normal"
-                sx={{
-                  "& .MuiInputBase-input": {
-                    fontSize: { xs: "16px", sm: "16px" },
-                  },
-                }}
-              />
-              <TextField
-                fullWidth
-                label={t("form.email")}
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                margin="normal"
-                sx={{
-                  "& .MuiInputBase-input": {
-                    fontSize: { xs: "16px", sm: "16px" },
-                  },
-                }}
-              />
-              <TextField
-                fullWidth
-                label={t("form.phone")}
-                name="phone"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                margin="normal"
-                sx={{
-                  "& .MuiInputBase-input": {
-                    fontSize: { xs: "16px", sm: "16px" },
-                  },
-                }}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setJoinDialogOpen(false)}>
-                {t("form.cancel")}
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={submitting || !user}
-              >
-                {submitting ? t("form.submitting") : t("form.submit")}
-              </Button>
-            </DialogActions>
-          </form>
+          <DialogTitle>{t("joinMinistry")}</DialogTitle>
+          <DialogContent>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {currentMember && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {t("joinConfirmation") ||
+                    "Are you sure you want to request to join this ministry?"}
+                </Typography>
+                <Box sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <strong>{t("form.name")}:</strong> {currentMember.name}
+                  </Typography>
+                  {currentMember.email && (
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      <strong>{t("form.email")}:</strong> {currentMember.email}
+                    </Typography>
+                  )}
+                  {currentMember.phone && (
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>{t("form.phone")}:</strong> {currentMember.phone}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setJoinDialogOpen(false)}
+              disabled={submitting}
+            >
+              {t("form.cancel")}
+            </Button>
+            <Button
+              onClick={handleJoinConfirm}
+              variant="contained"
+              disabled={submitting || !user || !currentMember}
+            >
+              {submitting ? t("form.submitting") : t("form.confirm") || "Confirm"}
+            </Button>
+          </DialogActions>
         </Dialog>
       </Container>
     </>

@@ -334,7 +334,7 @@ export const LandingPage = () => {
             >
               <Button
                 component={Link}
-                to="/events"
+                to="/signup"
                 variant="contained"
                 size="large"
                 sx={{

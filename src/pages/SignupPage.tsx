@@ -15,10 +15,11 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
+import cddLogo from "../assets/cddLogo.png";
 import { useAuth } from "../hooks/useAuth";
 
 export const SignupPage = () => {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation(["common", "landing"]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -65,12 +66,54 @@ export const SignupPage = () => {
           <Paper
             sx={{
               p: 4,
-              display: { xs: "none", md: "block" },
+              display: { xs: "none", md: "flex" },
+              flexDirection: "column",
               backgroundColor: "primary.main",
               color: "white",
             }}
           >
-            <Typography variant="h4" component="h2" gutterBottom>
+            {/* Logo */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mb: 3,
+              }}
+            >
+              <Box
+                component="img"
+                src={cddLogo}
+                alt="City of David Logo"
+                sx={{
+                  height: { xs: 80, md: 100 },
+                  width: "auto",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+
+            {/* Welcome Text */}
+            <Typography
+              variant="h4"
+              component="h2"
+              gutterBottom
+              sx={{ textAlign: "center", fontWeight: 600 }}
+            >
+              {t("welcomeTitle", { ns: "landing" })}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                mb: 4,
+                opacity: 0.95,
+                lineHeight: 1.7,
+                textAlign: "center",
+              }}
+            >
+              {t("welcomeMessage", { ns: "landing" })}
+            </Typography>
+
+            <Typography variant="h5" component="h3" gutterBottom sx={{ mt: 2 }}>
               {t("signUpBenefitsTitle")}
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, opacity: 0.95 }}>
@@ -118,14 +161,56 @@ export const SignupPage = () => {
 
           {/* Signup Form */}
           <Paper sx={{ p: 4, width: "100%" }}>
+            {/* Logo for Mobile */}
+            <Box
+              sx={{
+                display: { xs: "flex", md: "none" },
+                justifyContent: "center",
+                mb: 3,
+              }}
+            >
+              <Box
+                component="img"
+                src={cddLogo}
+                alt="City of David Logo"
+                sx={{
+                  height: 80,
+                  width: "auto",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+
             <Typography
               variant="h4"
               component="h1"
               gutterBottom
               textAlign="center"
+              sx={{ fontWeight: 600 }}
             >
               {t("signUpTitle")}
             </Typography>
+
+            {/* Welcome Text for Mobile */}
+            <Box sx={{ display: { xs: "block", md: "none" }, mb: 3, mt: 2 }}>
+              <Typography
+                variant="h6"
+                component="h2"
+                gutterBottom
+                color="primary.main"
+                textAlign="center"
+                sx={{ fontWeight: 600 }}
+              >
+                {t("welcomeTitle", { ns: "landing" })}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textAlign: "center", lineHeight: 1.6 }}
+              >
+                {t("welcomeMessage", { ns: "landing" })}
+              </Typography>
+            </Box>
 
             {/* Benefits Section for Mobile */}
             <Box sx={{ display: { xs: "block", md: "none" }, mb: 3, mt: 2 }}>

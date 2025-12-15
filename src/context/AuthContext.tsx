@@ -8,6 +8,7 @@ export interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  memberLoading: boolean;
   currentMember: Member | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [session, setSession] = useState<Session | null>(null);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
+  const [memberLoading, setMemberLoading] = useState(false);
 
   const loadMember = useCallback(async (userId: string | undefined) => {
     if (!userId) {
@@ -71,11 +73,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Reset member state when user logs out
       queueMicrotask(() => {
         setCurrentMember(null);
+        setMemberLoading(false);
       });
       return;
     }
 
     let cancelled = false;
+    setMemberLoading(true);
 
     // Load member asynchronously
     const loadMemberData = async () => {
@@ -83,11 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const member = await membersService.getByUserId(user.id);
         if (!cancelled) {
           setCurrentMember(member);
+          setMemberLoading(false);
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Error loading member:", error);
           setCurrentMember(null);
+          setMemberLoading(false);
         }
       }
     };
@@ -96,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => {
       cancelled = true;
+      setMemberLoading(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -174,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         user,
         session,
         loading,
+        memberLoading,
         currentMember,
         signIn,
         signUp,
