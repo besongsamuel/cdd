@@ -11,10 +11,12 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import { SOCIAL_MEDIA_LINKS } from "../../utils/constants";
 
 export const Footer = () => {
   const { t } = useTranslation("common");
+  const { user } = useAuth();
   const currentYear = new Date().getFullYear();
   const [mounted, setMounted] = useState(false);
 
@@ -115,6 +117,40 @@ export const Footer = () => {
               >
                 {t("termsAndConditions")}
               </MuiLink>
+              {!user && (
+                <>
+                  <MuiLink
+                    component={Link}
+                    to="/login"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "13px",
+                      textDecoration: "none",
+                      "&:hover": {
+                        color: "primary.main",
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    {t("login")}
+                  </MuiLink>
+                  <MuiLink
+                    component={Link}
+                    to="/signup"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "13px",
+                      textDecoration: "none",
+                      "&:hover": {
+                        color: "primary.main",
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    {t("signUp")}
+                  </MuiLink>
+                </>
+              )}
             </Box>
           </Box>
           <Box

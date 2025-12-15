@@ -11,23 +11,28 @@ import { RequestsManager } from "./components/Admin/RequestsManager";
 import { Footer } from "./components/Layout/Footer";
 import { Header } from "./components/Layout/Header";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { ProfileRedirect } from "./components/common/ProfileRedirect";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./i18n/config";
+import { CompleteProfilePage } from "./pages/CompleteProfilePage";
 import { ContactPage } from "./pages/ContactPage";
 import { DepartmentDetailPage } from "./pages/DepartmentDetailPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { DonationsPage } from "./pages/DonationsPage";
+import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { EventsPage } from "./pages/EventsPage";
 import { FinancialTransparencyPage } from "./pages/FinancialTransparencyPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
+import { LoginPage } from "./pages/LoginPage";
 import { MembersPage } from "./pages/MembersPage";
 import { MinistriesPage } from "./pages/MinistriesPage";
 import { MinistryDetailPage } from "./pages/MinistryDetailPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { RequestsPage } from "./pages/RequestsPage";
 import { ServicesPage } from "./pages/ServicesPage";
+import { SignupPage } from "./pages/SignupPage";
 import { SuggestionsPage } from "./pages/SuggestionsPage";
 import { TermsAndConditionsPage } from "./pages/TermsAndConditionsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -115,238 +120,256 @@ function App() {
           <CssBaseline />
           <AuthProvider>
             <BrowserRouter>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: "100vh",
-                }}
-              >
-                <Routes>
-                  {/* Public Routes */}
-                  <Route
-                    path="/"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <LandingPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/contact"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <ContactPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/members"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <MembersPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/services"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <ServicesPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/events"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <EventsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/gallery"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <GalleryPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/requests"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <RequestsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/suggestions"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <SuggestionsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/donations"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <DonationsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/financial-transparency"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <FinancialTransparencyPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/departments"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <DepartmentsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/departments/:id"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <DepartmentDetailPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/ministries"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <MinistriesPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/ministries/:id"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <MinistryDetailPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/privacy-policy"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <PrivacyPolicyPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/terms-and-conditions"
-                    element={
-                      <>
-                        <Header />
-                        <Box component="main" sx={{ flexGrow: 1 }}>
-                          <TermsAndConditionsPage />
-                        </Box>
-                        <Footer />
-                      </>
-                    }
-                  />
+              <ProfileRedirect>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: "100vh",
+                  }}
+                >
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route
+                      path="/"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <LandingPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/contact"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <ContactPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/members"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <MembersPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/services"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <ServicesPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/events"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <EventsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/gallery"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <GalleryPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/requests"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <RequestsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/suggestions"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <SuggestionsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/donations"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <DonationsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/financial-transparency"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <FinancialTransparencyPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/departments"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <DepartmentsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/departments/:id"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <DepartmentDetailPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/ministries"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <MinistriesPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/ministries/:id"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <MinistryDetailPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/privacy-policy"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <PrivacyPolicyPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/terms-and-conditions"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <TermsAndConditionsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
 
-                  {/* Admin Routes */}
-                  <Route path="/admin/login" element={<AdminLoginPage />} />
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedRoute>
-                        <AdminLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="members" element={<MembersManager />} />
-                    <Route path="events" element={<EventsManager />} />
-                    <Route path="donations" element={<DonationsManager />} />
+                    {/* Auth Routes */}
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/login" element={<LoginPage />} />
                     <Route
-                      path="departments"
-                      element={<DepartmentsManager />}
-                    />
-                    <Route path="requests" element={<RequestsManager />} />
-                    <Route
-                      path="contact"
-                      element={<ContactSubmissionsManager />}
+                      path="/verify-email"
+                      element={<EmailVerificationPage />}
                     />
                     <Route
-                      path=""
-                      element={<Navigate to="/admin/dashboard" replace />}
+                      path="/profile/complete"
+                      element={
+                        <ProtectedRoute requireAdmin={false}>
+                          <CompleteProfilePage />
+                        </ProtectedRoute>
+                      }
                     />
-                  </Route>
-                </Routes>
-              </Box>
+
+                    {/* Admin Routes */}
+                    <Route path="/admin/login" element={<AdminLoginPage />} />
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute>
+                          <AdminLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="members" element={<MembersManager />} />
+                      <Route path="events" element={<EventsManager />} />
+                      <Route path="donations" element={<DonationsManager />} />
+                      <Route
+                        path="departments"
+                        element={<DepartmentsManager />}
+                      />
+                      <Route path="requests" element={<RequestsManager />} />
+                      <Route
+                        path="contact"
+                        element={<ContactSubmissionsManager />}
+                      />
+                      <Route
+                        path=""
+                        element={<Navigate to="/admin/dashboard" replace />}
+                      />
+                    </Route>
+                  </Routes>
+                </Box>
+              </ProfileRedirect>
             </BrowserRouter>
           </AuthProvider>
         </ThemeProvider>

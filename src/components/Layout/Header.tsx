@@ -2,6 +2,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Drawer,
@@ -23,11 +24,14 @@ import { LanguageSwitcher } from "../LanguageSwitcher";
 
 export const Header = () => {
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { user, currentMember, isAdmin, signOut } = useAuth();
   const { t } = useTranslation("navigation");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
+    null
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -95,6 +99,19 @@ export const Header = () => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    handleUserMenuClose();
   };
 
   const drawer = (
@@ -279,15 +296,39 @@ export const Header = () => {
           </ListItem>
         ))}
 
-        {isAdmin && (
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/admin/dashboard">
-              <ListItemText
-                primary={t("admin")}
-                primaryTypographyProps={{ fontSize: "17px" }}
-              />
-            </ListItemButton>
-          </ListItem>
+        {user && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="/profile/complete">
+                <ListItemText
+                  primary="Profile"
+                  primaryTypographyProps={{ fontSize: "17px" }}
+                />
+              </ListItemButton>
+            </ListItem>
+            {isAdmin && (
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/admin/dashboard">
+                  <ListItemText
+                    primary={t("admin")}
+                    primaryTypographyProps={{ fontSize: "17px" }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={async () => {
+                  await signOut();
+                }}
+              >
+                <ListItemText
+                  primary="Logout"
+                  primaryTypographyProps={{ fontSize: "17px" }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </>
         )}
       </List>
     </Box>
@@ -671,6 +712,50 @@ export const Header = () => {
               >
                 {t("admin")}
               </Button>
+            )}
+            {user && (
+              <>
+                <IconButton
+                  onClick={handleUserMenuOpen}
+                  sx={{
+                    ml: 1,
+                    minWidth: "44px",
+                    minHeight: "44px",
+                  }}
+                >
+                  <Avatar
+                    src={currentMember?.picture_url}
+                    alt={currentMember?.name || user.email || "User"}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {(currentMember?.name ||
+                      user.email ||
+                      "U")[0].toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={handleUserMenuClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <MenuItem
+                    component={Link}
+                    to="/profile/complete"
+                    onClick={handleUserMenuClose}
+                  >
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleSignOut}>Logout</MenuItem>
+                </Menu>
+              </>
             )}
             <Box
               sx={{

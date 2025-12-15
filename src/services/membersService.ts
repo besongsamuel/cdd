@@ -1,12 +1,12 @@
-import { supabase } from './supabase';
-import type { Member } from '../types';
+import type { Member } from "../types";
+import { supabase } from "./supabase";
 
 export const membersService = {
   async getAll(): Promise<Member[]> {
     const { data, error } = await supabase
-      .from('members')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("members")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -14,10 +14,10 @@ export const membersService = {
 
   async getLeaders(): Promise<Member[]> {
     const { data, error } = await supabase
-      .from('members')
-      .select('*')
-      .eq('type', 'leader')
-      .order('created_at', { ascending: false });
+      .from("members")
+      .select("*")
+      .eq("type", "leader")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -25,18 +25,20 @@ export const membersService = {
 
   async getRegularMembers(): Promise<Member[]> {
     const { data, error } = await supabase
-      .from('members')
-      .select('*')
-      .eq('type', 'regular')
-      .order('created_at', { ascending: false });
+      .from("members")
+      .select("*")
+      .eq("type", "regular")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data || [];
   },
 
-  async create(member: Omit<Member, 'id' | 'created_at' | 'updated_at'>): Promise<Member> {
+  async create(
+    member: Omit<Member, "id" | "created_at" | "updated_at">
+  ): Promise<Member> {
     const { data, error } = await supabase
-      .from('members')
+      .from("members")
       .insert(member)
       .select()
       .single();
@@ -47,9 +49,9 @@ export const membersService = {
 
   async update(id: string, member: Partial<Member>): Promise<Member> {
     const { data, error } = await supabase
-      .from('members')
+      .from("members")
       .update({ ...member, updated_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -58,14 +60,49 @@ export const membersService = {
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('members')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("members").delete().eq("id", id);
 
     if (error) throw error;
   },
+
+  async getByUserId(userId: string): Promise<Member | null> {
+    const { data, error } = await supabase
+      .from("members")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // No rows returned
+        return null;
+      }
+      throw error;
+    }
+
+    if (!data) return null;
+
+    // Fetch title name if title_id exists
+    if (data.title_id) {
+      const { data: titleData } = await supabase
+        .from("titles")
+        .select("name")
+        .eq("id", data.title_id)
+        .single();
+
+      if (titleData) {
+        (data as any).title_name = titleData.name;
+      }
+    }
+
+    return data as Member;
+  },
+
+  async getCurrentMember(): Promise<Member | null> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    return this.getByUserId(user.id);
+  },
 };
-
-
-
