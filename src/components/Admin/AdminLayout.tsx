@@ -23,10 +23,14 @@ export const AdminLayout = () => {
   const menuItems = [
     { label: "Dashboard", path: "/admin/dashboard" },
     { label: "Members", path: "/admin/members" },
-    { label: "Events", path: "/admin/events" },
+    { label: "Events & Programs", path: "/admin/events" },
     { label: "Departments", path: "/admin/departments" },
+    { label: "Ministries", path: "/admin/ministries" },
+    { label: "Gallery", path: "/admin/gallery" },
     { label: "Donations", path: "/admin/donations" },
     { label: "Requests", path: "/admin/requests" },
+    { label: "Suggestions", path: "/admin/suggestions" },
+    { label: "Titles", path: "/admin/titles" },
     { label: "Contact Submissions", path: "/admin/contact" },
   ];
 

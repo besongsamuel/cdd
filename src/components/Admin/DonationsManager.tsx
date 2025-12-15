@@ -1,9 +1,13 @@
 import AddIcon from "@mui/icons-material/Add";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import PendingIcon from "@mui/icons-material/Pending";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   Dialog,
   DialogActions,
@@ -27,6 +31,7 @@ import {
   TableRow,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -75,13 +80,20 @@ export const DonationsManager = () => {
   const [editingItem, setEditingItem] = useState<
     Donation | DonationCategory | YearlyBudget | null
   >(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    total: number;
+    totalAmount: number;
+    byStatus?: Record<string, number>;
+  } | null>(null);
   const [filterStatus, setFilterStatus] = useState<DonationStatus | "all">(
     "all"
   );
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
+  );
+  const [selectedDonations, setSelectedDonations] = useState<Set<string>>(
+    new Set()
   );
 
   const [donationForm, setDonationForm] = useState({
@@ -110,6 +122,7 @@ export const DonationsManager = () => {
 
   useEffect(() => {
     loadAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -120,6 +133,7 @@ export const DonationsManager = () => {
     } else if (tabValue === 2) {
       loadBudgets();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabValue, selectedYear]);
 
   const loadAllData = async () => {
@@ -345,6 +359,59 @@ export const DonationsManager = () => {
     }
   };
 
+  const getStatusIcon = (status: DonationStatus) => {
+    switch (status) {
+      case "pending":
+        return <PendingIcon fontSize="small" />;
+      case "received":
+        return <CheckCircleIcon fontSize="small" />;
+      case "verified":
+        return <VerifiedIcon fontSize="small" />;
+      default:
+        return null;
+    }
+  };
+
+  const handleSelectDonation = (id: string) => {
+    const newSelected = new Set(selectedDonations);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedDonations(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedDonations.size === filteredDonations.length) {
+      setSelectedDonations(new Set());
+    } else {
+      setSelectedDonations(new Set(filteredDonations.map((d) => d.id)));
+    }
+  };
+
+  const handleBulkStatusUpdate = async (status: DonationStatus) => {
+    if (selectedDonations.size === 0) return;
+    if (
+      !confirm(
+        `Update ${selectedDonations.size} donation(s) to ${status} status?`
+      )
+    )
+      return;
+
+    try {
+      const promises = Array.from(selectedDonations).map((id) =>
+        donationsService.update(id, { status })
+      );
+      await Promise.all(promises);
+      setSelectedDonations(new Set());
+      loadDonations();
+    } catch (error) {
+      console.error("Error updating donations:", error);
+      alert("Failed to update some donations");
+    }
+  };
+
   const filteredDonations = donations.filter((d) => {
     if (filterStatus !== "all" && d.status !== filterStatus) return false;
     if (filterCategory !== "all" && d.category_id !== filterCategory)
@@ -372,7 +439,15 @@ export const DonationsManager = () => {
 
       {/* Donations Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Box sx={{ mb: 3, display: "flex", gap: 2, alignItems: "center" }}>
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -380,6 +455,30 @@ export const DonationsManager = () => {
           >
             Add Donation
           </Button>
+
+          {selectedDonations.size > 0 && (
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDonations.size} selected
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<CheckCircleIcon />}
+                onClick={() => handleBulkStatusUpdate("received")}
+              >
+                Mark Received
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<VerifiedIcon />}
+                onClick={() => handleBulkStatusUpdate("verified")}
+              >
+                Mark Verified
+              </Button>
+            </Box>
+          )}
 
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
@@ -433,6 +532,19 @@ export const DonationsManager = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      selectedDonations.size > 0 &&
+                      selectedDonations.size < filteredDonations.length
+                    }
+                    checked={
+                      filteredDonations.length > 0 &&
+                      selectedDonations.size === filteredDonations.length
+                    }
+                    onChange={handleSelectAll}
+                  />
+                </TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Donor</TableCell>
                 <TableCell>Category</TableCell>
@@ -443,8 +555,22 @@ export const DonationsManager = () => {
             </TableHead>
             <TableBody>
               {filteredDonations.map((donation) => (
-                <TableRow key={donation.id}>
-                  <TableCell>${donation.amount.toLocaleString()}</TableCell>
+                <TableRow
+                  key={donation.id}
+                  selected={selectedDonations.has(donation.id)}
+                  hover
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedDonations.has(donation.id)}
+                      onChange={() => handleSelectDonation(donation.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight="medium">
+                      ${donation.amount.toLocaleString()}
+                    </Typography>
+                  </TableCell>
                   <TableCell>
                     {donation.donor_name || "Anonymous"}
                     {donation.donor_email && (
@@ -461,11 +587,26 @@ export const DonationsManager = () => {
                     {donation.category_name || "Unspecified"}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={donation.status}
-                      color={getStatusColor(donation.status) as any}
-                      size="small"
-                    />
+                    <Tooltip title={donation.status}>
+                      <Chip
+                        icon={getStatusIcon(donation.status) || undefined}
+                        label={donation.status}
+                        color={
+                          getStatusColor(donation.status) as
+                            | "default"
+                            | "primary"
+                            | "secondary"
+                            | "error"
+                            | "info"
+                            | "success"
+                            | "warning"
+                        }
+                        size="small"
+                        variant={
+                          donation.status === "pending" ? "outlined" : "filled"
+                        }
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell>
                     {new Date(donation.created_at).toLocaleDateString()}

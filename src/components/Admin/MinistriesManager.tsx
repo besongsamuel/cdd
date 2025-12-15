@@ -31,21 +31,22 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { ImageUpload } from "../common/ImageUpload";
+import { LoadingSpinner } from "../common/LoadingSpinner";
+import { MarkdownEditor } from "../common/MarkdownEditor";
 import { useAuth } from "../../hooks/useAuth";
-import { departmentJoinRequestsService } from "../../services/departmentJoinRequestsService";
-import { departmentMembersService } from "../../services/departmentMembersService";
-import { departmentsService } from "../../services/departmentsService";
+import { ministryJoinRequestsService } from "../../services/ministryJoinRequestsService";
+import { ministryMembersService } from "../../services/ministryMembersService";
+import { ministriesService } from "../../services/ministriesService";
 import { membersService } from "../../services/membersService";
 import { roleService } from "../../services/roleService";
 import type {
-  Department,
-  DepartmentJoinRequest,
-  DepartmentMember,
+  Ministry,
+  MinistryJoinRequest,
+  MinistryMember,
   DepartmentRequestStatus,
   Member,
 } from "../../types";
-import { LoadingSpinner } from "../common/LoadingSpinner";
-import { MarkdownEditor } from "../common/MarkdownEditor";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,8 +60,8 @@ function TabPanel(props: TabPanelProps) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`departments-tabpanel-${index}`}
-      aria-labelledby={`departments-tab-${index}`}
+      id={`ministries-tabpanel-${index}`}
+      aria-labelledby={`ministries-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
@@ -68,32 +69,28 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export const DepartmentsManager = () => {
+export const MinistriesManager = () => {
   const { currentMember, isAdmin } = useAuth();
   const [tabValue, setTabValue] = useState(0);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [filteredDepartments, setFilteredDepartments] = useState<Department[]>(
-    []
-  );
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
-  const [departmentMembers, setDepartmentMembers] = useState<
-    DepartmentMember[]
-  >([]);
+  const [ministries, setMinistries] = useState<Ministry[]>([]);
+  const [filteredMinistries, setFilteredMinistries] = useState<Ministry[]>([]);
+  const [selectedMinistryId, setSelectedMinistryId] = useState<string>("");
+  const [ministryMembers, setMinistryMembers] = useState<MinistryMember[]>([]);
   const [allMembers, setAllMembers] = useState<Member[]>([]);
-  const [joinRequests, setJoinRequests] = useState<DepartmentJoinRequest[]>([]);
+  const [joinRequests, setJoinRequests] = useState<MinistryJoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<
-    "department" | "member" | "request"
-  >("department");
+    "ministry" | "member" | "request"
+  >("ministry");
   const [editingItem, setEditingItem] = useState<
-    Department | DepartmentJoinRequest | null
+    Ministry | MinistryJoinRequest | null
   >(null);
   const [filterStatus, setFilterStatus] = useState<
     DepartmentRequestStatus | "all"
   >("all");
 
-  const [departmentForm, setDepartmentForm] = useState({
+  const [ministryForm, setMinistryForm] = useState({
     name: "",
     description: "",
     image_url: "",
@@ -108,15 +105,13 @@ export const DepartmentsManager = () => {
 
   useEffect(() => {
     loadAllData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (currentMember) {
       checkUserPermissions();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMember, isAdmin, departments]);
+  }, [currentMember, isAdmin]);
 
   useEffect(() => {
     if (tabValue === 1) {
@@ -125,25 +120,24 @@ export const DepartmentsManager = () => {
     } else if (tabValue === 2) {
       loadJoinRequests();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabValue, selectedDepartmentId]);
+  }, [tabValue, selectedMinistryId]);
 
   const checkUserPermissions = async () => {
     if (!currentMember) return;
 
     if (isAdmin) {
-      // Admin sees all departments
-      setFilteredDepartments(departments);
+      // Admin sees all ministries
+      setFilteredMinistries(ministries);
     } else {
-      // Non-admin: check if they're a department lead
-      const userDepartments = await roleService.getUserDepartments(
+      // Non-admin: check if they're a ministry lead
+      const userMinistries = await roleService.getUserMinistries(
         currentMember.id
       );
-      setFilteredDepartments(userDepartments);
-
-      // If they only have one department, auto-select it
-      if (userDepartments.length === 1) {
-        setSelectedDepartmentId(userDepartments[0].id);
+      setFilteredMinistries(userMinistries);
+      
+      // If they only have one ministry, auto-select it
+      if (userMinistries.length === 1) {
+        setSelectedMinistryId(userMinistries[0].id);
       }
     }
   };
@@ -152,7 +146,7 @@ export const DepartmentsManager = () => {
     setLoading(true);
     try {
       await Promise.all([
-        loadDepartments(),
+        loadMinistries(),
         loadMembers(),
         loadAllMembers(),
         loadJoinRequests(),
@@ -162,32 +156,32 @@ export const DepartmentsManager = () => {
     }
   };
 
-  const loadDepartments = async () => {
+  const loadMinistries = async () => {
     try {
-      const data = await departmentsService.getAll();
-      setDepartments(data);
+      const data = await ministriesService.getAll();
+      setMinistries(data);
       if (currentMember) {
         await checkUserPermissions();
       } else {
-        setFilteredDepartments(data);
+        setFilteredMinistries(data);
       }
     } catch (error) {
-      console.error("Error loading departments:", error);
+      console.error("Error loading ministries:", error);
     }
   };
 
   const loadMembers = async () => {
-    if (!selectedDepartmentId) {
-      setDepartmentMembers([]);
+    if (!selectedMinistryId) {
+      setMinistryMembers([]);
       return;
     }
     try {
-      const data = await departmentMembersService.getByDepartment(
-        selectedDepartmentId
+      const data = await ministryMembersService.getByMinistry(
+        selectedMinistryId
       );
-      setDepartmentMembers(data);
+      setMinistryMembers(data);
     } catch (error) {
-      console.error("Error loading department members:", error);
+      console.error("Error loading ministry members:", error);
     }
   };
 
@@ -202,7 +196,7 @@ export const DepartmentsManager = () => {
 
   const loadJoinRequests = async () => {
     try {
-      const data = await departmentJoinRequestsService.getAll();
+      const data = await ministryJoinRequestsService.getAll();
       setJoinRequests(data);
     } catch (error) {
       console.error("Error loading join requests:", error);
@@ -213,28 +207,28 @@ export const DepartmentsManager = () => {
     setTabValue(newValue);
   };
 
-  const handleOpenDepartmentDialog = (department?: Department) => {
-    if (!isAdmin && department) {
-      // Leads can't edit department details
+  const handleOpenMinistryDialog = (ministry?: Ministry) => {
+    if (!isAdmin && ministry) {
+      // Leads can't edit ministry details
       return;
     }
 
-    setDialogType("department");
-    setEditingItem(department || null);
-    if (department) {
-      setDepartmentForm({
-        name: department.name,
-        description: department.description || "",
-        image_url: department.image_url || "",
-        display_order: department.display_order,
-        is_active: department.is_active,
+    setDialogType("ministry");
+    setEditingItem(ministry || null);
+    if (ministry) {
+      setMinistryForm({
+        name: ministry.name,
+        description: ministry.description || "",
+        image_url: ministry.image_url || "",
+        display_order: ministry.display_order,
+        is_active: ministry.is_active,
       });
     } else {
-      setDepartmentForm({
+      setMinistryForm({
         name: "",
         description: "",
         image_url: "",
-        display_order: departments.length,
+        display_order: ministries.length,
         is_active: true,
       });
     }
@@ -247,40 +241,40 @@ export const DepartmentsManager = () => {
     setRequestNotes("");
   };
 
-  const handleSaveDepartment = async () => {
+  const handleSaveMinistry = async () => {
     try {
       if (editingItem) {
-        await departmentsService.update(editingItem.id, departmentForm);
+        await ministriesService.update(editingItem.id, ministryForm);
       } else {
-        await departmentsService.create(departmentForm);
+        await ministriesService.create(ministryForm);
       }
       handleCloseDialog();
-      loadDepartments();
+      loadMinistries();
     } catch (error) {
-      console.error("Error saving department:", error);
-      alert(error instanceof Error ? error.message : "Error saving department");
+      console.error("Error saving ministry:", error);
+      alert(error instanceof Error ? error.message : "Error saving ministry");
     }
   };
 
-  const handleDeleteDepartment = async (id: string) => {
+  const handleDeleteMinistry = async (id: string) => {
     if (!isAdmin) return;
-    if (!confirm("Are you sure you want to delete this department?")) return;
+    if (!confirm("Are you sure you want to delete this ministry?")) return;
     try {
-      await departmentsService.delete(id);
-      loadDepartments();
+      await ministriesService.delete(id);
+      loadMinistries();
     } catch (error) {
-      console.error("Error deleting department:", error);
+      console.error("Error deleting ministry:", error);
       alert(
-        error instanceof Error ? error.message : "Error deleting department"
+        error instanceof Error ? error.message : "Error deleting ministry"
       );
     }
   };
 
   const handleAddMember = async (memberId: string) => {
-    if (!selectedDepartmentId) return;
+    if (!selectedMinistryId) return;
     try {
-      await departmentMembersService.addMember(
-        selectedDepartmentId,
+      await ministryMembersService.addMember(
+        selectedMinistryId,
         memberId,
         false
       );
@@ -292,11 +286,11 @@ export const DepartmentsManager = () => {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!selectedDepartmentId) return;
-    if (!confirm("Remove this member from the department?")) return;
+    if (!selectedMinistryId) return;
+    if (!confirm("Remove this member from the ministry?")) return;
     try {
-      await departmentMembersService.removeMember(
-        selectedDepartmentId,
+      await ministryMembersService.removeMember(
+        selectedMinistryId,
         memberId
       );
       loadMembers();
@@ -310,14 +304,14 @@ export const DepartmentsManager = () => {
     memberId: string,
     currentLeadStatus: boolean
   ) => {
-    if (!selectedDepartmentId) return;
+    if (!selectedMinistryId) return;
     if (!isAdmin) {
       // Leads can't change lead status
       return;
     }
     try {
-      await departmentMembersService.setLead(
-        selectedDepartmentId,
+      await ministryMembersService.setLead(
+        selectedMinistryId,
         memberId,
         !currentLeadStatus
       );
@@ -332,7 +326,7 @@ export const DepartmentsManager = () => {
 
   const handleApproveRequest = async (requestId: string) => {
     try {
-      await departmentJoinRequestsService.updateStatus(
+      await ministryJoinRequestsService.updateStatus(
         requestId,
         "approved",
         requestNotes
@@ -347,7 +341,7 @@ export const DepartmentsManager = () => {
 
   const handleRejectRequest = async (requestId: string) => {
     try {
-      await departmentJoinRequestsService.updateStatus(
+      await ministryJoinRequestsService.updateStatus(
         requestId,
         "rejected",
         requestNotes
@@ -363,7 +357,7 @@ export const DepartmentsManager = () => {
   const handleDeleteRequest = async (id: string) => {
     if (!confirm("Delete this join request?")) return;
     try {
-      await departmentJoinRequestsService.delete(id);
+      await ministryJoinRequestsService.delete(id);
       loadJoinRequests();
     } catch (error) {
       console.error("Error deleting request:", error);
@@ -377,37 +371,38 @@ export const DepartmentsManager = () => {
       : joinRequests.filter((r) => r.status === filterStatus);
 
   const availableMembers = allMembers.filter(
-    (m) => !departmentMembers.some((dm) => dm.member_id === m.id)
+    (m) => !ministryMembers.some((mm) => mm.member_id === m.id)
   );
 
   const canManageAll = isAdmin;
+  const canEditMinistry = isAdmin;
 
-  if (loading && departments.length === 0) {
+  if (loading && ministries.length === 0) {
     return <LoadingSpinner />;
   }
 
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Departments Management
+        Ministries Management
       </Typography>
 
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
-        <Tab label="Departments" />
+        <Tab label="Ministries" />
         <Tab label="Members" />
         <Tab label="Join Requests" />
       </Tabs>
 
-      {/* Departments Tab */}
+      {/* Ministries Tab */}
       <TabPanel value={tabValue} index={0}>
         {canManageAll && (
           <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => handleOpenDepartmentDialog()}
+              onClick={() => handleOpenMinistryDialog()}
             >
-              Add Department
+              Add Ministry
             </Button>
           </Box>
         )}
@@ -424,19 +419,19 @@ export const DepartmentsManager = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredDepartments.map((department) => (
-                <TableRow key={department.id}>
-                  <TableCell>{department.name}</TableCell>
+              {filteredMinistries.map((ministry) => (
+                <TableRow key={ministry.id}>
+                  <TableCell>{ministry.name}</TableCell>
                   <TableCell>
-                    {department.description
-                      ? department.description.substring(0, 50) + "..."
+                    {ministry.description
+                      ? ministry.description.substring(0, 50) + "..."
                       : "-"}
                   </TableCell>
-                  <TableCell>{department.display_order}</TableCell>
+                  <TableCell>{ministry.display_order}</TableCell>
                   <TableCell>
                     <Chip
-                      label={department.is_active ? "Active" : "Inactive"}
-                      color={department.is_active ? "success" : "default"}
+                      label={ministry.is_active ? "Active" : "Inactive"}
+                      color={ministry.is_active ? "success" : "default"}
                       size="small"
                     />
                   </TableCell>
@@ -444,13 +439,13 @@ export const DepartmentsManager = () => {
                     <TableCell>
                       <IconButton
                         size="small"
-                        onClick={() => handleOpenDepartmentDialog(department)}
+                        onClick={() => handleOpenMinistryDialog(ministry)}
                       >
                         <EditIcon />
                       </IconButton>
                       <IconButton
                         size="small"
-                        onClick={() => handleDeleteDepartment(department.id)}
+                        onClick={() => handleDeleteMinistry(ministry.id)}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -467,23 +462,23 @@ export const DepartmentsManager = () => {
       <TabPanel value={tabValue} index={1}>
         <Box sx={{ mb: 3 }}>
           <FormControl fullWidth sx={{ maxWidth: 400 }}>
-            <InputLabel>Select Department</InputLabel>
+            <InputLabel>Select Ministry</InputLabel>
             <Select
-              value={selectedDepartmentId}
-              onChange={(e) => setSelectedDepartmentId(e.target.value)}
-              label="Select Department"
-              disabled={!canManageAll && filteredDepartments.length === 1}
+              value={selectedMinistryId}
+              onChange={(e) => setSelectedMinistryId(e.target.value)}
+              label="Select Ministry"
+              disabled={!canManageAll && filteredMinistries.length === 1}
             >
-              {filteredDepartments.map((dept) => (
-                <MenuItem key={dept.id} value={dept.id}>
-                  {dept.name}
+              {filteredMinistries.map((ministry) => (
+                <MenuItem key={ministry.id} value={ministry.id}>
+                  {ministry.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
 
-        {selectedDepartmentId && (
+        {selectedMinistryId && (
           <>
             <Box sx={{ mb: 2 }}>
               <Typography variant="h6" gutterBottom>
@@ -524,21 +519,21 @@ export const DepartmentsManager = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {departmentMembers.length === 0 ? (
+                  {ministryMembers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={3} align="center">
-                        No members in this department
+                        No members in this ministry
                       </TableCell>
                     </TableRow>
                   ) : (
-                    departmentMembers.map((dm) => (
-                      <TableRow key={dm.id}>
-                        <TableCell>{dm.member_name || "Unknown"}</TableCell>
+                    ministryMembers.map((mm) => (
+                      <TableRow key={mm.id}>
+                        <TableCell>{mm.member_name || "Unknown"}</TableCell>
                         <TableCell>
                           <Switch
-                            checked={dm.is_lead}
+                            checked={mm.is_lead}
                             onChange={() =>
-                              handleToggleLead(dm.member_id, dm.is_lead)
+                              handleToggleLead(mm.member_id, mm.is_lead)
                             }
                             size="small"
                             disabled={!canManageAll}
@@ -547,7 +542,7 @@ export const DepartmentsManager = () => {
                         <TableCell>
                           <IconButton
                             size="small"
-                            onClick={() => handleRemoveMember(dm.member_id)}
+                            onClick={() => handleRemoveMember(mm.member_id)}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -595,7 +590,7 @@ export const DepartmentsManager = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Department</TableCell>
+                <TableCell>Ministry</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Phone</TableCell>
@@ -614,7 +609,7 @@ export const DepartmentsManager = () => {
               ) : (
                 filteredRequests.map((request) => (
                   <TableRow key={request.id}>
-                    <TableCell>{request.department_name || "-"}</TableCell>
+                    <TableCell>{request.ministry_name || "-"}</TableCell>
                     <TableCell>{request.member_name}</TableCell>
                     <TableCell>{request.member_email || "-"}</TableCell>
                     <TableCell>{request.member_phone || "-"}</TableCell>
@@ -678,58 +673,55 @@ export const DepartmentsManager = () => {
         </TableContainer>
       </TabPanel>
 
-      {/* Department Dialog */}
+      {/* Ministry Dialog */}
       <Dialog
-        open={dialogOpen && dialogType === "department"}
+        open={dialogOpen && dialogType === "ministry"}
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>
-          {editingItem ? "Edit Department" : "Add Department"}
+          {editingItem ? "Edit Ministry" : "Add Ministry"}
         </DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             label="Name"
-            value={departmentForm.name}
+            value={ministryForm.name}
             onChange={(e) =>
-              setDepartmentForm({ ...departmentForm, name: e.target.value })
+              setMinistryForm({ ...ministryForm, name: e.target.value })
             }
             margin="normal"
             required
           />
           <MarkdownEditor
-            value={departmentForm.description}
-            onChange={(value: string | undefined) =>
-              setDepartmentForm({
-                ...departmentForm,
+            value={ministryForm.description}
+            onChange={(value) =>
+              setMinistryForm({
+                ...ministryForm,
                 description: value || "",
               })
             }
             label="Description (Markdown)"
             minHeight={300}
           />
-          <TextField
-            fullWidth
-            label="Image URL"
-            value={departmentForm.image_url}
-            onChange={(e) =>
-              setDepartmentForm({
-                ...departmentForm,
-                image_url: e.target.value,
-              })
+          <ImageUpload
+            mode="single"
+            bucket="ministry-images"
+            value={ministryForm.image_url}
+            onChange={(url) =>
+              setMinistryForm({ ...ministryForm, image_url: url as string })
             }
-            margin="normal"
+            label="Ministry Image"
           />
           <TextField
             fullWidth
             label="Display Order"
             type="number"
-            value={departmentForm.display_order}
+            value={ministryForm.display_order}
             onChange={(e) =>
-              setDepartmentForm({
-                ...departmentForm,
+              setMinistryForm({
+                ...ministryForm,
                 display_order: parseInt(e.target.value) || 0,
               })
             }
@@ -738,10 +730,10 @@ export const DepartmentsManager = () => {
           <FormControlLabel
             control={
               <Switch
-                checked={departmentForm.is_active}
+                checked={ministryForm.is_active}
                 onChange={(e) =>
-                  setDepartmentForm({
-                    ...departmentForm,
+                  setMinistryForm({
+                    ...ministryForm,
                     is_active: e.target.checked,
                   })
                 }
@@ -753,7 +745,7 @@ export const DepartmentsManager = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSaveDepartment} variant="contained">
+          <Button onClick={handleSaveMinistry} variant="contained">
             Save
           </Button>
         </DialogActions>
@@ -768,7 +760,7 @@ export const DepartmentsManager = () => {
       >
         <DialogTitle>
           {editingItem &&
-          (editingItem as DepartmentJoinRequest).status === "pending"
+          (editingItem as MinistryJoinRequest).status === "pending"
             ? "Process Join Request"
             : "Request Details"}
         </DialogTitle>
@@ -776,22 +768,22 @@ export const DepartmentsManager = () => {
           {editingItem && (
             <Box>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                <strong>Department:</strong>{" "}
-                {(editingItem as DepartmentJoinRequest).department_name}
+                <strong>Ministry:</strong>{" "}
+                {(editingItem as MinistryJoinRequest).ministry_name}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 <strong>Name:</strong>{" "}
-                {(editingItem as DepartmentJoinRequest).member_name}
+                {(editingItem as MinistryJoinRequest).member_name}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 <strong>Email:</strong>{" "}
-                {(editingItem as DepartmentJoinRequest).member_email || "-"}
+                {(editingItem as MinistryJoinRequest).member_email || "-"}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 <strong>Phone:</strong>{" "}
-                {(editingItem as DepartmentJoinRequest).member_phone || "-"}
+                {(editingItem as MinistryJoinRequest).member_phone || "-"}
               </Typography>
-              {(editingItem as DepartmentJoinRequest).status === "pending" && (
+              {(editingItem as MinistryJoinRequest).status === "pending" && (
                 <TextField
                   fullWidth
                   label="Notes (optional)"
@@ -808,7 +800,7 @@ export const DepartmentsManager = () => {
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           {editingItem &&
-            (editingItem as DepartmentJoinRequest).status === "pending" && (
+            (editingItem as MinistryJoinRequest).status === "pending" && (
               <>
                 {requestAction === "reject" && (
                   <Button
@@ -835,3 +827,4 @@ export const DepartmentsManager = () => {
     </Box>
   );
 };
+

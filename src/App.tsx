@@ -6,8 +6,12 @@ import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissions
 import { DepartmentsManager } from "./components/Admin/DepartmentsManager";
 import { DonationsManager } from "./components/Admin/DonationsManager";
 import { EventsManager } from "./components/Admin/EventsManager";
+import { GalleryManager } from "./components/Admin/GalleryManager";
 import { MembersManager } from "./components/Admin/MembersManager";
+import { MinistriesManager } from "./components/Admin/MinistriesManager";
 import { RequestsManager } from "./components/Admin/RequestsManager";
+import { SuggestionsManager } from "./components/Admin/SuggestionsManager";
+import { TitlesManager } from "./components/Admin/TitlesManager";
 import { Footer } from "./components/Layout/Footer";
 import { Header } from "./components/Layout/Header";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
@@ -334,7 +338,13 @@ function App() {
                       path="/profile/complete"
                       element={
                         <ProtectedRoute requireAdmin={false}>
-                          <CompleteProfilePage />
+                          <>
+                            <Header />
+                            <Box component="main" sx={{ flexGrow: 1 }}>
+                              <CompleteProfilePage />
+                            </Box>
+                            <Footer />
+                          </>
                         </ProtectedRoute>
                       }
                     />
@@ -352,12 +362,22 @@ function App() {
                       <Route path="dashboard" element={<AdminDashboard />} />
                       <Route path="members" element={<MembersManager />} />
                       <Route path="events" element={<EventsManager />} />
-                      <Route path="donations" element={<DonationsManager />} />
                       <Route
                         path="departments"
                         element={<DepartmentsManager />}
                       />
+                      <Route
+                        path="ministries"
+                        element={<MinistriesManager />}
+                      />
+                      <Route path="gallery" element={<GalleryManager />} />
+                      <Route path="donations" element={<DonationsManager />} />
                       <Route path="requests" element={<RequestsManager />} />
+                      <Route
+                        path="suggestions"
+                        element={<SuggestionsManager />}
+                      />
+                      <Route path="titles" element={<TitlesManager />} />
                       <Route
                         path="contact"
                         element={<ContactSubmissionsManager />}
