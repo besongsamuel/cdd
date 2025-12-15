@@ -79,5 +79,8 @@
   "verifyingEmailMessage": "Please wait while we verify your email address...",
   "redirectingToLogin": "Redirecting to login page...",
   "goToLogin": "Go to Login",
-  "backToLogin": "Back to Login"
+  "backToLogin": "Back to Login",
+  "loginScriptureTitle": "Welcome Back",
+  "loginScripture": "Come to me, all you who are weary and burdened, and I will give you rest.",
+  "loginScriptureReference": "Matthew 11:28"
 }

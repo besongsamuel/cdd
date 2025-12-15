@@ -11,7 +11,7 @@ export interface AuthContextType {
   memberLoading: boolean;
   currentMember: Member | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   getCurrentMember: () => Promise<Member | null>;
   isAdmin: boolean;
@@ -119,10 +119,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await loadMember(data.user?.id);
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string) => {
     // Create auth user
     // Note: Supabase will send an email verification link
     // The user won't be automatically logged in until they verify their email
+    // Member record will be created in CompleteProfilePage after email verification
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -134,21 +135,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (authError) throw authError;
     if (!authData.user) throw new Error("Failed to create user");
 
-    // Set user in context (but not session, as email isn't verified yet)
-    setUser(authData.user);
-
-    // Create member record linked to user from AuthContext (authData.user.id)
-    // We use the user from the auth response, which we've now set in context
-    await membersService.create({
-      name,
-      type: "regular",
-      user_id: authData.user.id,
-      is_admin: false,
-    });
-
-    // Don't set session yet - wait for email verification
+    // Don't set user or session yet - wait for email verification
     // The user will be redirected to the verify-email page
-    // Member will be loaded when they log in after email verification
+    // After email verification, they'll log in and be redirected to complete profile
+    // Member will be created when they complete their profile
   };
 
   const signOut = async () => {

@@ -36,7 +36,7 @@ export const SignupPage = () => {
     setLoading(true);
 
     try {
-      await signUp(email, password, name);
+      await signUp(email, password);
       navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");

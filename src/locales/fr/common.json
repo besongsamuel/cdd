@@ -79,5 +79,8 @@
   "verifyingEmailMessage": "Veuillez patienter pendant que nous vérifions votre adresse courriel...",
   "redirectingToLogin": "Redirection vers la page de connexion...",
   "goToLogin": "Aller à la connexion",
-  "backToLogin": "Retour à la connexion"
+  "backToLogin": "Retour à la connexion",
+  "loginScriptureTitle": "Bon Retour",
+  "loginScripture": "Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.",
+  "loginScriptureReference": "Matthieu 11:28"
 }
