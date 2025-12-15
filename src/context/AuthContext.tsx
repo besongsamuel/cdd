@@ -152,12 +152,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setCurrentMember(null);
   };
 
-  const getCurrentMember = async (): Promise<Member | null> => {
+  const getCurrentMember = useCallback(async (): Promise<Member | null> => {
     if (!user) return null;
-    const member = await membersService.getByUserId(user.id);
-    setCurrentMember(member);
-    return member;
-  };
+    try {
+      const member = await membersService.getByUserId(user.id);
+      setCurrentMember(member);
+      return member;
+    } catch (error) {
+      console.error("Error loading member:", error);
+      setCurrentMember(null);
+      return null;
+    }
+  }, [user?.id]);
 
   // Check if current member is admin
   const isAdmin = currentMember?.is_admin ?? false;

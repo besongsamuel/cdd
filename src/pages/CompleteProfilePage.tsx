@@ -17,8 +17,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { useNavigate } from "react-router-dom";
 import { PassionsAutocomplete } from "../components/common/PassionsAutocomplete";
 import { ProfilePictureUpload } from "../components/common/ProfilePictureUpload";
@@ -39,6 +41,8 @@ export const CompleteProfilePage = () => {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [landscapePicture, setLandscapePicture] = useState<File | null>(null);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,41 +50,95 @@ export const CompleteProfilePage = () => {
   const [uploadingLandscape, setUploadingLandscape] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const hasLoadedRef = useRef<string | null>(null);
 
+  // Load titles on mount
+  useEffect(() => {
+    const loadTitles = async () => {
+      try {
+        const titlesData = await titlesService.getAll();
+        setTitles(titlesData);
+      } catch (err) {
+        console.error("Error loading titles:", err);
+      }
+    };
+    loadTitles();
+  }, []);
+
+  // Handle user authentication check and reset loaded state when user changes
   useEffect(() => {
     if (!user) {
       navigate("/login");
+      hasLoadedRef.current = null;
+      return;
+    }
+    // Reset loaded state when user ID changes
+    if (hasLoadedRef.current && hasLoadedRef.current !== user.id) {
+      hasLoadedRef.current = null;
+    }
+  }, [user?.id, navigate]);
+
+  // Sync form fields with currentMember when it loads or changes
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    // If we've already loaded for this user, only update if currentMember changes
+    if (hasLoadedRef.current === userId) {
+      if (currentMember) {
+        // Update form with current member data
+        setName(currentMember.name);
+        setBio(currentMember.bio || "");
+        setTitleId(currentMember.title_id || "");
+        setPassions(currentMember.passions || []);
+        setEmail(currentMember.email || user.email || "");
+        setPhone(currentMember.phone || "");
+      }
+      setLoading(false);
       return;
     }
 
-    const loadData = async () => {
-      try {
-        // Load titles
-        const titlesData = await titlesService.getAll();
-        setTitles(titlesData);
+    // First load for this user
+    if (currentMember) {
+      // Member exists - populate form with member data
+      setName(currentMember.name);
+      setBio(currentMember.bio || "");
+      setTitleId(currentMember.title_id || "");
+      setPassions(currentMember.passions || []);
+      setEmail(currentMember.email || user.email || "");
+      setPhone(currentMember.phone || "");
+      setLoading(false);
+      hasLoadedRef.current = userId;
+    } else {
+      // No member exists - set default values and try to load member
+      const defaultName = user.email?.split("@")[0] || "Member";
+      setName(defaultName);
+      setEmail(user.email || "");
+      setPhone("");
+      setLoading(true);
 
-        // Load current member data if exists
-        const member = await getCurrentMember();
-        if (member) {
-          setName(member.name);
-          setBio(member.bio || "");
-          setTitleId(member.title_id || "");
-          setPassions(member.passions || []);
-        } else {
-          // If no member exists, set default name from user email
-          const defaultName = user.email?.split("@")[0] || "Member";
-          setName(defaultName);
-        }
-      } catch (err) {
-        console.error("Error loading profile data:", err);
-        setError("Failed to load profile data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user, navigate, getCurrentMember]);
+      // Attempt to load member (may still be loading in AuthContext)
+      getCurrentMember()
+        .then((member) => {
+          if (member) {
+            setName(member.name);
+            setBio(member.bio || "");
+            setTitleId(member.title_id || "");
+            setPassions(member.passions || []);
+            setEmail(member.email || user.email || "");
+            setPhone(member.phone || "");
+          }
+          setLoading(false);
+          hasLoadedRef.current = userId;
+        })
+        .catch((err) => {
+          console.error("Error loading member:", err);
+          setLoading(false);
+          hasLoadedRef.current = userId; // Mark as loaded even on error
+        });
+    }
+  }, [user, currentMember, getCurrentMember]);
 
   const handleProfilePictureSelected = (file: File) => {
     setProfilePicture(file);
@@ -154,6 +212,8 @@ export const CompleteProfilePage = () => {
           passions: passions.length > 0 ? passions : undefined,
           picture_url: profilePictureUrl,
           landscape_picture_url: landscapePictureUrl,
+          email: email || undefined,
+          phone: phone || undefined,
         });
       } else {
         // Create new member profile first (with basic info)
@@ -169,6 +229,8 @@ export const CompleteProfilePage = () => {
           bio: bio || undefined,
           title_id: titleId || undefined,
           passions: passions.length > 0 ? passions : undefined,
+          email: email || user.email || undefined,
+          phone: phone || undefined,
         });
 
         memberId = newMember.id;
@@ -341,6 +403,38 @@ export const CompleteProfilePage = () => {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* Email */}
+              <TextField
+                fullWidth
+                label={t("email")}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                margin="normal"
+                helperText={t("optional")}
+              />
+
+              {/* Phone */}
+              <Box sx={{ mt: 2, mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 0.5,
+                    color: "text.secondary",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  {t("phone")} ({t("optional")})
+                </Typography>
+                <PhoneInput
+                  international
+                  defaultCountry="CA"
+                  value={phone || undefined}
+                  onChange={(value) => setPhone(value || "")}
+                  className="phone-input-mui"
+                />
+              </Box>
 
               <Divider sx={{ my: 4 }} />
 
