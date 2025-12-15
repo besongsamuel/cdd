@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Donation</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px;">
+        <h2 style="color: #2c3e50;">New Donation Received</h2>
+        
+        <p>Hello,</p>
+        
+        <p>A new donation has been received:</p>
+        
+        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #27ae60; margin: 20px 0;">
+            <p><strong>Amount:</strong> ${{amount}}</p>
+            <p><strong>Category:</strong> {{category_name}}</p>
+            <p><strong>Donor Name:</strong> {{donor_name}}</p>
+            <p><strong>Donor Email:</strong> {{donor_email}}</p>
+            <p><strong>E-Transfer Email:</strong> {{etransfer_email}}</p>
+            <p><strong>Status:</strong> {{status}}</p>
+            {{#notes}}
+            <p><strong>Notes:</strong> {{notes}}</p>
+            {{/notes}}
+            <p><strong>Received:</strong> {{created_at}}</p>
+        </div>
+        
+        <p>Please verify and process this donation accordingly.</p>
+        
+        <p style="margin-top: 30px;">Best regards,<br>City of David Church</p>
+    </div>
+</body>
+</html>
+
