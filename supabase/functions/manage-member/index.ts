@@ -161,8 +161,18 @@ serve(async (req) => {
         type: "regular", // Hardcoded for non-admins
         is_admin: false, // Hardcoded for non-admins
         user_id: user.id,
-        email: user.email || null, // Default to auth user email
       };
+
+      // Handle email: admins can specify email, non-admins default to auth email
+      if (isAdmin) {
+        // Admin can specify email or leave it empty
+        if (payload.data.email !== undefined) {
+          memberData.email = payload.data.email || null;
+        }
+      } else {
+        // Non-admin defaults to their auth email
+        memberData.email = user.email || null;
+      }
 
       // Add optional fields if provided
       if (payload.data.bio !== undefined) memberData.bio = payload.data.bio;
@@ -174,12 +184,6 @@ serve(async (req) => {
         memberData.phone = payload.data.phone;
       if (payload.data.title_id !== undefined)
         memberData.title_id = payload.data.title_id;
-
-      // Admin-only overrides during creation
-      if (isAdmin) {
-        if (payload.data.email !== undefined)
-          memberData.email = payload.data.email;
-      }
 
       // Insert member
       const { data: newMember, error: insertError } = await supabaseAdmin

@@ -1,11 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "resend";
 
-// AWS SES configuration
-const AWS_SES_REGION = Deno.env.get("AWS_SES_REGION") || "us-east-1";
-const AWS_ACCESS_KEY_ID = Deno.env.get("AWS_ACCESS_KEY_ID") || "";
-const AWS_SECRET_ACCESS_KEY = Deno.env.get("AWS_SECRET_ACCESS_KEY") || "";
-const FROM_EMAIL = "noreply@eglisecitededavid.com";
+// Resend configuration
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const FROM_EMAIL = "City of David <noreply@eglisecitededavid.com>";
 
 interface EmailRecipient {
   email: string;
@@ -107,8 +106,8 @@ serve(async (req) => {
       payload.eventData
     );
 
-    // Send email via AWS SES
-    await sendEmailViaSES(
+    // Send email via Resend
+    await sendEmailViaResend(
       recipients.to.map((r) => r.email),
       ccRecipients.map((r) => r.email),
       `New ${getEventTypeLabel(payload.eventType)}`,
@@ -455,15 +454,21 @@ async function loadAndProcessTemplate(
     const templatePath = `./templates/${templateName}`;
     const templateContent = await Deno.readTextFile(templatePath);
 
-    // Simple placeholder replacement
-    // Replace {{variable}} with actual values from eventData
     let processed = templateContent;
 
-    // Replace common placeholders
-    for (const [key, value] of Object.entries(eventData)) {
-      const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, "g");
-      processed = processed.replace(placeholder, String(value || ""));
-    }
+    // Handle Mustache-style conditionals {{#variable}}...{{/variable}}
+    // Process conditionals first to remove blocks where variables are undefined/null/empty
+    processed = processed.replace(
+      /{{#(\w+)}}([\s\S]*?){{\/\1}}/g,
+      (_match, varName, content) => {
+        const value = eventData[varName];
+        // If value exists and is truthy, include the content
+        if (value !== undefined && value !== null && value !== "") {
+          return content;
+        }
+        return "";
+      }
+    );
 
     // Replace nested object properties (e.g., {{department.name}})
     const nestedRegex =
@@ -482,6 +487,12 @@ async function loadAndProcessTemplate(
       return value ? String(value) : "";
     });
 
+    // Replace common placeholders (do this last after conditionals are processed)
+    for (const [key, value] of Object.entries(eventData)) {
+      const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, "g");
+      processed = processed.replace(placeholder, String(value || ""));
+    }
+
     return processed;
   } catch (error) {
     console.error(`Error loading template ${templateName}:`, error);
@@ -497,152 +508,29 @@ async function loadAndProcessTemplate(
   }
 }
 
-async function sendEmailViaSES(
+async function sendEmailViaResend(
   toAddresses: string[],
   ccAddresses: string[],
   subject: string,
   htmlBody: string
 ): Promise<void> {
-  if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
-    throw new Error("AWS credentials not configured");
+  if (!RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY not configured");
   }
 
-  // AWS SES v2 SendEmail API endpoint
-  const endpoint = `https://email.${AWS_SES_REGION}.amazonaws.com/v2/email/outbound-emails`;
+  const resend = new Resend(RESEND_API_KEY);
 
-  // Create AWS Signature Version 4
-  const now = new Date();
-  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
-  const dateStamp = amzDate.substring(0, 8);
-
-  const payload = {
-    FromEmailAddress: FROM_EMAIL,
-    Destination: {
-      ToAddresses: toAddresses,
-      ...(ccAddresses.length > 0 && { CcAddresses: ccAddresses }),
-    },
-    Content: {
-      Simple: {
-        Subject: {
-          Data: subject,
-          Charset: "UTF-8",
-        },
-        Body: {
-          Html: {
-            Data: htmlBody,
-            Charset: "UTF-8",
-          },
-        },
-      },
-    },
-  };
-
-  const payloadString = JSON.stringify(payload);
-  const payloadHash = await sha256(payloadString);
-
-  // Create canonical request for AWS Signature V4
-  const canonicalRequest = `POST
-/v2/email/outbound-emails
-
-host:email.${AWS_SES_REGION}.amazonaws.com
-x-amz-date:${amzDate}
-
-host;x-amz-date
-${payloadHash}`;
-
-  const canonicalRequestHash = await sha256(canonicalRequest);
-  const stringToSign = `AWS4-HMAC-SHA256
-${amzDate}
-${dateStamp}/${AWS_SES_REGION}/ses/aws4_request
-${canonicalRequestHash}`;
-
-  const signingKey = await getSigningKey(
-    AWS_SECRET_ACCESS_KEY,
-    dateStamp,
-    AWS_SES_REGION,
-    "ses"
-  );
-
-  const signature = await hmacSha256Hex(signingKey, stringToSign);
-  const authHeader = `AWS4-HMAC-SHA256 Credential=${AWS_ACCESS_KEY_ID}/${dateStamp}/${AWS_SES_REGION}/ses/aws4_request, SignedHeaders=host;x-amz-date, Signature=${signature}`;
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-amz-date": amzDate,
-      Authorization: authHeader,
-    },
-    body: payloadString,
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: toAddresses,
+    cc: ccAddresses.length > 0 ? ccAddresses : undefined,
+    subject: subject,
+    html: htmlBody,
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`AWS SES error: ${response.status} - ${errorText}`);
+  if (error) {
+    throw new Error(`Resend error: ${JSON.stringify(error)}`);
   }
-}
-
-// Helper functions for AWS Signature V4
-async function sha256(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function hmacSha256Hex(
-  key: Uint8Array,
-  message: string
-): Promise<string> {
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    key,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    cryptoKey,
-    new TextEncoder().encode(message)
-  );
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function getSigningKey(
-  secretKey: string,
-  dateStamp: string,
-  region: string,
-  service: string
-): Promise<Uint8Array> {
-  const kDate = await hmacSha256Raw(
-    new TextEncoder().encode(`AWS4${secretKey}`),
-    dateStamp
-  );
-  const kRegion = await hmacSha256Raw(kDate, region);
-  const kService = await hmacSha256Raw(kRegion, service);
-  return await hmacSha256Raw(kService, "aws4_request");
-}
-
-async function hmacSha256Raw(
-  key: Uint8Array,
-  message: string
-): Promise<Uint8Array> {
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    key,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    cryptoKey,
-    new TextEncoder().encode(message)
-  );
-  return new Uint8Array(signature);
 }
 
 function getEventTypeLabel(eventType: string): string {

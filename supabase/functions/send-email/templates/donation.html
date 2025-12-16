@@ -1,36 +1,171 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Donation</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px;">
-        <h2 style="color: #2c3e50;">New Donation Received</h2>
-        
-        <p>Hello,</p>
-        
-        <p>A new donation has been received:</p>
-        
-        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #27ae60; margin: 20px 0;">
-            <p><strong>Amount:</strong> ${{amount}}</p>
-            <p><strong>Category:</strong> {{category_name}}</p>
-            <p><strong>Donor Name:</strong> {{donor_name}}</p>
-            <p><strong>Donor Email:</strong> {{donor_email}}</p>
-            <p><strong>E-Transfer Email:</strong> {{etransfer_email}}</p>
-            <p><strong>Status:</strong> {{status}}</p>
-            {{#notes}}
-            <p><strong>Notes:</strong> {{notes}}</p>
-            {{/notes}}
-            <p><strong>Received:</strong> {{created_at}}</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Donation Received</title>
+  </head>
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px">
+      <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px">
+        <h2
+          style="
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+          "
+        >
+          New Donation Received
+        </h2>
+
+        <p
+          style="
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+          "
+        >
+          Hello,
+        </p>
+
+        <p
+          style="
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+          "
+        >
+          A new donation has been received:
+        </p>
+
+        <div
+          style="
+            background-color: #fff;
+            padding: 15px;
+            border-left: 4px solid #27ae60;
+            margin: 20px 0;
+          "
+        >
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Amount:</strong> ${{amount}}
+          </p>
+          {{#category_name}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Category:</strong> {{category_name}}
+          </p>
+          {{/category_name}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Donor Name:</strong> {{donor_name}}
+          </p>
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Donor Email:</strong> {{donor_email}}
+          </p>
+          {{#etransfer_email}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>E-Transfer Email:</strong> {{etransfer_email}}
+          </p>
+          {{/etransfer_email}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Status:</strong> {{status}}
+          </p>
+          {{#notes}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Notes:</strong> {{notes}}
+          </p>
+          {{/notes}}
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Received:</strong> {{created_at}}
+          </p>
         </div>
-        
-        <p>Please verify and process this donation accordingly.</p>
-        
-        <p style="margin-top: 30px;">Best regards,<br>City of David Church</p>
+
+        <p
+          style="
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+          "
+        >
+          Please verify and process this donation accordingly.
+        </p>
+
+        <p
+          style="
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-top: 30px;
+          "
+        >
+          Best regards,<br />City of David Church
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>
-
-
