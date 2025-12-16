@@ -45,6 +45,8 @@ export const MembersManager = () => {
     name: "",
     type: "regular" as MemberType,
     bio: "",
+    email: "",
+    phone: "",
     passions: [] as string[],
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
@@ -72,6 +74,8 @@ export const MembersManager = () => {
         name: member.name,
         type: member.type,
         bio: member.bio || "",
+        email: member.email || "",
+        phone: member.phone || "",
         passions: member.passions || [],
       });
     } else {
@@ -80,6 +84,8 @@ export const MembersManager = () => {
         name: "",
         type: "regular",
         bio: "",
+        email: "",
+        phone: "",
         passions: [],
       });
     }
@@ -222,6 +228,8 @@ export const MembersManager = () => {
             <TableRow>
               <TableCell>Photo</TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Phone</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell>Passions</TableCell>
@@ -231,7 +239,7 @@ export const MembersManager = () => {
           <TableBody>
             {filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={8} align="center">
                   {searchQuery
                     ? "No members found matching your search"
                     : "No members found"}
@@ -250,6 +258,8 @@ export const MembersManager = () => {
                     </Avatar>
                   </TableCell>
                   <TableCell>{member.name}</TableCell>
+                  <TableCell>{member.email || "-"}</TableCell>
+                  <TableCell>{member.phone || "-"}</TableCell>
                   <TableCell>
                     <Chip label={member.type} size="small" />
                   </TableCell>
@@ -310,6 +320,23 @@ export const MembersManager = () => {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             margin="normal"
             required
+          />
+          <TextField
+            fullWidth
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            margin="normal"
+            helperText="Member's email address"
+          />
+          <TextField
+            fullWidth
+            label="Phone"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            margin="normal"
+            helperText="Member's phone number"
           />
           <FormControl fullWidth margin="normal">
             <InputLabel>Type</InputLabel>

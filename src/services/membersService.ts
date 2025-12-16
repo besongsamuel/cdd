@@ -165,6 +165,7 @@ export const membersService = {
     if (member.type !== undefined) edgeFunctionData.type = member.type;
     if (member.is_admin !== undefined)
       edgeFunctionData.is_admin = member.is_admin;
+    if (member.email !== undefined) edgeFunctionData.email = member.email;
     if (member.profile_picture_position !== undefined)
       edgeFunctionData.profile_picture_position =
         member.profile_picture_position;
@@ -180,36 +181,66 @@ export const membersService = {
   },
 
   async getByUserId(userId: string): Promise<Member | null> {
+    // First, try to find by user_id
     const { data, error } = await supabase
       .from("members")
       .select("*")
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        // No rows returned
-        return null;
-      }
+    if (error && error.code !== "PGRST116") {
       throw error;
     }
 
-    if (!data) return null;
+    let member = data;
 
-    // Fetch title name if title_id exists
-    if (data.title_id) {
-      const { data: titleData } = await supabase
-        .from("titles")
-        .select("name")
-        .eq("id", data.title_id)
-        .single();
+    // If not found by user_id, try email fallback
+    if (!member) {
+      // Get the user's email from auth
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (titleData) {
-        (data as Member).title_name = titleData.name;
+      if (user?.email) {
+        const { data: emailData, error: emailError } = await supabase
+          .from("members")
+          .select("*")
+          .eq("email", user.email)
+          .maybeSingle();
+
+        if (emailError && emailError.code !== "PGRST116") {
+          throw emailError;
+        }
+
+        member = emailData;
+
+        // If found by email, update the user_id to link them
+        if (member) {
+          await supabase
+            .from("members")
+            .update({ user_id: userId })
+            .eq("id", member.id);
+          member.user_id = userId;
+        }
       }
     }
 
-    return data as Member;
+    if (!member) return null;
+
+    // Fetch title name if title_id exists
+    if (member.title_id) {
+      const { data: titleData } = await supabase
+        .from("titles")
+        .select("name")
+        .eq("id", member.title_id)
+        .single();
+
+      if (titleData) {
+        (member as Member).title_name = titleData.name;
+      }
+    }
+
+    return member as Member;
   },
 
   async getCurrentMember(): Promise<Member | null> {

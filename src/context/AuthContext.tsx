@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [session, setSession] = useState<Session | null>(null);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
-  const [memberLoading, setMemberLoading] = useState(false);
+  const [memberLoading, setMemberLoading] = useState(true);
 
   useEffect(() => {
     // Get initial session
@@ -39,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
-      setMemberLoading(true);
     });
 
     // Listen for auth changes
@@ -49,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
-      setMemberLoading(true);
     });
 
     return () => subscription.unsubscribe();
@@ -58,11 +56,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Load member when user changes
   useEffect(() => {
     if (!user) {
-      // Reset member state when user logs out
-      queueMicrotask(() => {
-        setCurrentMember(null);
-        setMemberLoading(false);
-      });
       return;
     }
 
@@ -90,7 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => {
       cancelled = true;
-      setMemberLoading(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);

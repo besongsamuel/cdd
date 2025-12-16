@@ -14,6 +14,7 @@ interface MemberData {
   profile_picture_position?: { x: number; y: number };
   passions?: string[];
   phone?: string;
+  email?: string;
   title_id?: string;
   type?: "regular" | "leader";
   is_admin?: boolean;
@@ -157,10 +158,10 @@ serve(async (req) => {
       // Prepare member data
       const memberData: any = {
         name: payload.data.name.trim(),
-        type: "regular", // Hardcoded
-        is_admin: false, // Hardcoded
+        type: "regular", // Hardcoded for non-admins
+        is_admin: false, // Hardcoded for non-admins
         user_id: user.id,
-        email: user.email || null,
+        email: user.email || null, // Default to auth user email
       };
 
       // Add optional fields if provided
@@ -173,6 +174,12 @@ serve(async (req) => {
         memberData.phone = payload.data.phone;
       if (payload.data.title_id !== undefined)
         memberData.title_id = payload.data.title_id;
+
+      // Admin-only overrides during creation
+      if (isAdmin) {
+        if (payload.data.email !== undefined)
+          memberData.email = payload.data.email;
+      }
 
       // Insert member
       const { data: newMember, error: insertError } = await supabaseAdmin
@@ -268,11 +275,11 @@ serve(async (req) => {
           updateData.type = payload.data.type;
         if (payload.data.is_admin !== undefined)
           updateData.is_admin = payload.data.is_admin;
+        if (payload.data.email !== undefined)
+          updateData.email = payload.data.email;
         if (payload.data.profile_picture_position !== undefined)
           updateData.profile_picture_position =
             payload.data.profile_picture_position;
-        // Admins can update email (sync with user email)
-        if (user.email) updateData.email = user.email;
       }
 
       // Update member
