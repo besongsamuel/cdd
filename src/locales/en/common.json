@@ -82,5 +82,7 @@
   "backToLogin": "Back to Login",
   "loginScriptureTitle": "Welcome Back",
   "loginScripture": "Come to me, all you who are weary and burdened, and I will give you rest.",
-  "loginScriptureReference": "Matthew 11:28"
+  "loginScriptureReference": "Matthew 11:28",
+  "signUpBibleVerse": "Now you are the body of Christ, and each one of you is a part of it.",
+  "signUpBibleVerseReference": "1 Corinthians 12:27"
 }

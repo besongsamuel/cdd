@@ -25,6 +25,18 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
     setImageError(true);
   };
 
+  // Format display name with title (unless "Regular Member" or empty)
+  const getDisplayName = (member: Member): string => {
+    if (
+      member.title_name &&
+      member.title_name.trim() !== "" &&
+      member.title_name.toLowerCase() !== "regular member"
+    ) {
+      return `${member.title_name} ${member.name}`;
+    }
+    return member.name;
+  };
+
   return (
     <Card>
       {imageError || !leader.picture_url ? (
@@ -89,9 +101,10 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
         <CardMedia
           component="img"
           image={leader.picture_url}
-          alt={leader.name}
+          alt={getDisplayName(leader)}
           sx={{
             objectFit: "cover",
+            objectPosition: "top",
             height: { xs: 200, sm: 250 },
           }}
           onError={handleImageError}
@@ -99,7 +112,7 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
       )}
       <CardContent>
         <Typography variant="h6" component="h3" gutterBottom>
-          {leader.name}
+          {getDisplayName(leader)}
         </Typography>
         {leader.bio && (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -544,12 +557,25 @@ export const MembersPage = () => {
                     : "No members match your search"}
                 </Typography>
               ) : (
-                filteredRegularMembers.map((member) => (
-                  <Card key={member.id}>
-                    <CardContent>
-                      <Typography variant="h6" component="h3" gutterBottom>
-                        {member.name}
-                      </Typography>
+                filteredRegularMembers.map((member) => {
+                  // Format display name with title (unless "Regular Member" or empty)
+                  const getDisplayName = (m: Member): string => {
+                    if (
+                      m.title_name &&
+                      m.title_name.trim() !== "" &&
+                      m.title_name.toLowerCase() !== "regular member"
+                    ) {
+                      return `${m.title_name} ${m.name}`;
+                    }
+                    return m.name;
+                  };
+
+                  return (
+                    <Card key={member.id}>
+                      <CardContent>
+                        <Typography variant="h6" component="h3" gutterBottom>
+                          {getDisplayName(member)}
+                        </Typography>
                       {(member.email || member.phone) && (
                         <Box
                           sx={{
@@ -599,7 +625,8 @@ export const MembersPage = () => {
                       )}
                     </CardContent>
                   </Card>
-                ))
+                  );
+                })
               )}
             </Box>
           </Box>

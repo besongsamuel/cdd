@@ -82,5 +82,7 @@
   "backToLogin": "Retour à la connexion",
   "loginScriptureTitle": "Bon Retour",
   "loginScripture": "Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.",
-  "loginScriptureReference": "Matthieu 11:28"
+  "loginScriptureReference": "Matthieu 11:28",
+  "signUpBibleVerse": "Vous êtes le corps de Christ, et vous êtes ses membres, chacun pour sa part.",
+  "signUpBibleVerseReference": "1 Corinthiens 12:27"
 }

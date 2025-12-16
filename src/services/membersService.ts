@@ -5,33 +5,66 @@ export const membersService = {
   async getAll(): Promise<Member[]> {
     const { data, error } = await supabase
       .from("members")
-      .select("*")
+      .select(
+        `
+        *,
+        titles:title_id (
+          name
+        )
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map((member: any) => ({
+      ...member,
+      title_name: member.titles?.name || null,
+      titles: undefined, // Remove the nested object
+    }));
   },
 
   async getLeaders(): Promise<Member[]> {
     const { data, error } = await supabase
       .from("members")
-      .select("*")
+      .select(
+        `
+        *,
+        titles:title_id (
+          name
+        )
+      `
+      )
       .eq("type", "leader")
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map((member: any) => ({
+      ...member,
+      title_name: member.titles?.name || null,
+      titles: undefined, // Remove the nested object
+    }));
   },
 
   async getRegularMembers(): Promise<Member[]> {
     const { data, error } = await supabase
       .from("members")
-      .select("*")
+      .select(
+        `
+        *,
+        titles:title_id (
+          name
+        )
+      `
+      )
       .eq("type", "regular")
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map((member: any) => ({
+      ...member,
+      title_name: member.titles?.name || null,
+      titles: undefined, // Remove the nested object
+    }));
   },
 
   async create(
