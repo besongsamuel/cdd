@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "resend";
+import { Resend } from "https://esm.sh/resend@3.0.0";
 
 // Resend configuration
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
@@ -30,31 +30,34 @@ const EVENT_TEMPLATE_MAP: Record<string, string> = {
   "contact-submission": "contact-submission.html",
 };
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
 serve(async (req) => {
-  // CORS headers for all responses
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-    "Content-Type": "application/json",
-  };
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: {
+        ...corsHeaders,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+      },
+    });
+  }
 
   try {
-    // Handle CORS preflight
-    if (req.method === "OPTIONS") {
-      return new Response("ok", {
-        headers: corsHeaders,
-      });
-    }
-
     let payload: EmailPayload;
     try {
       payload = await req.json();
     } catch {
       return new Response(
         JSON.stringify({ error: "Invalid JSON in request body" }),
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -62,7 +65,10 @@ serve(async (req) => {
     if (!payload.eventType || !payload.eventData) {
       return new Response(
         JSON.stringify({ error: "Missing eventType or eventData" }),
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -84,7 +90,10 @@ serve(async (req) => {
       if (!payload.testRecipient) {
         return new Response(
           JSON.stringify({ error: "testRecipient is required in test mode" }),
-          { status: 400, headers: corsHeaders }
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -93,7 +102,10 @@ serve(async (req) => {
       if (!authHeader) {
         return new Response(
           JSON.stringify({ error: "Missing authorization header" }),
-          { status: 401, headers: corsHeaders }
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -110,7 +122,7 @@ serve(async (req) => {
       if (userError || !user) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: corsHeaders,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
@@ -127,7 +139,10 @@ serve(async (req) => {
       if (!isAdmin) {
         return new Response(
           JSON.stringify({ error: "Forbidden: Admin access required" }),
-          { status: 403, headers: corsHeaders }
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -136,7 +151,10 @@ serve(async (req) => {
       if (!templateName) {
         return new Response(
           JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
-          { status: 400, headers: corsHeaders }
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -158,7 +176,10 @@ serve(async (req) => {
           message: "Test email sent successfully",
           recipient: payload.testRecipient,
         }),
-        { status: 200, headers: corsHeaders }
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -176,7 +197,10 @@ serve(async (req) => {
       console.log(`No recipients found for event type: ${payload.eventType}`);
       return new Response(
         JSON.stringify({ success: true, message: "No recipients to notify" }),
-        { status: 200, headers: corsHeaders }
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -195,7 +219,10 @@ serve(async (req) => {
       console.error(`Unknown event type: ${payload.eventType}`);
       return new Response(
         JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -219,7 +246,10 @@ serve(async (req) => {
         recipients: recipients.to.length,
         cc: ccRecipients.length,
       }),
-      { status: 200, headers: corsHeaders }
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   } catch (error) {
     // Log error but return success (non-blocking)
@@ -230,7 +260,10 @@ serve(async (req) => {
         message: "Email processing attempted (errors logged)",
         error: error instanceof Error ? error.message : String(error),
       }),
-      { status: 200, headers: corsHeaders }
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });
