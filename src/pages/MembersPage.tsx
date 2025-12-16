@@ -32,15 +32,10 @@ const LeaderCard = ({
     position: { x: number; y: number }
   ) => Promise<void>;
 }) => {
-  const [imageError, setImageError] = useState(false);
   const [position, setPosition] = useState(
     leader.profile_picture_position || { x: 50, y: 50 }
   );
   const [isSaving, setIsSaving] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   const handlePositionChange = async (newPosition: { x: number; y: number }) => {
     setPosition(newPosition);
@@ -89,7 +84,7 @@ const LeaderCard = ({
           <Typography variant="caption">Saving...</Typography>
         </Box>
       )}
-      {imageError || !leader.picture_url ? (
+      {!leader.picture_url ? (
         <Box
           sx={{
             height: { xs: 200, sm: 250 },
@@ -154,7 +149,7 @@ const LeaderCard = ({
           position={position}
           isEditable={isAdmin}
           onPositionChange={handlePositionChange}
-          height={{ xs: 200, sm: 250 }}
+          height={250}
         />
       )}
       <CardContent>
