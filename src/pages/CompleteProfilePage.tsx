@@ -39,7 +39,6 @@ export const CompleteProfilePage = () => {
   const [titleId, setTitleId] = useState<string>("");
   const [passions, setPassions] = useState<string[]>([]);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [landscapePicture, setLandscapePicture] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -47,7 +46,6 @@ export const CompleteProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
-  const [uploadingLandscape, setUploadingLandscape] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const hasLoadedRef = useRef<string | null>(null);
@@ -148,14 +146,6 @@ export const CompleteProfilePage = () => {
     setProfilePicture(null);
   };
 
-  const handleLandscapePictureSelected = (file: File) => {
-    setLandscapePicture(file);
-  };
-
-  const handleLandscapePictureRemove = () => {
-    setLandscapePicture(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -167,7 +157,6 @@ export const CompleteProfilePage = () => {
       }
 
       let profilePictureUrl: string | undefined;
-      let landscapePictureUrl: string | undefined;
 
       let memberId: string;
 
@@ -190,21 +179,6 @@ export const CompleteProfilePage = () => {
           profilePictureUrl = currentMember.picture_url;
         }
 
-        // Upload landscape picture if provided and member is a leader
-        if (landscapePicture && currentMember.type === "leader") {
-          setUploadingLandscape(true);
-          try {
-            landscapePictureUrl = await profileService.uploadLandscapePicture(
-              landscapePicture,
-              memberId
-            );
-          } finally {
-            setUploadingLandscape(false);
-          }
-        } else {
-          landscapePictureUrl = currentMember.landscape_picture_url;
-        }
-
         // Update member profile
         // Note: email is automatically managed by the edge function and should not be sent
         await membersService.update(memberId, {
@@ -212,7 +186,6 @@ export const CompleteProfilePage = () => {
           title_id: titleId || undefined,
           passions: passions.length > 0 ? passions : undefined,
           picture_url: profilePictureUrl,
-          landscape_picture_url: landscapePictureUrl,
           phone: phone || undefined,
         });
       } else {
@@ -250,23 +223,6 @@ export const CompleteProfilePage = () => {
             setUploadingProfile(false);
           }
         }
-
-        // Upload landscape picture if provided (for leaders)
-        if (landscapePicture) {
-          setUploadingLandscape(true);
-          try {
-            landscapePictureUrl = await profileService.uploadLandscapePicture(
-              landscapePicture,
-              memberId
-            );
-            // Update member with landscape picture URL
-            await membersService.update(memberId, {
-              landscape_picture_url: landscapePictureUrl,
-            });
-          } finally {
-            setUploadingLandscape(false);
-          }
-        }
       }
 
       // Refresh current member
@@ -298,8 +254,6 @@ export const CompleteProfilePage = () => {
       </Container>
     );
   }
-
-  const isLeader = currentMember?.type === "leader";
 
   return (
     <Container maxWidth="lg">
@@ -456,21 +410,6 @@ export const CompleteProfilePage = () => {
                 />
               </Box>
 
-              {/* Landscape Picture (Leaders only) */}
-              {isLeader && (
-                <Box sx={{ mb: 4 }}>
-                  <ProfilePictureUpload
-                    currentImageUrl={currentMember?.landscape_picture_url}
-                    onImageSelected={handleLandscapePictureSelected}
-                    onImageRemove={handleLandscapePictureRemove}
-                    uploading={uploadingLandscape}
-                    label={t("landscapePicture")}
-                    size="large"
-                    aspectRatio="landscape"
-                  />
-                </Box>
-              )}
-
               <Divider sx={{ my: 4 }} />
 
               {/* Passions Section */}
@@ -522,7 +461,7 @@ export const CompleteProfilePage = () => {
                   type="submit"
                   variant="contained"
                   size="large"
-                  disabled={saving || uploadingProfile || uploadingLandscape}
+                  disabled={saving || uploadingProfile}
                   sx={{ minWidth: 150 }}
                 >
                   {saving ? t("saving") : t("saveProfile")}

@@ -14,7 +14,6 @@ interface MemberData {
   passions?: string[];
   phone?: string;
   title_id?: string;
-  landscape_picture_url?: string;
   type?: "regular" | "leader";
   is_admin?: boolean;
 }
@@ -36,8 +35,14 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          success: false,
+          error: "Missing authorization header",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -52,7 +57,10 @@ serve(async (req) => {
       console.error("Missing Supabase configuration");
       return new Response(
         JSON.stringify({ success: false, error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -69,7 +77,10 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ success: false, error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -79,7 +90,10 @@ serve(async (req) => {
       console.error("Missing service role key");
       return new Response(
         JSON.stringify({ success: false, error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -91,7 +105,10 @@ serve(async (req) => {
     if (!payload.action || !payload.data) {
       return new Response(
         JSON.stringify({ success: false, error: "Missing action or data" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -109,7 +126,10 @@ serve(async (req) => {
       if (!payload.data.name || !payload.data.name.trim()) {
         return new Response(
           JSON.stringify({ success: false, error: "Name is required" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -122,8 +142,14 @@ serve(async (req) => {
 
       if (existingMember) {
         return new Response(
-          JSON.stringify({ success: false, error: "Member record already exists for this user" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            success: false,
+            error: "Member record already exists for this user",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -138,11 +164,14 @@ serve(async (req) => {
 
       // Add optional fields if provided
       if (payload.data.bio !== undefined) memberData.bio = payload.data.bio;
-      if (payload.data.picture_url !== undefined) memberData.picture_url = payload.data.picture_url;
-      if (payload.data.passions !== undefined) memberData.passions = payload.data.passions;
-      if (payload.data.phone !== undefined) memberData.phone = payload.data.phone;
-      if (payload.data.title_id !== undefined) memberData.title_id = payload.data.title_id;
-      if (payload.data.landscape_picture_url !== undefined) memberData.landscape_picture_url = payload.data.landscape_picture_url;
+      if (payload.data.picture_url !== undefined)
+        memberData.picture_url = payload.data.picture_url;
+      if (payload.data.passions !== undefined)
+        memberData.passions = payload.data.passions;
+      if (payload.data.phone !== undefined)
+        memberData.phone = payload.data.phone;
+      if (payload.data.title_id !== undefined)
+        memberData.title_id = payload.data.title_id;
 
       // Insert member
       const { data: newMember, error: insertError } = await supabaseAdmin
@@ -155,19 +184,31 @@ serve(async (req) => {
         console.error("Error creating member:", insertError);
         return new Response(
           JSON.stringify({ success: false, error: "Failed to create member" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
       return new Response(
         JSON.stringify({ success: true, member: newMember }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     } else if (payload.action === "update") {
       if (!payload.memberId) {
         return new Response(
-          JSON.stringify({ success: false, error: "Member ID is required for update" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            success: false,
+            error: "Member ID is required for update",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -181,15 +222,24 @@ serve(async (req) => {
       if (fetchError || !memberToUpdate) {
         return new Response(
           JSON.stringify({ success: false, error: "Member not found" }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
       // Authorization check
       if (!isAdmin && memberToUpdate.user_id !== user.id) {
         return new Response(
-          JSON.stringify({ success: false, error: "Unauthorized: You can only update your own member record" }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            success: false,
+            error: "Unauthorized: You can only update your own member record",
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
@@ -199,18 +249,24 @@ serve(async (req) => {
       };
 
       // Build update data based on provided fields
-      if (payload.data.name !== undefined) updateData.name = payload.data.name.trim();
+      if (payload.data.name !== undefined)
+        updateData.name = payload.data.name.trim();
       if (payload.data.bio !== undefined) updateData.bio = payload.data.bio;
-      if (payload.data.picture_url !== undefined) updateData.picture_url = payload.data.picture_url;
-      if (payload.data.passions !== undefined) updateData.passions = payload.data.passions;
-      if (payload.data.phone !== undefined) updateData.phone = payload.data.phone;
-      if (payload.data.title_id !== undefined) updateData.title_id = payload.data.title_id;
-      if (payload.data.landscape_picture_url !== undefined) updateData.landscape_picture_url = payload.data.landscape_picture_url;
+      if (payload.data.picture_url !== undefined)
+        updateData.picture_url = payload.data.picture_url;
+      if (payload.data.passions !== undefined)
+        updateData.passions = payload.data.passions;
+      if (payload.data.phone !== undefined)
+        updateData.phone = payload.data.phone;
+      if (payload.data.title_id !== undefined)
+        updateData.title_id = payload.data.title_id;
 
       // Admin-only fields (only process if user is admin)
       if (isAdmin) {
-        if (payload.data.type !== undefined) updateData.type = payload.data.type;
-        if (payload.data.is_admin !== undefined) updateData.is_admin = payload.data.is_admin;
+        if (payload.data.type !== undefined)
+          updateData.type = payload.data.type;
+        if (payload.data.is_admin !== undefined)
+          updateData.is_admin = payload.data.is_admin;
         // Admins can update email (sync with user email)
         if (user.email) updateData.email = user.email;
       }
@@ -227,26 +283,40 @@ serve(async (req) => {
         console.error("Error updating member:", updateError);
         return new Response(
           JSON.stringify({ success: false, error: "Failed to update member" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
         );
       }
 
       return new Response(
         JSON.stringify({ success: true, member: updatedMember }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     } else {
       return new Response(
-        JSON.stringify({ success: false, error: "Invalid action. Must be 'create' or 'update'" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          success: false,
+          error: "Invalid action. Must be 'create' or 'update'",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
   } catch (error) {
     console.error("Error in manage-member function:", error);
     return new Response(
       JSON.stringify({ success: false, error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });
-

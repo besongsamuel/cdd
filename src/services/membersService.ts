@@ -44,8 +44,12 @@ const callEdgeFunction = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    const errorData = await response
+      .json()
+      .catch(() => ({ error: "Unknown error" }));
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`
+    );
   }
 
   const result = await response.json();
@@ -127,14 +131,16 @@ export const membersService = {
   ): Promise<Member> {
     // Prepare data for edge function (only allowed fields)
     const edgeFunctionData: Record<string, unknown> = {};
-    
+
     if (member.name) edgeFunctionData.name = member.name;
     if (member.bio !== undefined) edgeFunctionData.bio = member.bio;
-    if (member.picture_url !== undefined) edgeFunctionData.picture_url = member.picture_url;
-    if (member.passions !== undefined) edgeFunctionData.passions = member.passions;
+    if (member.picture_url !== undefined)
+      edgeFunctionData.picture_url = member.picture_url;
+    if (member.passions !== undefined)
+      edgeFunctionData.passions = member.passions;
     if (member.phone !== undefined) edgeFunctionData.phone = member.phone;
-    if (member.title_id !== undefined) edgeFunctionData.title_id = member.title_id;
-    if (member.landscape_picture_url !== undefined) edgeFunctionData.landscape_picture_url = member.landscape_picture_url;
+    if (member.title_id !== undefined)
+      edgeFunctionData.title_id = member.title_id;
 
     // Note: type, is_admin, email, and user_id are automatically set by the edge function
     return callEdgeFunction("create", undefined, edgeFunctionData);
@@ -143,19 +149,22 @@ export const membersService = {
   async update(id: string, member: Partial<Member>): Promise<Member> {
     // Prepare data for edge function
     const edgeFunctionData: Record<string, unknown> = {};
-    
+
     // Allowed fields for all users
     if (member.name !== undefined) edgeFunctionData.name = member.name;
     if (member.bio !== undefined) edgeFunctionData.bio = member.bio;
-    if (member.picture_url !== undefined) edgeFunctionData.picture_url = member.picture_url;
-    if (member.passions !== undefined) edgeFunctionData.passions = member.passions;
+    if (member.picture_url !== undefined)
+      edgeFunctionData.picture_url = member.picture_url;
+    if (member.passions !== undefined)
+      edgeFunctionData.passions = member.passions;
     if (member.phone !== undefined) edgeFunctionData.phone = member.phone;
-    if (member.title_id !== undefined) edgeFunctionData.title_id = member.title_id;
-    if (member.landscape_picture_url !== undefined) edgeFunctionData.landscape_picture_url = member.landscape_picture_url;
+    if (member.title_id !== undefined)
+      edgeFunctionData.title_id = member.title_id;
 
     // Admin-only fields (edge function will validate if user is admin)
     if (member.type !== undefined) edgeFunctionData.type = member.type;
-    if (member.is_admin !== undefined) edgeFunctionData.is_admin = member.is_admin;
+    if (member.is_admin !== undefined)
+      edgeFunctionData.is_admin = member.is_admin;
 
     // Note: updated_at is automatically set by the edge function
     return callEdgeFunction("update", id, edgeFunctionData);

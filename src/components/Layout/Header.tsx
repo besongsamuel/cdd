@@ -297,6 +297,21 @@ export const Header = () => {
           </ListItem>
         ))}
 
+        {!user && (
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/login">
+              <ListItemText
+                primary="Member Login"
+                primaryTypographyProps={{ 
+                  fontSize: "15px",
+                  color: "text.secondary",
+                  fontWeight: 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
         {user && (
           <>
             <ListItem disablePadding>
@@ -757,6 +772,30 @@ export const Header = () => {
                   <MenuItem onClick={handleSignOut}>Logout</MenuItem>
                 </Menu>
               </>
+            )}
+            {!user && (
+              <Button
+                component={Link}
+                to="/login"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  px: 2,
+                  py: 1,
+                  textTransform: "none",
+                  minHeight: "44px",
+                  minWidth: "44px",
+                  opacity: 0.7,
+                  "&:hover": {
+                    opacity: 1,
+                    backgroundColor: "transparent",
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Member Login
+              </Button>
             )}
             <Box
               sx={{

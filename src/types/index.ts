@@ -28,7 +28,6 @@ export interface Member {
   is_admin?: boolean;
   title_id?: string;
   title_name?: string; // Joined field for display
-  landscape_picture_url?: string;
   created_at: string;
   updated_at: string;
 }
