@@ -15,3 +15,4 @@ INSERT INTO suggestion_categories (name, description, display_order, is_active) 
   ('Other', 'Other suggestions that don''t fit into the above categories', 99, true);
 
 
+

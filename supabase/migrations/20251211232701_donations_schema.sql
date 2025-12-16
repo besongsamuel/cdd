@@ -97,3 +97,4 @@ CREATE POLICY "Authenticated users can update donations" ON donations
 CREATE POLICY "Authenticated users can delete donations" ON donations
   FOR DELETE USING (auth.role() = 'authenticated');
 
+

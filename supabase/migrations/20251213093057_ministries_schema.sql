@@ -95,3 +95,4 @@ CREATE POLICY "Authenticated users can delete ministry join requests" ON ministr
   FOR DELETE USING (auth.role() = 'authenticated');
 
 
+

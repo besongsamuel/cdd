@@ -96,3 +96,4 @@ CREATE POLICY "Authenticated users can update department join requests" ON depar
 CREATE POLICY "Authenticated users can delete department join requests" ON department_join_requests
   FOR DELETE USING (auth.role() = 'authenticated');
 
+

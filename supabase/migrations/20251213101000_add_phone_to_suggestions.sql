@@ -2,3 +2,4 @@
 ALTER TABLE suggestions ADD COLUMN submitter_phone TEXT;
 
 
+

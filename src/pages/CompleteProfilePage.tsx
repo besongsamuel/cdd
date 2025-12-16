@@ -206,13 +206,13 @@ export const CompleteProfilePage = () => {
         }
 
         // Update member profile
+        // Note: email is automatically managed by the edge function and should not be sent
         await membersService.update(memberId, {
           bio: bio || undefined,
           title_id: titleId || undefined,
           passions: passions.length > 0 ? passions : undefined,
           picture_url: profilePictureUrl,
           landscape_picture_url: landscapePictureUrl,
-          email: email || undefined,
           phone: phone || undefined,
         });
       } else {
@@ -229,7 +229,6 @@ export const CompleteProfilePage = () => {
           bio: bio || undefined,
           title_id: titleId || undefined,
           passions: passions.length > 0 ? passions : undefined,
-          email: email || user.email || undefined,
           phone: phone || undefined,
         });
 
@@ -359,6 +358,23 @@ export const CompleteProfilePage = () => {
             </Box>
           ) : (
             <form onSubmit={handleSubmit}>
+              {/* Email - Read-only, shown at top */}
+              <TextField
+                fullWidth
+                label={t("email")}
+                type="email"
+                value={email || user?.email || ""}
+                margin="normal"
+                InputProps={{
+                  readOnly: true,
+                }}
+                sx={{
+                  "& .MuiInputBase-input.Mui-readOnly": {
+                    cursor: "default",
+                  },
+                }}
+              />
+
               {/* Name (only show if creating new member) */}
               {!currentMember && (
                 <TextField
@@ -403,17 +419,6 @@ export const CompleteProfilePage = () => {
                   ))}
                 </Select>
               </FormControl>
-
-              {/* Email */}
-              <TextField
-                fullWidth
-                label={t("email")}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                margin="normal"
-                helperText={t("optional")}
-              />
 
               {/* Phone */}
               <Box sx={{ mt: 2, mb: 1 }}>
@@ -530,4 +535,5 @@ export const CompleteProfilePage = () => {
     </Container>
   );
 };
+
 

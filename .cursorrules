@@ -22,3 +22,4 @@ When adding new database migrations, follow this procedure:
 - Migration files should be numbered sequentially (e.g., `004_new_feature.sql`)
 - Always test migrations in a development environment before applying to production
 
+

@@ -107,3 +107,4 @@ WHERE name = 'Martine Bélanger';
 UPDATE members SET passions = ARRAY['Men''s Ministry', 'Accountability', 'Discipleship', 'Business'] 
 WHERE name = 'Luc Dubois';
 
+

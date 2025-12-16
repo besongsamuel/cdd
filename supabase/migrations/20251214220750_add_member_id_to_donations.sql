@@ -7,3 +7,4 @@ ADD COLUMN member_id UUID REFERENCES members(id) ON DELETE SET NULL;
 COMMENT ON COLUMN donations.member_id IS 'ID of the member who made the donation. NULL if submitted anonymously or by a non-member.';
 
 
+

@@ -1,6 +1,61 @@
 import type { Member } from "../types";
 import { supabase } from "./supabase";
 
+const getSupabaseUrl = (): string => {
+  return import.meta.env.VITE_SUPABASE_URL || "";
+};
+
+const callEdgeFunction = async (
+  action: "create" | "update",
+  memberId: string | undefined,
+  data: Record<string, unknown>
+): Promise<Member> => {
+  const supabaseUrl = getSupabaseUrl();
+  if (!supabaseUrl) {
+    throw new Error("Missing Supabase URL configuration");
+  }
+
+  // Get the session token
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+
+  const edgeFunctionUrl = `${supabaseUrl}/functions/v1/manage-member`;
+  const payload: any = {
+    action,
+    data,
+  };
+
+  if (action === "update" && memberId) {
+    payload.memberId = memberId;
+  }
+
+  const response = await fetch(edgeFunctionUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || "Operation failed");
+  }
+
+  return result.member;
+};
+
 export const membersService = {
   async getAll(): Promise<Member[]> {
     const { data, error } = await supabase
@@ -70,45 +125,40 @@ export const membersService = {
   async create(
     member: Omit<Member, "id" | "created_at" | "updated_at">
   ): Promise<Member> {
-    // Try using the database function first (if it exists)
-    // This bypasses RLS restrictions while still ensuring security
-    try {
-      const { data, error } = await supabase.rpc("create_member_for_user", {
-        p_name: member.name,
-        p_type: member.type,
-        p_user_id: member.user_id,
-        p_is_admin: member.is_admin || false,
-      });
+    // Prepare data for edge function (only allowed fields)
+    const edgeFunctionData: Record<string, unknown> = {};
+    
+    if (member.name) edgeFunctionData.name = member.name;
+    if (member.bio !== undefined) edgeFunctionData.bio = member.bio;
+    if (member.picture_url !== undefined) edgeFunctionData.picture_url = member.picture_url;
+    if (member.passions !== undefined) edgeFunctionData.passions = member.passions;
+    if (member.phone !== undefined) edgeFunctionData.phone = member.phone;
+    if (member.title_id !== undefined) edgeFunctionData.title_id = member.title_id;
+    if (member.landscape_picture_url !== undefined) edgeFunctionData.landscape_picture_url = member.landscape_picture_url;
 
-      if (!error && data) {
-        return data;
-      }
-    } catch {
-      // RPC function might not exist yet, fall through to direct insert
-      console.log("RPC function not available, using direct insert");
-    }
-
-    // Fall back to direct insert (will use updated RLS policy)
-    const { data, error } = await supabase
-      .from("members")
-      .insert(member)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    // Note: type, is_admin, email, and user_id are automatically set by the edge function
+    return callEdgeFunction("create", undefined, edgeFunctionData);
   },
 
   async update(id: string, member: Partial<Member>): Promise<Member> {
-    const { data, error } = await supabase
-      .from("members")
-      .update({ ...member, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+    // Prepare data for edge function
+    const edgeFunctionData: Record<string, unknown> = {};
+    
+    // Allowed fields for all users
+    if (member.name !== undefined) edgeFunctionData.name = member.name;
+    if (member.bio !== undefined) edgeFunctionData.bio = member.bio;
+    if (member.picture_url !== undefined) edgeFunctionData.picture_url = member.picture_url;
+    if (member.passions !== undefined) edgeFunctionData.passions = member.passions;
+    if (member.phone !== undefined) edgeFunctionData.phone = member.phone;
+    if (member.title_id !== undefined) edgeFunctionData.title_id = member.title_id;
+    if (member.landscape_picture_url !== undefined) edgeFunctionData.landscape_picture_url = member.landscape_picture_url;
 
-    if (error) throw error;
-    return data;
+    // Admin-only fields (edge function will validate if user is admin)
+    if (member.type !== undefined) edgeFunctionData.type = member.type;
+    if (member.is_admin !== undefined) edgeFunctionData.is_admin = member.is_admin;
+
+    // Note: updated_at is automatically set by the edge function
+    return callEdgeFunction("update", id, edgeFunctionData);
   },
 
   async delete(id: string): Promise<void> {

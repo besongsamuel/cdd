@@ -6,8 +6,6 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
   IconButton,
   InputAdornment,
   List,
@@ -31,9 +29,13 @@ export const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -72,9 +74,6 @@ export const SignupPage = () => {
     }
     if (password !== confirmPassword) {
       return "Passwords do not match";
-    }
-    if (!acceptTerms) {
-      return "You must accept the terms and conditions to continue";
     }
     return null;
   };
@@ -376,12 +375,13 @@ export const SignupPage = () => {
                 setEmail(e.target.value);
                 if (error) setError(null);
               }}
+              onBlur={() => setTouched({ ...touched, email: true })}
               required
               margin="normal"
               autoComplete="email"
-              error={email.trim() !== "" && !isValidEmail(email) ? true : false}
+              error={touched.email && email.trim() !== "" && !isValidEmail(email)}
               helperText={
-                email.trim() !== "" && !isValidEmail(email)
+                touched.email && email.trim() !== "" && !isValidEmail(email)
                   ? "Please enter a valid email address"
                   : ""
               }
@@ -395,10 +395,16 @@ export const SignupPage = () => {
                 setPassword(e.target.value);
                 if (error) setError(null);
               }}
+              onBlur={() => setTouched({ ...touched, password: true })}
               required
               margin="normal"
               autoComplete="new-password"
-              helperText="Must be at least 6 characters"
+              error={touched.password && password !== "" && password.length < 6}
+              helperText={
+                touched.password && password !== "" && password.length < 6
+                  ? "Must be at least 6 characters"
+                  : "Must be at least 6 characters"
+              }
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -422,17 +428,18 @@ export const SignupPage = () => {
                 setConfirmPassword(e.target.value);
                 if (error) setError(null);
               }}
+              onBlur={() => setTouched({ ...touched, confirmPassword: true })}
               required
               margin="normal"
               autoComplete="new-password"
               error={
+                touched.confirmPassword &&
                 confirmPassword !== "" &&
                 password !== "" &&
                 password !== confirmPassword
-                  ? true
-                  : false
               }
               helperText={
+                touched.confirmPassword &&
                 confirmPassword !== "" &&
                 password !== "" &&
                 password !== confirmPassword
@@ -455,35 +462,20 @@ export const SignupPage = () => {
                 ),
               }}
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={acceptTerms}
-                  onChange={(e) => {
-                    setAcceptTerms(e.target.checked);
-                    if (error) setError(null);
-                  }}
-                  required
-                />
-              }
-              label={
-                <Typography variant="body2">
-                  I accept the{" "}
-                  <Link
-                    to="/terms-and-conditions"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: "none" }}
-                  >
-                    Terms and Conditions
-                  </Link>
-                </Typography>
-              }
-              sx={{ mt: 2 }}
-            />
-            {(error || getValidationError()) && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              By signing up, you accept the{" "}
+              <Link
+                to="/terms-and-conditions"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none" }}
+              >
+                Terms and Conditions
+              </Link>
+            </Typography>
+            {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
-                {error || getValidationError()}
+                {error}
               </Alert>
             )}
             <Button
@@ -491,7 +483,7 @@ export const SignupPage = () => {
               variant="contained"
               fullWidth
               sx={{ mt: 3 }}
-              disabled={loading || !isFormValid() || !acceptTerms}
+              disabled={loading || !isFormValid()}
             >
               {loading ? "Creating account..." : "Sign Up"}
             </Button>

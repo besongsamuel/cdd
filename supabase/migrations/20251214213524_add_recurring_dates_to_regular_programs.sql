@@ -9,3 +9,4 @@ COMMENT ON COLUMN regular_programs.start_date IS 'Start date for recurring progr
 COMMENT ON COLUMN regular_programs.end_date IS 'End date for recurring programs. If NULL, program repeats indefinitely.';
 
 
+

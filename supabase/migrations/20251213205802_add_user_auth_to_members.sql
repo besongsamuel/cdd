@@ -55,3 +55,4 @@ COMMENT ON COLUMN members.is_admin IS 'Flags admin members';
 COMMENT ON COLUMN members.title_id IS 'Foreign key to titles table';
 COMMENT ON COLUMN members.landscape_picture_url IS 'Landscape image for leaders';
 
+
