@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
+      setMemberLoading(true);
     });
 
     // Listen for auth changes
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
+      setMemberLoading(true);
     });
 
     return () => subscription.unsubscribe();

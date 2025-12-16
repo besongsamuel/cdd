@@ -35,10 +35,11 @@ export const ProfileRedirect = ({
   // If user is authenticated but has no member profile, redirect to complete profile
   // Skip this check for excluded paths
   if (user && !currentMember && !isExcludedPath) {
+    console.log(
+      "ProfileRedirect: Redirecting to /profile/complete - no member found"
+    );
     return <Navigate to="/profile/complete" replace />;
   }
 
   return <>{children}</>;
 };
-
-
