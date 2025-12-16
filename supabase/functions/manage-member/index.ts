@@ -11,6 +11,7 @@ interface MemberData {
   name?: string;
   bio?: string;
   picture_url?: string;
+  profile_picture_position?: { x: number; y: number };
   passions?: string[];
   phone?: string;
   title_id?: string;
@@ -267,6 +268,9 @@ serve(async (req) => {
           updateData.type = payload.data.type;
         if (payload.data.is_admin !== undefined)
           updateData.is_admin = payload.data.is_admin;
+        if (payload.data.profile_picture_position !== undefined)
+          updateData.profile_picture_position =
+            payload.data.profile_picture_position;
         // Admins can update email (sync with user email)
         if (user.email) updateData.email = user.email;
       }

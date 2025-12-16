@@ -33,20 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [memberLoading, setMemberLoading] = useState(false);
 
-  const loadMember = useCallback(async (userId: string | undefined) => {
-    if (!userId) {
-      setCurrentMember(null);
-      return;
-    }
-    try {
-      const member = await membersService.getByUserId(userId);
-      setCurrentMember(member);
-    } catch (error) {
-      console.error("Error loading member:", error);
-      setCurrentMember(null);
-    }
-  }, []);
-
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session: _session } }) => {
@@ -116,7 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (error) throw error;
     setSession(data.session);
     setUser(data.user);
-    await loadMember(data.user?.id);
   };
 
   const signUp = async (email: string, password: string) => {

@@ -3,8 +3,8 @@ import {
   Box,
   Card,
   CardContent,
-  CardMedia,
   Chip,
+  CircularProgress,
   Container,
   InputAdornment,
   TextField,
@@ -12,17 +12,48 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DraggableProfileImage } from "../components/common/DraggableProfileImage";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
+import { useAuth } from "../hooks/useAuth";
 import { membersService } from "../services/membersService";
 import type { Member } from "../types";
 
 // Component for Leader Card with image error handling
-const LeaderCard = ({ leader }: { leader: Member }) => {
+const LeaderCard = ({
+  leader,
+  isAdmin,
+  onPositionUpdate,
+}: {
+  leader: Member;
+  isAdmin: boolean;
+  onPositionUpdate: (
+    memberId: string,
+    position: { x: number; y: number }
+  ) => Promise<void>;
+}) => {
   const [imageError, setImageError] = useState(false);
+  const [position, setPosition] = useState(
+    leader.profile_picture_position || { x: 50, y: 50 }
+  );
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleImageError = () => {
     setImageError(true);
+  };
+
+  const handlePositionChange = async (newPosition: { x: number; y: number }) => {
+    setPosition(newPosition);
+    setIsSaving(true);
+    try {
+      await onPositionUpdate(leader.id, newPosition);
+    } catch (error) {
+      console.error("Failed to save position:", error);
+      // Revert to original position on error
+      setPosition(leader.profile_picture_position || { x: 50, y: 50 });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Format display name with title (unless "Regular Member" or empty)
@@ -38,7 +69,26 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
   };
 
   return (
-    <Card>
+    <Card sx={{ position: "relative" }}>
+      {isSaving && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            zIndex: 10,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderRadius: 1,
+            p: 0.5,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <CircularProgress size={16} />
+          <Typography variant="caption">Saving...</Typography>
+        </Box>
+      )}
       {imageError || !leader.picture_url ? (
         <Box
           sx={{
@@ -98,16 +148,13 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
           </Box>
         </Box>
       ) : (
-        <CardMedia
-          component="img"
-          image={leader.picture_url}
+        <DraggableProfileImage
+          imageUrl={leader.picture_url}
           alt={getDisplayName(leader)}
-          sx={{
-            objectFit: "cover",
-            objectPosition: "top",
-            height: { xs: 200, sm: 250 },
-          }}
-          onError={handleImageError}
+          position={position}
+          isEditable={isAdmin}
+          onPositionChange={handlePositionChange}
+          height={{ xs: 200, sm: 250 }}
         />
       )}
       <CardContent>
@@ -142,6 +189,7 @@ const LeaderCard = ({ leader }: { leader: Member }) => {
 
 export const MembersPage = () => {
   const { t } = useTranslation("members");
+  const { isAdmin } = useAuth();
   const [leaders, setLeaders] = useState<Member[]>([]);
   const [regularMembers, setRegularMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,6 +214,18 @@ export const MembersPage = () => {
 
     loadMembers();
   }, []);
+
+  const handlePositionUpdate = async (
+    memberId: string,
+    position: { x: number; y: number }
+  ) => {
+    await membersService.update(memberId, {
+      profile_picture_position: position,
+    });
+    // Refresh leaders list to get updated data
+    const leadersData = await membersService.getLeaders();
+    setLeaders(leadersData);
+  };
 
   // Calculate passion frequencies for word cloud
   const passionFrequencies = (() => {
@@ -522,7 +582,12 @@ export const MembersPage = () => {
                 </Typography>
               ) : (
                 filteredLeaders.map((leader) => (
-                  <LeaderCard key={leader.id} leader={leader} />
+                  <LeaderCard
+                    key={leader.id}
+                    leader={leader}
+                    isAdmin={isAdmin}
+                    onPositionUpdate={handlePositionUpdate}
+                  />
                 ))
               )}
             </Box>

@@ -21,6 +21,7 @@ export interface Member {
   type: MemberType;
   bio?: string;
   picture_url?: string;
+  profile_picture_position?: { x: number; y: number };
   passions?: string[];
   email?: string;
   phone?: string;

@@ -165,6 +165,9 @@ export const membersService = {
     if (member.type !== undefined) edgeFunctionData.type = member.type;
     if (member.is_admin !== undefined)
       edgeFunctionData.is_admin = member.is_admin;
+    if (member.profile_picture_position !== undefined)
+      edgeFunctionData.profile_picture_position =
+        member.profile_picture_position;
 
     // Note: updated_at is automatically set by the edge function
     return callEdgeFunction("update", id, edgeFunctionData);
