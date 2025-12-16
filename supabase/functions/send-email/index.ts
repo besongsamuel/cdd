@@ -14,6 +14,8 @@ interface EmailRecipient {
 interface EmailPayload {
   eventType: string;
   eventData: Record<string, unknown>;
+  testMode?: boolean;
+  testRecipient?: string;
 }
 
 // Event type to template mapping
@@ -29,42 +31,138 @@ const EVENT_TEMPLATE_MAP: Record<string, string> = {
 };
 
 serve(async (req) => {
+  // CORS headers for all responses
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Content-Type": "application/json",
+  };
+
   try {
     // Handle CORS preflight
     if (req.method === "OPTIONS") {
       return new Response("ok", {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers":
-            "authorization, x-client-info, apikey, content-type",
-        },
+        headers: corsHeaders,
       });
     }
 
-    const payload: EmailPayload = await req.json();
+    let payload: EmailPayload;
+    try {
+      payload = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
 
     // Validate payload
     if (!payload.eventType || !payload.eventData) {
       return new Response(
         JSON.stringify({ error: "Missing eventType or eventData" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: corsHeaders }
       );
     }
 
-    // Get Supabase client
-    // Use service role key for database access from edge function
+    // Get Supabase configuration
     const supabaseUrl =
       Deno.env.get("SUPABASE_URL") ||
       Deno.env.get("SUPABASE_PROJECT_URL") ||
       "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
       console.error("Missing Supabase configuration");
       throw new Error("Missing Supabase configuration");
     }
 
+    // If test mode, verify admin authentication
+    if (payload.testMode) {
+      if (!payload.testRecipient) {
+        return new Response(
+          JSON.stringify({ error: "testRecipient is required in test mode" }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      // Get authorization header
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: "Missing authorization header" }),
+          { status: 401, headers: corsHeaders }
+        );
+      }
+
+      // Create authenticated client to verify user
+      const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      // Check if user is admin
+      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: currentMember } = await supabaseAdmin
+        .from("members")
+        .select("is_admin, user_id")
+        .eq("user_id", user.id)
+        .single();
+
+      const isAdmin = currentMember?.is_admin === true;
+
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: Admin access required" }),
+          { status: 403, headers: corsHeaders }
+        );
+      }
+
+      // Test mode: send directly to testRecipient
+      const templateName = EVENT_TEMPLATE_MAP[payload.eventType];
+      if (!templateName) {
+        return new Response(
+          JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      const htmlBody = await loadAndProcessTemplate(
+        templateName,
+        payload.eventData
+      );
+
+      await sendEmailViaResend(
+        [payload.testRecipient],
+        [],
+        `[TEST] New ${getEventTypeLabel(payload.eventType)}`,
+        htmlBody
+      );
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Test email sent successfully",
+          recipient: payload.testRecipient,
+        }),
+        { status: 200, headers: corsHeaders }
+      );
+    }
+
+    // Normal mode: Get Supabase client for database access
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Resolve recipients based on event type
@@ -78,7 +176,7 @@ serve(async (req) => {
       console.log(`No recipients found for event type: ${payload.eventType}`);
       return new Response(
         JSON.stringify({ success: true, message: "No recipients to notify" }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
+        { status: 200, headers: corsHeaders }
       );
     }
 
@@ -97,7 +195,7 @@ serve(async (req) => {
       console.error(`Unknown event type: ${payload.eventType}`);
       return new Response(
         JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -121,7 +219,7 @@ serve(async (req) => {
         recipients: recipients.to.length,
         cc: ccRecipients.length,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: corsHeaders }
     );
   } catch (error) {
     // Log error but return success (non-blocking)
@@ -132,7 +230,7 @@ serve(async (req) => {
         message: "Email processing attempted (errors logged)",
         error: error instanceof Error ? error.message : String(error),
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: corsHeaders }
     );
   }
 });

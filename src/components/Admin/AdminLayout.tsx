@@ -33,6 +33,7 @@ export const AdminLayout = () => {
     { label: "Suggestions", path: "/admin/suggestions" },
     { label: "Titles", path: "/admin/titles" },
     { label: "Contact Submissions", path: "/admin/contact" },
+    { label: "Test Emails", path: "/admin/email-test" },
   ];
 
   const handleLogout = async () => {

@@ -1,11 +1,15 @@
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
   CircularProgress,
   Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   InputAdornment,
   TextField,
   Typography,
@@ -36,8 +40,12 @@ const LeaderCard = ({
     leader.profile_picture_position || { x: 50, y: 50 }
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [bioDialogOpen, setBioDialogOpen] = useState(false);
 
-  const handlePositionChange = async (newPosition: { x: number; y: number }) => {
+  const handlePositionChange = async (newPosition: {
+    x: number;
+    y: number;
+  }) => {
     setPosition(newPosition);
     setIsSaving(true);
     try {
@@ -157,9 +165,38 @@ const LeaderCard = ({
           {getDisplayName(leader)}
         </Typography>
         {leader.bio && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {leader.bio}
-          </Typography>
+          <Box sx={{ mb: 1 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                display: "-webkit-box",
+                WebkitLineClamp: 10,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                mb: leader.bio.length > 500 ? 0.5 : 0,
+              }}
+            >
+              {leader.bio}
+            </Typography>
+            {leader.bio.length > 500 && (
+              <Button
+                size="small"
+                onClick={() => setBioDialogOpen(true)}
+                sx={{
+                  mt: 0.5,
+                  textTransform: "none",
+                  fontSize: "0.75rem",
+                  minWidth: "auto",
+                  p: 0,
+                  color: "primary.main",
+                }}
+              >
+                More
+              </Button>
+            )}
+          </Box>
         )}
         {(leader.email || leader.phone) && (
           <Box
@@ -178,6 +215,21 @@ const LeaderCard = ({
           </Box>
         )}
       </CardContent>
+      {leader.bio && (
+        <Dialog
+          open={bioDialogOpen}
+          onClose={() => setBioDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>{getDisplayName(leader)}</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" color="text.secondary">
+              {leader.bio}
+            </Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 };
@@ -636,55 +688,55 @@ export const MembersPage = () => {
                         <Typography variant="h6" component="h3" gutterBottom>
                           {getDisplayName(member)}
                         </Typography>
-                      {(member.email || member.phone) && (
-                        <Box
-                          sx={{
-                            mt: 0.5,
-                            mb: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 0.5,
-                          }}
-                        >
-                          {member.email && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              📧 {member.email}
-                            </Typography>
-                          )}
-                          {member.phone && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              📞 {member.phone}
-                            </Typography>
-                          )}
-                        </Box>
-                      )}
-                      {member.passions && member.passions.length > 0 && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                            mt: 1,
-                          }}
-                        >
-                          {member.passions.map((passion, index) => (
-                            <Chip
-                              key={index}
-                              label={passion}
-                              size="small"
-                              variant="outlined"
-                            />
-                          ))}
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
+                        {(member.email || member.phone) && (
+                          <Box
+                            sx={{
+                              mt: 0.5,
+                              mb: 1,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 0.5,
+                            }}
+                          >
+                            {member.email && (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                📧 {member.email}
+                              </Typography>
+                            )}
+                            {member.phone && (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                📞 {member.phone}
+                              </Typography>
+                            )}
+                          </Box>
+                        )}
+                        {member.passions && member.passions.length > 0 && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 1,
+                              mt: 1,
+                            }}
+                          >
+                            {member.passions.map((passion, index) => (
+                              <Chip
+                                key={index}
+                                label={passion}
+                                size="small"
+                                variant="outlined"
+                              />
+                            ))}
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
                   );
                 })
               )}
@@ -750,8 +802,8 @@ export const MembersPage = () => {
                           count >= maxFrequency * 0.7
                             ? 700
                             : count >= maxFrequency * 0.4
-                            ? 600
-                            : 500,
+                              ? 600
+                              : 500,
                         color: isSelected ? "#1e3a8a" : getColor(index),
                         opacity: isSelected
                           ? 1
@@ -765,8 +817,8 @@ export const MembersPage = () => {
                         textShadow: isSelected
                           ? "0 2px 8px rgba(30, 58, 138, 0.3)"
                           : count >= maxFrequency * 0.5
-                          ? "0 1px 3px rgba(0, 0, 0, 0.1)"
-                          : "none",
+                            ? "0 1px 3px rgba(0, 0, 0, 0.1)"
+                            : "none",
                         px: { xs: 0.5, sm: 1 },
                         py: 0.5,
                         backgroundColor: isSelected

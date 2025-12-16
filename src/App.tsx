@@ -5,6 +5,7 @@ import { AdminLayout } from "./components/Admin/AdminLayout";
 import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissionsManager";
 import { DepartmentsManager } from "./components/Admin/DepartmentsManager";
 import { DonationsManager } from "./components/Admin/DonationsManager";
+import { EmailTestManager } from "./components/Admin/EmailTestManager";
 import { EventsManager } from "./components/Admin/EventsManager";
 import { GalleryManager } from "./components/Admin/GalleryManager";
 import { MembersManager } from "./components/Admin/MembersManager";
@@ -395,6 +396,7 @@ function App() {
                         path="contact"
                         element={<ContactSubmissionsManager />}
                       />
+                      <Route path="email-test" element={<EmailTestManager />} />
                       <Route
                         path=""
                         element={<Navigate to="/admin/dashboard" replace />}
