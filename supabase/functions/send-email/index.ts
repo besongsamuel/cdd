@@ -583,8 +583,27 @@ async function loadAndProcessTemplate(
 ): Promise<string> {
   try {
     // Load template from filesystem
-    const templatePath = `./templates/${templateName}`;
-    const templateContent = await Deno.readTextFile(templatePath);
+    // Try multiple path resolution strategies for compatibility
+    let templateContent: string | undefined;
+    const pathsToTry = [
+      `./templates/${templateName}`,
+      `templates/${templateName}`,
+      new URL(`./templates/${templateName}`, import.meta.url).pathname,
+    ];
+
+    for (const templatePath of pathsToTry) {
+      try {
+        templateContent = await Deno.readTextFile(templatePath);
+        break;
+      } catch {
+        // Try next path
+        continue;
+      }
+    }
+
+    if (!templateContent) {
+      throw new Error(`Template ${templateName} not found in any location`);
+    }
 
     let processed = templateContent;
 
