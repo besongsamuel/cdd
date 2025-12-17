@@ -30,7 +30,8 @@ import {
 import { useEffect, useState } from "react";
 import { membersService } from "../../services/membersService";
 import { profileService } from "../../services/profileService";
-import type { Member, MemberType } from "../../types";
+import { titlesService } from "../../services/titlesService";
+import type { Member, MemberType, Title } from "../../types";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { PassionsAutocomplete } from "../common/PassionsAutocomplete";
 import { ProfilePictureUpload } from "../common/ProfilePictureUpload";
@@ -41,6 +42,7 @@ export const MembersManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [titles, setTitles] = useState<Title[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     type: "regular" as MemberType,
@@ -48,13 +50,24 @@ export const MembersManager = () => {
     email: "",
     phone: "",
     passions: [] as string[],
+    title_id: "" as string | undefined,
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [uploadingProfile, setUploadingProfile] = useState(false);
 
   useEffect(() => {
     loadMembers();
+    loadTitles();
   }, []);
+
+  const loadTitles = async () => {
+    try {
+      const titlesData = await titlesService.getAll();
+      setTitles(titlesData);
+    } catch (error) {
+      console.error("Error loading titles:", error);
+    }
+  };
 
   const loadMembers = async () => {
     try {
@@ -77,6 +90,7 @@ export const MembersManager = () => {
         email: member.email || "",
         phone: member.phone || "",
         passions: member.passions || [],
+        title_id: member.title_id || undefined,
       });
     } else {
       setEditingMember(null);
@@ -87,6 +101,7 @@ export const MembersManager = () => {
         email: "",
         phone: "",
         passions: [],
+        title_id: undefined,
       });
     }
     setDialogOpen(true);
@@ -231,6 +246,7 @@ export const MembersManager = () => {
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>Type</TableCell>
+              <TableCell>Title</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell>Passions</TableCell>
               <TableCell>Actions</TableCell>
@@ -239,7 +255,7 @@ export const MembersManager = () => {
           <TableBody>
             {filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
+                <TableCell colSpan={9} align="center">
                   {searchQuery
                     ? "No members found matching your search"
                     : "No members found"}
@@ -263,6 +279,7 @@ export const MembersManager = () => {
                   <TableCell>
                     <Chip label={member.type} size="small" />
                   </TableCell>
+                  <TableCell>{member.title_name || "-"}</TableCell>
                   <TableCell>{member.bio || "-"}</TableCell>
                   <TableCell>
                     {member.passions && member.passions.length > 0
@@ -326,7 +343,9 @@ export const MembersManager = () => {
             label="Email"
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             margin="normal"
             helperText="Member's email address"
           />
@@ -334,7 +353,9 @@ export const MembersManager = () => {
             fullWidth
             label="Phone"
             value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
             margin="normal"
             helperText="Member's phone number"
           />
@@ -349,6 +370,28 @@ export const MembersManager = () => {
             >
               <MenuItem value="leader">Leader</MenuItem>
               <MenuItem value="regular">Regular</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Title</InputLabel>
+            <Select
+              value={formData.title_id || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  title_id: e.target.value || undefined,
+                })
+              }
+              label="Title"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {titles.map((title) => (
+                <MenuItem key={title.id} value={title.id}>
+                  {title.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           {formData.type === "leader" && (

@@ -135,42 +135,98 @@ serve(async (req) => {
         );
       }
 
-      // Check if member already exists for this user
-      const { data: existingMember } = await supabaseAdmin
-        .from("members")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (existingMember) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Member record already exists for this user",
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
       // Prepare member data
       const memberData: any = {
         name: payload.data.name.trim(),
-        type: "regular", // Hardcoded for non-admins
-        is_admin: false, // Hardcoded for non-admins
-        user_id: user.id,
+        type: payload.data.type || "regular",
+        is_admin: payload.data.is_admin || false,
       };
 
-      // Handle email: admins can specify email, non-admins default to auth email
       if (isAdmin) {
-        // Admin can specify email or leave it empty
-        if (payload.data.email !== undefined) {
-          memberData.email = payload.data.email || null;
+        // Admin can create members for others
+        // Set user_id only if explicitly provided, otherwise leave null (for members without auth accounts)
+        if (payload.data.email) {
+          memberData.email = payload.data.email;
+        }
+
+        // Check if member already exists by email (if email provided)
+        if (payload.data.email) {
+          const { data: existingByEmail, error: emailCheckError } =
+            await supabaseAdmin
+              .from("members")
+              .select("id")
+              .eq("email", payload.data.email)
+              .maybeSingle();
+
+          if (emailCheckError && emailCheckError.code !== "PGRST116") {
+            console.error(
+              "Error checking for existing member by email:",
+              emailCheckError
+            );
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "Error checking for existing member",
+              }),
+              {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              }
+            );
+          }
+
+          if (existingByEmail) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "Member with this email already exists",
+              }),
+              {
+                status: 400,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              }
+            );
+          }
         }
       } else {
-        // Non-admin defaults to their auth email
+        // Non-admin creating their own member record
+        // Check if member already exists for this user
+        const { data: existingMember, error: existingError } =
+          await supabaseAdmin
+            .from("members")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (existingError && existingError.code !== "PGRST116") {
+          console.error("Error checking for existing member:", existingError);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: "Error checking for existing member",
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+
+        if (existingMember) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: "Member record already exists for this user",
+            }),
+            {
+              status: 400,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+
+        // Non-admin defaults to their own user_id and auth email
+        memberData.user_id = user.id;
         memberData.email = user.email || null;
       }
 
@@ -184,6 +240,12 @@ serve(async (req) => {
         memberData.phone = payload.data.phone;
       if (payload.data.title_id !== undefined)
         memberData.title_id = payload.data.title_id;
+      if (payload.data.profile_picture_position !== undefined)
+        memberData.profile_picture_position =
+          payload.data.profile_picture_position;
+
+      // For admins: if no user_id is set, leave it null (member will be linked when user signs up)
+      // The email fallback in getByUserId will handle linking existing members to auth users
 
       // Insert member
       const { data: newMember, error: insertError } = await supabaseAdmin
