@@ -1,5 +1,7 @@
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -10,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   InputAdornment,
   TextField,
   Typography,
@@ -242,6 +245,10 @@ export const MembersPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPassion, setSelectedPassion] = useState<string | null>(null);
+  const [selectedMemberPhoto, setSelectedMemberPhoto] = useState<Member | null>(
+    null
+  );
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
 
   useEffect(() => {
     const loadMembers = async () => {
@@ -364,7 +371,8 @@ export const MembersPage = () => {
   };
 
   const filteredLeaders = filterMembers(leaders);
-  const filteredRegularMembers = filterMembers(regularMembers);
+  // Combine leaders and regular members for the members list (leaders should also appear)
+  const filteredAllMembers = filterMembers([...leaders, ...regularMembers]);
 
   const handlePassionClick = (passion: string) => {
     if (selectedPassion === passion) {
@@ -640,7 +648,7 @@ export const MembersPage = () => {
             </Box>
           </Box>
 
-          {/* Regular Members Section */}
+          {/* All Members Section */}
           <Box sx={{ mt: { xs: 6, md: 8 } }}>
             <Typography
               variant="h4"
@@ -662,14 +670,14 @@ export const MembersPage = () => {
                 mt: 2,
               }}
             >
-              {filteredRegularMembers.length === 0 ? (
+              {filteredAllMembers.length === 0 ? (
                 <Typography color="text.secondary">
-                  {regularMembers.length === 0
+                  {leaders.length === 0 && regularMembers.length === 0
                     ? t("noMembers")
                     : "No members match your search"}
                 </Typography>
               ) : (
-                filteredRegularMembers.map((member) => {
+                filteredAllMembers.map((member) => {
                   // Format display name with title (unless "Regular Member" or empty)
                   const getDisplayName = (m: Member): string => {
                     if (
@@ -685,9 +693,37 @@ export const MembersPage = () => {
                   return (
                     <Card key={member.id}>
                       <CardContent>
-                        <Typography variant="h6" component="h3" gutterBottom>
-                          {getDisplayName(member)}
-                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                            mb: 1,
+                          }}
+                        >
+                          <Avatar
+                            src={member.picture_url}
+                            alt={member.name}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              cursor: member.picture_url
+                                ? "pointer"
+                                : "default",
+                            }}
+                            onClick={() => {
+                              if (member.picture_url) {
+                                setSelectedMemberPhoto(member);
+                                setPhotoModalOpen(true);
+                              }
+                            }}
+                          >
+                            {member.name[0].toUpperCase()}
+                          </Avatar>
+                          <Typography variant="h6" component="h3">
+                            {getDisplayName(member)}
+                          </Typography>
+                        </Box>
                         {(member.email || member.phone) && (
                           <Box
                             sx={{
@@ -846,6 +882,75 @@ export const MembersPage = () => {
           )}
         </Container>
       </Box>
+
+      {/* Profile Picture Modal */}
+      <Dialog
+        open={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0, position: "relative" }}>
+          {selectedMemberPhoto?.picture_url && (
+            <>
+              <Box
+                component="img"
+                src={selectedMemberPhoto.picture_url}
+                alt={selectedMemberPhoto.name}
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "90vh",
+                  objectFit: "contain",
+                  borderRadius: 1,
+                }}
+              />
+              <IconButton
+                onClick={() => setPhotoModalOpen(false)}
+                sx={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  },
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  color: "white",
+                  p: 2,
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="h6" component="div">
+                  {selectedMemberPhoto.title_name &&
+                  selectedMemberPhoto.title_name.trim() !== "" &&
+                  selectedMemberPhoto.title_name.toLowerCase() !==
+                    "regular member"
+                    ? `${selectedMemberPhoto.title_name} ${selectedMemberPhoto.name}`
+                    : selectedMemberPhoto.name}
+                </Typography>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
