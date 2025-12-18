@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 // Import Resend directly from npm registry via esm.sh
 import { Resend } from "https://esm.sh/resend@3.3.0";
 
@@ -30,6 +30,7 @@ const EVENT_TEMPLATE_MAP: Record<string, string> = {
   "testimony-request": "testimony-request",
   donation: "donation",
   "contact-submission": "contact-submission",
+  "weekly-digest": "weekly-digest",
 };
 
 const corsHeaders = {
@@ -205,10 +206,11 @@ serve(async (req) => {
 
     // Get CC recipients (elders and apostles)
     // Special case: for donations, only apostles are CC'd (elders are TO)
+    // For weekly-digest, no CC (all recipients are in TO)
     let ccRecipients: EmailRecipient[] = [];
     if (payload.eventType === "donation") {
       ccRecipients = await getApostleRecipients(supabase);
-    } else {
+    } else if (payload.eventType !== "weekly-digest") {
       ccRecipients = await getCCRecipients(supabase);
     }
 
@@ -503,6 +505,33 @@ async function resolveRecipients(
       }
       break;
     }
+
+    case "weekly-digest": {
+      // Get Elder and Apostle title IDs
+      const { data: titlesData } = await supabase
+        .from("titles")
+        .select("id")
+        .in("name", ["Elder", "Apostle"]);
+
+      if (titlesData && titlesData.length > 0) {
+        const titleIds = titlesData.map((t) => t.id);
+        const { data, error } = await supabase
+          .from("members")
+          .select("email, name")
+          .in("title_id", titleIds)
+          .not("email", "is", null);
+
+        if (!error && data) {
+          recipients = (data as MemberData[])
+            .filter((m) => m.email && typeof m.email === "string")
+            .map((m) => ({
+              email: m.email!,
+              name: m.name,
+            }));
+        }
+      }
+      break;
+    }
   }
 
   return { to: recipients };
@@ -683,6 +712,7 @@ function getEventTypeLabel(eventType: string): string {
     "testimony-request": "Testimony Request",
     donation: "Donation",
     "contact-submission": "Contact Submission",
+    "weekly-digest": "Weekly Digest",
   };
   return labels[eventType] || eventType;
 }
