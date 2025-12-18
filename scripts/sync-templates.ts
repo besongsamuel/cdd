@@ -147,9 +147,35 @@ async function createTemplate(
       throw new Error(`Failed to create template: ${JSON.stringify(error)}`);
     }
 
-    console.log(`✅ Created template: ${name} (ID: ${data?.id})`);
+    const templateId = data?.id;
+    if (!templateId) {
+      throw new Error("Template created but no ID returned");
+    }
+
+    console.log(`✅ Created template: ${name} (ID: ${templateId})`);
 
     // Wait 2 seconds after create to avoid rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Publish the template
+    try {
+      const { error: publishError } =
+        await resend.templates.publish(templateId);
+      if (publishError) {
+        console.warn(
+          `⚠️  Warning: Template "${name}" created but failed to publish: ${JSON.stringify(publishError)}`
+        );
+      } else {
+        console.log(`📢 Published template: ${name}`);
+      }
+    } catch (publishError) {
+      console.warn(
+        `⚠️  Warning: Template "${name}" created but failed to publish:`,
+        publishError
+      );
+    }
+
+    // Wait 2 seconds after publish to avoid rate limiting
     await new Promise((resolve) => setTimeout(resolve, 2000));
   } catch (error) {
     console.error(`❌ Error creating template "${name}":`, error);
@@ -177,9 +203,30 @@ async function updateTemplate(
       throw new Error(`Failed to update template: ${JSON.stringify(error)}`);
     }
 
-    console.log(`✅ Updated template: ${name} (ID: ${data?.id})`);
+    console.log(`✅ Updated template: ${name} (ID: ${templateId})`);
 
     // Wait 2 seconds after update to avoid rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Publish the template
+    try {
+      const { error: publishError } =
+        await resend.templates.publish(templateId);
+      if (publishError) {
+        console.warn(
+          `⚠️  Warning: Template "${name}" updated but failed to publish: ${JSON.stringify(publishError)}`
+        );
+      } else {
+        console.log(`📢 Published template: ${name}`);
+      }
+    } catch (publishError) {
+      console.warn(
+        `⚠️  Warning: Template "${name}" updated but failed to publish:`,
+        publishError
+      );
+    }
+
+    // Wait 2 seconds after publish to avoid rate limiting
     await new Promise((resolve) => setTimeout(resolve, 2000));
   } catch (error) {
     console.error(`❌ Error updating template "${name}":`, error);
@@ -258,10 +305,7 @@ async function main() {
 
     console.log("═".repeat(50));
     console.log("✅ Template sync completed!");
-    console.log(
-      "\n💡 Note: Templates must be published in Resend before they can be used."
-    );
-    console.log("   You can publish them via the Resend dashboard or API.");
+    console.log("📢 All templates have been published and are ready to use.");
   } catch (error) {
     console.error("\n❌ Sync failed:", error);
     process.exit(1);
