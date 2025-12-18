@@ -39,7 +39,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -514,7 +514,9 @@ async function resolveRecipients(
         .in("name", ["Elder", "Apostle"]);
 
       if (titlesData && titlesData.length > 0) {
-        const titleIds = titlesData.map((t) => t.id);
+        const titleIds = (titlesData as TitleData[]).map(
+          (t: TitleData) => t.id
+        );
         const { data, error } = await supabase
           .from("members")
           .select("email, name")
@@ -663,6 +665,7 @@ async function sendEmailViaResend(
       eventType === "contact-submission" ? "CONTACT_EMAIL" : "SUBMITTER_EMAIL";
 
     // Create new object without EMAIL and with the correct email key
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { EMAIL: _removed, ...rest } = templateVariables;
     const finalVariables = {
       ...rest,
