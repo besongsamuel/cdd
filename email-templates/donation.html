@@ -7,159 +7,309 @@
   </head>
   <body
     style="
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+      background-color: #f5f5f5;
       margin: 0;
       padding: 0;
+      line-height: 1.6;
     "
   >
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px">
-      <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px">
-        <h2
-          style="
-            color: #2c3e50;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-          "
-        >
-          New Donation Received
-        </h2>
+    <table
+      role="presentation"
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #f5f5f5;
+        padding: 40px 20px;
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 0">
+          <table
+            role="presentation"
+            style="
+              max-width: 600px;
+              width: 100%;
+              border-collapse: collapse;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background-color: #27ae60;
+                  padding: 30px;
+                  text-align: center;
+                  border-radius: 8px 8px 0 0;
+                "
+              >
+                <h1
+                  style="
+                    color: #ffffff;
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin: 0;
+                  "
+                >
+                  New Donation Received
+                </h1>
+              </td>
+            </tr>
 
-        <p
-          style="
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-          "
-        >
-          Hello,
-        </p>
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 30px">
+                <p style="color: #333333; font-size: 16px; margin: 0 0 25px 0">
+                  Hello,
+                </p>
+                <p style="color: #555555; font-size: 15px; margin: 0 0 30px 0">
+                  A new donation has been received:
+                </p>
 
-        <p
-          style="
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-          "
-        >
-          A new donation has been received:
-        </p>
+                <!-- Donation Details -->
+                <div
+                  style="
+                    background-color: #f8f9fa;
+                    border-left: 4px solid #27ae60;
+                    padding: 25px;
+                    border-radius: 4px;
+                    margin-bottom: 25px;
+                  "
+                >
+                  <table role="presentation" style="width: 100%">
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Amount
+                        </div>
+                        <div
+                          style="
+                            color: #27ae60;
+                            font-size: 20px;
+                            font-weight: 600;
+                          "
+                        >
+                          ${{{AMOUNT}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Category
+                        </div>
+                        <div
+                          style="
+                            color: #2c3e50;
+                            font-size: 16px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{{CATEGORY_NAME}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Donor Name
+                        </div>
+                        <div
+                          style="
+                            color: #2c3e50;
+                            font-size: 16px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{{DONOR_NAME}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Donor Email
+                        </div>
+                        <div style="color: #27ae60; font-size: 16px">
+                          <a
+                            href="mailto:{{{DONOR_EMAIL}}}"
+                            style="color: #27ae60; text-decoration: none"
+                            >{{{DONOR_EMAIL}}}</a
+                          >
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          E-Transfer Email
+                        </div>
+                        <div style="color: #2c3e50; font-size: 16px">
+                          {{{ETRANSFER_EMAIL}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Status
+                        </div>
+                        <div
+                          style="
+                            color: #2c3e50;
+                            font-size: 16px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{{STATUS}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                          "
+                        >
+                          Notes
+                        </div>
+                        <div
+                          style="
+                            background-color: #ffffff;
+                            padding: 15px;
+                            border-radius: 4px;
+                            color: #333333;
+                            font-size: 15px;
+                            line-height: 1.7;
+                            white-space: pre-wrap;
+                          "
+                        >
+                          {{{NOTES}}}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
 
-        <div
-          style="
-            background-color: #fff;
-            padding: 15px;
-            border-left: 4px solid #27ae60;
-            margin: 20px 0;
-          "
-        >
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Amount:</strong> ${{{AMOUNT}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Category:</strong> {{{CATEGORY_NAME}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Donor Name:</strong> {{{DONOR_NAME}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Donor Email:</strong> {{{DONOR_EMAIL}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>E-Transfer Email:</strong> {{{ETRANSFER_EMAIL}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Status:</strong> {{{STATUS}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Notes:</strong> {{{NOTES}}}
-          </p>
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Received:</strong> {{{CREATED_AT}}}
-          </p>
-        </div>
+                <!-- Timestamp -->
+                <p
+                  style="
+                    color: #888888;
+                    font-size: 13px;
+                    margin: 0 0 30px 0;
+                    text-align: center;
+                  "
+                >
+                  Received on {{{CREATED_AT}}}
+                </p>
 
-        <p
-          style="
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-          "
-        >
-          Please verify and process this donation accordingly.
-        </p>
+                <p
+                  style="
+                    color: #777777;
+                    font-size: 14px;
+                    margin: 0;
+                    text-align: center;
+                  "
+                >
+                  Please verify and process this donation accordingly.
+                </p>
+              </td>
+            </tr>
 
-        <p
-          style="
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-top: 30px;
-          "
-        >
-          Best regards,<br />City of David Church
-        </p>
-      </div>
-    </div>
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #f8f9fa;
+                  padding: 25px 30px;
+                  text-align: center;
+                  border-top: 1px solid #e9ecef;
+                  border-radius: 0 0 8px 8px;
+                "
+              >
+                <p
+                  style="
+                    color: #2c3e50;
+                    font-size: 15px;
+                    font-weight: 500;
+                    margin: 0 0 5px 0;
+                  "
+                >
+                  City of David Church
+                </p>
+                <p style="color: #888888; font-size: 12px; margin: 0">
+                  Automated notification from website donation system
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
