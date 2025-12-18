@@ -19,16 +19,17 @@ interface EmailPayload {
   testRecipient?: string;
 }
 
-// Event type to template mapping
+// Event type to template ID mapping
+// Template IDs are the template file names without the .html extension
 const EVENT_TEMPLATE_MAP: Record<string, string> = {
-  "department-join-request": "department-join-request.html",
-  "ministry-join-request": "ministry-join-request.html",
-  suggestion: "suggestion.html",
-  "prayer-request": "prayer-request.html",
-  "support-request": "support-request.html",
-  "testimony-request": "testimony-request.html",
-  donation: "donation.html",
-  "contact-submission": "contact-submission.html",
+  "department-join-request": "department-join-request",
+  "ministry-join-request": "ministry-join-request",
+  suggestion: "suggestion",
+  "prayer-request": "prayer-request",
+  "support-request": "support-request",
+  "testimony-request": "testimony-request",
+  donation: "donation",
+  "contact-submission": "contact-submission",
 };
 
 const corsHeaders = {
@@ -148,8 +149,8 @@ serve(async (req) => {
       }
 
       // Test mode: send directly to testRecipient
-      const templateName = EVENT_TEMPLATE_MAP[payload.eventType];
-      if (!templateName) {
+      const templateId = EVENT_TEMPLATE_MAP[payload.eventType];
+      if (!templateId) {
         return new Response(
           JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
           {
@@ -159,16 +160,13 @@ serve(async (req) => {
         );
       }
 
-      const htmlBody = await loadAndProcessTemplate(
-        templateName,
-        payload.eventData
-      );
-
       await sendEmailViaResend(
         [payload.testRecipient],
         [],
         `[TEST] New ${getEventTypeLabel(payload.eventType)}`,
-        htmlBody
+        templateId,
+        payload.eventData,
+        payload.eventType
       );
 
       return new Response(
@@ -214,9 +212,9 @@ serve(async (req) => {
       ccRecipients = await getCCRecipients(supabase);
     }
 
-    // Load and process email template
-    const templateName = EVENT_TEMPLATE_MAP[payload.eventType];
-    if (!templateName) {
+    // Get template ID for this event type
+    const templateId = EVENT_TEMPLATE_MAP[payload.eventType];
+    if (!templateId) {
       console.error(`Unknown event type: ${payload.eventType}`);
       return new Response(
         JSON.stringify({ error: `Unknown event type: ${payload.eventType}` }),
@@ -227,17 +225,14 @@ serve(async (req) => {
       );
     }
 
-    const htmlBody = await loadAndProcessTemplate(
-      templateName,
-      payload.eventData
-    );
-
-    // Send email via Resend
+    // Send email via Resend using template
     await sendEmailViaResend(
       recipients.to.map((r) => r.email),
       ccRecipients.map((r) => r.email),
       `New ${getEventTypeLabel(payload.eventType)}`,
-      htmlBody
+      templateId,
+      payload.eventData,
+      payload.eventType
     );
 
     return new Response(
@@ -577,93 +572,51 @@ async function getApostleRecipients(
     }));
 }
 
-async function loadAndProcessTemplate(
-  templateName: string,
+/**
+ * Convert event data to template variables
+ * Handles nested properties (e.g., department.name -> DEPARTMENT_NAME)
+ * and flattens the object for Resend template variables
+ */
+function prepareTemplateVariables(
   eventData: Record<string, unknown>
-): Promise<string> {
-  try {
-    // Load template from filesystem
-    // Try multiple path resolution strategies for compatibility
-    let templateContent: string | undefined;
-    const pathsToTry = [
-      `./templates/${templateName}`,
-      `templates/${templateName}`,
-      new URL(`./templates/${templateName}`, import.meta.url).pathname,
-    ];
+): Record<string, string | number> {
+  const variables: Record<string, string | number> = {};
 
-    for (const templatePath of pathsToTry) {
-      try {
-        templateContent = await Deno.readTextFile(templatePath);
-        break;
-      } catch {
-        // Try next path
+  function flattenObject(obj: Record<string, unknown>, prefix = ""): void {
+    for (const [key, value] of Object.entries(obj)) {
+      const variableKey = prefix
+        ? `${prefix}_${key.toUpperCase()}`
+        : key.toUpperCase();
+
+      if (value === null || value === undefined) {
         continue;
       }
-    }
 
-    if (!templateContent) {
-      throw new Error(`Template ${templateName} not found in any location`);
-    }
-
-    let processed = templateContent;
-
-    // Handle Mustache-style conditionals {{#variable}}...{{/variable}}
-    // Process conditionals first to remove blocks where variables are undefined/null/empty
-    processed = processed.replace(
-      /{{#(\w+)}}([\s\S]*?){{\/\1}}/g,
-      (_match, varName, content) => {
-        const value = eventData[varName];
-        // If value exists and is truthy, include the content
-        if (value !== undefined && value !== null && value !== "") {
-          return content;
-        }
-        return "";
-      }
-    );
-
-    // Replace nested object properties (e.g., {{department.name}})
-    const nestedRegex =
-      /{{\s*([a-zA-Z_][a-zA-Z0-9_]*\.([a-zA-Z_][a-zA-Z0-9_]*))\s*}}/g;
-    processed = processed.replace(nestedRegex, (_match, fullPath) => {
-      const parts = fullPath.split(".");
-      let value: unknown = eventData;
-      for (const part of parts) {
-        if (typeof value === "object" && value !== null && part in value) {
-          value = (value as Record<string, unknown>)[part];
+      if (typeof value === "object" && !Array.isArray(value)) {
+        // Recursively flatten nested objects
+        flattenObject(value as Record<string, unknown>, variableKey);
+      } else {
+        // Convert value to string or number
+        if (typeof value === "number") {
+          variables[variableKey] = value;
         } else {
-          value = undefined;
+          variables[variableKey] = String(value);
         }
-        if (value === undefined) break;
       }
-      return value ? String(value) : "";
-    });
-
-    // Replace common placeholders (do this last after conditionals are processed)
-    for (const [key, value] of Object.entries(eventData)) {
-      const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, "g");
-      processed = processed.replace(placeholder, String(value || ""));
     }
-
-    return processed;
-  } catch (error) {
-    console.error(`Error loading template ${templateName}:`, error);
-    // Return a basic HTML fallback
-    return `
-      <html>
-        <body>
-          <h2>New ${getEventTypeLabel(templateName.replace(".html", ""))}</h2>
-          <pre>${JSON.stringify(eventData, null, 2)}</pre>
-        </body>
-      </html>
-    `;
   }
+
+  flattenObject(eventData);
+  return variables;
 }
 
 async function sendEmailViaResend(
   toAddresses: string[],
   ccAddresses: string[],
   subject: string,
-  htmlBody: string
+  templateId: string,
+  eventData: Record<string, unknown>,
+  eventType?: string
 ): Promise<void> {
   if (!RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY not configured");
@@ -671,12 +624,48 @@ async function sendEmailViaResend(
 
   const resend = new Resend(RESEND_API_KEY);
 
+  // Prepare template variables from event data
+  const templateVariables = prepareTemplateVariables(eventData);
+
+  // Map EMAIL to appropriate variable name to avoid Resend reserved variable
+  if ("EMAIL" in templateVariables) {
+    const emailValue = templateVariables.EMAIL;
+    const emailKey =
+      eventType === "contact-submission" ? "CONTACT_EMAIL" : "SUBMITTER_EMAIL";
+
+    // Create new object without EMAIL and with the correct email key
+    const { EMAIL: _removed, ...rest } = templateVariables;
+    const finalVariables = {
+      ...rest,
+      [emailKey]: emailValue,
+    };
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: toAddresses,
+      cc: ccAddresses.length > 0 ? ccAddresses : undefined,
+      subject: subject,
+      template: {
+        id: templateId,
+        variables: finalVariables,
+      },
+    });
+
+    if (error) {
+      throw new Error(`Resend error: ${JSON.stringify(error)}`);
+    }
+    return;
+  }
+
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: toAddresses,
     cc: ccAddresses.length > 0 ? ccAddresses : undefined,
     subject: subject,
-    html: htmlBody,
+    template: {
+      id: templateId,
+      variables: templateVariables,
+    },
   });
 
   if (error) {

@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview-email": "tsx scripts/preview-email.ts"
+    "preview-email": "tsx scripts/preview-email.ts",
+    "sync-templates": "tsx scripts/sync-templates.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -36,7 +37,8 @@
     "react-markdown": "^10.1.0",
     "react-phone-number-input": "^3.4.14",
     "react-router-dom": "^6.30.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "resend": "^6.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

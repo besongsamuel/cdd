@@ -64,29 +64,7 @@
               margin-bottom: 10px;
             "
           >
-            <strong>Amount:</strong> ${{amount}}
-          </p>
-          {{#category_name}}
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Category:</strong> {{category_name}}
-          </p>
-          {{/category_name}}
-          <p
-            style="
-              color: #333;
-              font-size: 16px;
-              line-height: 1.6;
-              margin-bottom: 10px;
-            "
-          >
-            <strong>Donor Name:</strong> {{donor_name}}
+            <strong>Amount:</strong> ${{{AMOUNT}}}
           </p>
           <p
             style="
@@ -96,9 +74,8 @@
               margin-bottom: 10px;
             "
           >
-            <strong>Donor Email:</strong> {{donor_email}}
+            <strong>Category:</strong> {{{CATEGORY_NAME}}}
           </p>
-          {{#etransfer_email}}
           <p
             style="
               color: #333;
@@ -107,9 +84,8 @@
               margin-bottom: 10px;
             "
           >
-            <strong>E-Transfer Email:</strong> {{etransfer_email}}
+            <strong>Donor Name:</strong> {{{DONOR_NAME}}}
           </p>
-          {{/etransfer_email}}
           <p
             style="
               color: #333;
@@ -118,9 +94,8 @@
               margin-bottom: 10px;
             "
           >
-            <strong>Status:</strong> {{status}}
+            <strong>Donor Email:</strong> {{{DONOR_EMAIL}}}
           </p>
-          {{#notes}}
           <p
             style="
               color: #333;
@@ -129,9 +104,8 @@
               margin-bottom: 10px;
             "
           >
-            <strong>Notes:</strong> {{notes}}
+            <strong>E-Transfer Email:</strong> {{{ETRANSFER_EMAIL}}}
           </p>
-          {{/notes}}
           <p
             style="
               color: #333;
@@ -140,7 +114,27 @@
               margin-bottom: 10px;
             "
           >
-            <strong>Received:</strong> {{created_at}}
+            <strong>Status:</strong> {{{STATUS}}}
+          </p>
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Notes:</strong> {{{NOTES}}}
+          </p>
+          <p
+            style="
+              color: #333;
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            "
+          >
+            <strong>Received:</strong> {{{CREATED_AT}}}
           </p>
         </div>
 

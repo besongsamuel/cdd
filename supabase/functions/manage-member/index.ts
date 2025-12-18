@@ -26,6 +26,34 @@ interface RequestPayload {
   data: MemberData;
 }
 
+interface CreateMemberData {
+  name: string;
+  type: "regular" | "leader";
+  is_admin: boolean;
+  user_id?: string;
+  email?: string | null;
+  bio?: string;
+  picture_url?: string;
+  passions?: string[];
+  phone?: string;
+  title_id?: string;
+  profile_picture_position?: { x: number; y: number };
+}
+
+interface UpdateMemberData {
+  updated_at: string;
+  name?: string;
+  bio?: string;
+  picture_url?: string;
+  passions?: string[];
+  phone?: string;
+  title_id?: string;
+  type?: "regular" | "leader";
+  is_admin?: boolean;
+  email?: string;
+  profile_picture_position?: { x: number; y: number };
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -136,7 +164,7 @@ serve(async (req) => {
       }
 
       // Prepare member data
-      const memberData: any = {
+      const memberData: CreateMemberData = {
         name: payload.data.name.trim(),
         type: payload.data.type || "regular",
         is_admin: payload.data.is_admin || false,
@@ -318,7 +346,7 @@ serve(async (req) => {
       }
 
       // Prepare update data
-      const updateData: any = {
+      const updateData: Partial<UpdateMemberData> & { updated_at: string } = {
         updated_at: new Date().toISOString(),
       };
 

@@ -1,6 +1,18 @@
 import type { Member } from "../types";
 import { supabase } from "./supabase";
 
+interface EdgeFunctionPayload {
+  action: "create" | "update";
+  data: Record<string, unknown>;
+  memberId?: string;
+}
+
+interface MemberWithTitle extends Omit<Member, "title_name"> {
+  titles?: {
+    name: string;
+  } | null;
+}
+
 const getSupabaseUrl = (): string => {
   return import.meta.env.VITE_SUPABASE_URL || "";
 };
@@ -25,7 +37,7 @@ const callEdgeFunction = async (
   }
 
   const edgeFunctionUrl = `${supabaseUrl}/functions/v1/manage-member`;
-  const payload: any = {
+  const payload: EdgeFunctionPayload = {
     action,
     data,
   };
@@ -75,11 +87,13 @@ export const membersService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((member: any) => ({
-      ...member,
-      title_name: member.titles?.name || null,
-      titles: undefined, // Remove the nested object
-    }));
+    return (data || []).map((member: MemberWithTitle) => {
+      const { titles, ...rest } = member;
+      return {
+        ...rest,
+        title_name: titles?.name || undefined,
+      };
+    });
   },
 
   async getLeaders(): Promise<Member[]> {
@@ -97,11 +111,13 @@ export const membersService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((member: any) => ({
-      ...member,
-      title_name: member.titles?.name || null,
-      titles: undefined, // Remove the nested object
-    }));
+    return (data || []).map((member: MemberWithTitle) => {
+      const { titles, ...rest } = member;
+      return {
+        ...rest,
+        title_name: titles?.name || undefined,
+      };
+    });
   },
 
   async getRegularMembers(): Promise<Member[]> {
@@ -119,11 +135,13 @@ export const membersService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((member: any) => ({
-      ...member,
-      title_name: member.titles?.name || null,
-      titles: undefined, // Remove the nested object
-    }));
+    return (data || []).map((member: MemberWithTitle) => {
+      const { titles, ...rest } = member;
+      return {
+        ...rest,
+        title_name: titles?.name || undefined,
+      };
+    });
   },
 
   async create(

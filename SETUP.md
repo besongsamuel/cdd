@@ -3,6 +3,7 @@
 ## Quick Start
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
@@ -19,9 +20,12 @@
      ```
      VITE_SUPABASE_URL=https://your-project.supabase.co
      VITE_SUPABASE_ANON_KEY=your-anon-key
+     RESEND_API_KEY=your-resend-api-key
      ```
+   - Get your Resend API key from [resend.com](https://resend.com/api-keys)
 
 4. **Start Development Server**
+
    ```bash
    npm run dev
    ```
@@ -33,6 +37,7 @@
 ## Initial Data Setup
 
 After running the migration, you'll have:
+
 - Regular programs pre-populated
 - Initial church info record
 
@@ -43,6 +48,18 @@ You can update church info and add founders' images through the admin panel afte
 1. Go to `/admin/login`
 2. Use the credentials you created in Supabase
 3. Access the dashboard at `/admin/dashboard`
+
+## Email Templates
+
+Email templates are stored in the `email-templates/` folder. To sync them to Resend:
+
+1. Add your HTML templates to the `email-templates/` folder
+2. Templates should use Resend's variable syntax: `{{{VARIABLE_NAME}}}`
+3. Run the sync script:
+   ```bash
+   npm run sync-templates
+   ```
+4. Templates must be published in Resend (via dashboard or API) before use
 
 ## Features to Configure
 
@@ -56,8 +73,3 @@ You can update church info and add founders' images through the admin panel afte
 - **CORS Issues**: Make sure your Supabase project allows requests from `localhost:5173`
 - **RLS Policies**: If you can't access data, check that RLS policies are correctly set
 - **Image Uploads**: Ensure storage buckets are created and have proper policies
-
-
-
-
-

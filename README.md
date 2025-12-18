@@ -31,12 +31,14 @@ A modern, responsive website for City of David church built with React, TypeScri
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd cdd
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -47,9 +49,12 @@ A modern, responsive website for City of David church built with React, TypeScri
      ```
      VITE_SUPABASE_URL=your_supabase_project_url
      VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+     RESEND_API_KEY=your_resend_api_key
      ```
+   - Get your Resend API key from [resend.com](https://resend.com/api-keys)
 
 4. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -73,6 +78,16 @@ src/
 └── utils/             # Utility functions and constants
 ```
 
+## Email Templates
+
+Email templates are maintained in the `email-templates/` folder and can be synced to Resend:
+
+```bash
+npm run sync-templates
+```
+
+Templates use Resend's variable syntax: `{{{VARIABLE_NAME}}}`. After syncing, templates must be published in Resend before use.
+
 ## Admin Access
 
 1. Create an admin user in Supabase (see `supabase/README.md`)
@@ -91,6 +106,7 @@ The built files will be in the `dist` directory.
 ## Deployment
 
 The application can be deployed to:
+
 - Vercel
 - Netlify
 - Any static hosting service
