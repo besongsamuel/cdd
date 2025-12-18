@@ -5,6 +5,10 @@
   "address": "Address",
   "phone": "Phone",
   "province": "Province",
+  "scripture": {
+    "verse": "Therefore encourage one another and build each other up, just as in fact you are doing.",
+    "reference": "— 1 Thessalonians 5:11 (NIV)"
+  },
   "form": {
     "name": "Name",
     "email": "Email",
@@ -15,7 +19,3 @@
     "error": "Failed to send message. Please try again."
   }
 }
-
-
-
-

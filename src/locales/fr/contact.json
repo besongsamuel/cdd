@@ -5,6 +5,10 @@
   "address": "Adresse",
   "phone": "Téléphone",
   "province": "Province",
+  "scripture": {
+    "verse": "C'est pourquoi encouragez-vous les uns les autres et édifiez-vous mutuellement, comme vous le faites déjà.",
+    "reference": "— 1 Thessaloniciens 5:11 (LSG)"
+  },
   "form": {
     "name": "Nom",
     "email": "Courriel",
@@ -15,7 +19,3 @@
     "error": "Échec de l'envoi du message. Veuillez réessayer."
   }
 }
-
-
-
-

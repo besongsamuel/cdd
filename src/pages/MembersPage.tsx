@@ -643,11 +643,46 @@ export const MembersPage = () => {
                   {} as Record<string, Member[]>
                 );
 
-                // Sort titles alphabetically, but put "Other Leaders" at the end
+                // Custom sort order: Pastors, Elders, Deacons, Ministers, then others alphabetically
+                const titleOrder = [
+                  "Pastor",
+                  "Pastors",
+                  "Elder",
+                  "Elders",
+                  "Deacon",
+                  "Deacons",
+                  "Minister",
+                  "Ministers",
+                ];
+
+                const getTitleOrder = (title: string): number => {
+                  // Check for exact match first
+                  const exactIndex = titleOrder.findIndex(
+                    (t) => t.toLowerCase() === title.toLowerCase()
+                  );
+                  if (exactIndex !== -1) return exactIndex;
+
+                  // Check if title contains any of the ordered words
+                  const titleLower = title.toLowerCase();
+                  for (let i = 0; i < titleOrder.length; i++) {
+                    if (titleLower.includes(titleOrder[i].toLowerCase())) {
+                      return i;
+                    }
+                  }
+
+                  // If "Other Leaders", put at the end
+                  if (title === "Other Leaders") return 999;
+
+                  // Otherwise, sort alphabetically after ordered titles
+                  return 100 + title.charCodeAt(0);
+                };
+
                 const sortedTitles = Object.keys(groupedLeaders).sort(
                   (a, b) => {
-                    if (a === "Other Leaders") return 1;
-                    if (b === "Other Leaders") return -1;
+                    const orderA = getTitleOrder(a);
+                    const orderB = getTitleOrder(b);
+                    if (orderA !== orderB) return orderA - orderB;
+                    // If same order, sort alphabetically
                     return a.localeCompare(b);
                   }
                 );
@@ -874,12 +909,24 @@ export const MembersPage = () => {
                 textAlign="center"
                 sx={{
                   fontSize: { xs: "24px", md: "32px" },
-                  mb: 4,
+                  mb: 1,
                   fontWeight: 600,
                   letterSpacing: "-0.01em",
                 }}
               >
                 {t("passionWordCloud")}
+              </Typography>
+              <Typography
+                variant="body2"
+                textAlign="center"
+                color="text.secondary"
+                sx={{
+                  mb: 4,
+                  fontStyle: "italic",
+                  fontSize: { xs: "13px", md: "14px" },
+                }}
+              >
+                Click on a word to view members who share that passion
               </Typography>
               <Box
                 sx={{
