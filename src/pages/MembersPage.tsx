@@ -607,7 +607,7 @@ export const MembersPage = () => {
             )}
           </Box>
 
-          {/* Leaders Section */}
+          {/* Leaders Section - Grouped by Title */}
           <Box sx={{ mt: { xs: 4, md: 6 } }}>
             <Typography
               variant="h4"
@@ -617,35 +617,120 @@ export const MembersPage = () => {
             >
               {t("leaders")}
             </Typography>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, 1fr)",
-                  md: "repeat(3, 1fr)",
-                },
-                gap: 3,
-                mt: 2,
-              }}
-            >
-              {filteredLeaders.length === 0 ? (
-                <Typography color="text.secondary">
-                  {leaders.length === 0
-                    ? t("noLeaders")
-                    : "No leaders match your search"}
-                </Typography>
-              ) : (
-                filteredLeaders.map((leader) => (
-                  <LeaderCard
-                    key={leader.id}
-                    leader={leader}
-                    isAdmin={isAdmin}
-                    onPositionUpdate={handlePositionUpdate}
-                  />
-                ))
-              )}
-            </Box>
+            {filteredLeaders.length === 0 ? (
+              <Typography color="text.secondary" sx={{ mt: 2 }}>
+                {leaders.length === 0
+                  ? t("noLeaders")
+                  : "No leaders match your search"}
+              </Typography>
+            ) : (
+              (() => {
+                // Group leaders by title_name
+                const groupedLeaders = filteredLeaders.reduce(
+                  (acc, leader) => {
+                    const title =
+                      leader.title_name &&
+                      leader.title_name.trim() !== "" &&
+                      leader.title_name.toLowerCase() !== "regular member"
+                        ? leader.title_name
+                        : "Other Leaders";
+                    if (!acc[title]) {
+                      acc[title] = [];
+                    }
+                    acc[title].push(leader);
+                    return acc;
+                  },
+                  {} as Record<string, Member[]>
+                );
+
+                // Sort titles alphabetically, but put "Other Leaders" at the end
+                const sortedTitles = Object.keys(groupedLeaders).sort(
+                  (a, b) => {
+                    if (a === "Other Leaders") return 1;
+                    if (b === "Other Leaders") return -1;
+                    return a.localeCompare(b);
+                  }
+                );
+
+                return sortedTitles.map((title, titleIndex) => (
+                  <Box
+                    key={title}
+                    sx={{
+                      mt: titleIndex === 0 ? 2 : { xs: 5, md: 6 },
+                    }}
+                  >
+                    {/* Title Section Header */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        mb: 3,
+                        position: "relative",
+                        "&::after": {
+                          content: '""',
+                          flex: 1,
+                          height: "2px",
+                          background:
+                            "linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.3) 50%, transparent 100%)",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          px: 2,
+                          py: 0.75,
+                          backgroundColor: "primary.main",
+                          color: "white",
+                          borderRadius: 2,
+                          boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
+                          fontWeight: 600,
+                          fontSize: { xs: "16px", md: "18px" },
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {title}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          fontStyle: "italic",
+                          fontSize: { xs: "12px", md: "14px" },
+                        }}
+                      >
+                        {groupedLeaders[title].length}{" "}
+                        {groupedLeaders[title].length === 1
+                          ? "member"
+                          : "members"}
+                      </Typography>
+                    </Box>
+
+                    {/* Leaders Grid for this Title */}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "1fr",
+                          sm: "repeat(2, 1fr)",
+                          md: "repeat(3, 1fr)",
+                        },
+                        gap: 3,
+                      }}
+                    >
+                      {groupedLeaders[title].map((leader) => (
+                        <LeaderCard
+                          key={leader.id}
+                          leader={leader}
+                          isAdmin={isAdmin}
+                          onPositionUpdate={handlePositionUpdate}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                ));
+              })()
+            )}
           </Box>
 
           {/* All Members Section */}
