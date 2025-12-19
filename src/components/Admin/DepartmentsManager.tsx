@@ -44,6 +44,7 @@ import type {
   DepartmentRequestStatus,
   Member,
 } from "../../types";
+import { ImageUpload } from "../common/ImageUpload";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { MarkdownEditor } from "../common/MarkdownEditor";
 
@@ -182,9 +183,8 @@ export const DepartmentsManager = () => {
       return;
     }
     try {
-      const data = await departmentMembersService.getByDepartment(
-        selectedDepartmentId
-      );
+      const data =
+        await departmentMembersService.getByDepartment(selectedDepartmentId);
       setDepartmentMembers(data);
     } catch (error) {
       console.error("Error loading department members:", error);
@@ -625,8 +625,8 @@ export const DepartmentsManager = () => {
                           request.status === "approved"
                             ? "success"
                             : request.status === "rejected"
-                            ? "error"
-                            : "warning"
+                              ? "error"
+                              : "warning"
                         }
                         size="small"
                       />
@@ -710,17 +710,14 @@ export const DepartmentsManager = () => {
             label="Description (Markdown)"
             minHeight={300}
           />
-          <TextField
-            fullWidth
-            label="Image URL"
+          <ImageUpload
+            mode="single"
+            bucket="department-images"
             value={departmentForm.image_url}
-            onChange={(e) =>
-              setDepartmentForm({
-                ...departmentForm,
-                image_url: e.target.value,
-              })
+            onChange={(url) =>
+              setDepartmentForm({ ...departmentForm, image_url: url as string })
             }
-            margin="normal"
+            label="Department Image"
           />
           <TextField
             fullWidth
