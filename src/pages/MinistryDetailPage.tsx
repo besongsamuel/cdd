@@ -1,5 +1,6 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
@@ -19,26 +20,32 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
+import { useAuth } from "../hooks/useAuth";
+import { membersService } from "../services/membersService";
+import { ministriesService } from "../services/ministriesService";
 import { ministryJoinRequestsService } from "../services/ministryJoinRequestsService";
 import { ministryMembersService } from "../services/ministryMembersService";
-import { ministriesService } from "../services/ministriesService";
-import type { Ministry, MinistryMember } from "../types";
+import { roleService } from "../services/roleService";
+import type { Member, Ministry, MinistryMember } from "../types";
 
 export const MinistryDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("ministries");
   const navigate = useNavigate();
-  const { user, currentMember } = useAuth();
+  const { user, currentMember, isAdmin } = useAuth();
   const [ministry, setMinistry] = useState<Ministry | null>(null);
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
+  const [isMinistryLead, setIsMinistryLead] = useState(false);
+  const [addingMember, setAddingMember] = useState(false);
 
   useEffect(() => {
     const loadMinistry = async () => {
@@ -62,6 +69,26 @@ export const MinistryDetailPage = () => {
     loadMinistry();
   }, [id, navigate]);
 
+  useEffect(() => {
+    const checkLeadStatus = async () => {
+      if (!currentMember || !id) {
+        setIsMinistryLead(false);
+        return;
+      }
+      try {
+        const isLead = await roleService.isMinistryLead(id, currentMember.id);
+        setIsMinistryLead(isLead);
+      } catch (error) {
+        console.error("Error checking ministry lead status:", error);
+        setIsMinistryLead(false);
+      }
+    };
+
+    checkLeadStatus();
+  }, [currentMember, id]);
+
+  const canAddMembers = isAdmin || isMinistryLead;
+
   const handleJoinConfirm = async () => {
     if (!id || !ministry || !user || !currentMember) return;
 
@@ -84,6 +111,41 @@ export const MinistryDetailPage = () => {
       setSubmitting(false);
     }
   };
+
+  const handleOpenAddMemberDialog = async () => {
+    if (!canAddMembers) return;
+    try {
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+      setAddMemberDialogOpen(true);
+    } catch (err) {
+      console.error("Error loading members:", err);
+      alert("Failed to load members");
+    }
+  };
+
+  const handleAddMember = async (memberId: string) => {
+    if (!id || !canAddMembers) return;
+    setAddingMember(true);
+    try {
+      await ministryMembersService.addMember(id, memberId, false);
+      // Reload members
+      const minMembers = await ministryMembersService.getByMinistry(id);
+      setMembers(minMembers);
+      // Reload all members to update available list
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+    } catch (err) {
+      console.error("Error adding member:", err);
+      alert(err instanceof Error ? err.message : "Failed to add member");
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
+  const availableMembers = allMembers.filter(
+    (m) => !members.some((mm) => mm.member_id === m.id)
+  );
 
   if (loading) {
     return (
@@ -187,7 +249,8 @@ export const MinistryDetailPage = () => {
                 left: 0,
                 right: 0,
                 height: "100px",
-                background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
+                background:
+                  "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
                 pointerEvents: "none",
               }}
             />
@@ -203,7 +266,8 @@ export const MinistryDetailPage = () => {
             fontSize: { xs: "32px", md: "48px" },
             fontWeight: 700,
             mb: 3,
-            background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
+            background:
+              "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -312,7 +376,8 @@ export const MinistryDetailPage = () => {
                   left: 0,
                   width: "60px",
                   height: "4px",
-                  background: "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
                   borderRadius: 2,
                 },
               }}
@@ -343,8 +408,8 @@ export const MinistryDetailPage = () => {
                           details.who_can_join.age_range_max === null
                             ? t("ageRangeMax")
                             : details.who_can_join.age_range_max
-                            ? `-${details.who_can_join.age_range_max}`
-                            : "",
+                              ? `-${details.who_can_join.age_range_max}`
+                              : "",
                       })}
                     </Typography>
                   </Box>
@@ -355,8 +420,8 @@ export const MinistryDetailPage = () => {
                       {details.who_can_join.gender === "mixed"
                         ? t("genderMixed")
                         : details.who_can_join.gender === "male"
-                        ? t("genderMale")
-                        : t("genderFemale")}
+                          ? t("genderMale")
+                          : t("genderFemale")}
                     </Typography>
                   </Box>
                 )}
@@ -413,7 +478,8 @@ export const MinistryDetailPage = () => {
                     left: 0,
                     width: "60px",
                     height: "4px",
-                    background: "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                    background:
+                      "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
                     borderRadius: 2,
                   },
                 }}
@@ -423,7 +489,8 @@ export const MinistryDetailPage = () => {
               <Card
                 sx={{
                   p: 3,
-                  background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
                   border: "1px solid rgba(30, 58, 138, 0.1)",
                   borderRadius: 3,
                   transition: "all 0.3s ease",
@@ -505,7 +572,8 @@ export const MinistryDetailPage = () => {
                   left: 0,
                   width: "60px",
                   height: "4px",
-                  background: "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
                   borderRadius: 2,
                 },
               }}
@@ -543,31 +611,53 @@ export const MinistryDetailPage = () => {
             },
           }}
         >
-          <Typography
-            variant="h5"
-            component="h2"
-            gutterBottom
+          <Box
             sx={{
-              fontSize: { xs: "24px", md: "32px" },
-              fontWeight: 700,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               mb: 3,
-              color: "primary.main",
-              position: "relative",
-              display: "inline-block",
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                bottom: -8,
-                left: 0,
-                width: "60px",
-                height: "4px",
-                background: "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                borderRadius: 2,
-              },
             }}
           >
-            {t("leadership")}
-          </Typography>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                fontSize: { xs: "24px", md: "32px" },
+                fontWeight: 700,
+                color: "primary.main",
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "60px",
+                  height: "4px",
+                  background:
+                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                  borderRadius: 2,
+                },
+              }}
+            >
+              {t("leadership")}
+            </Typography>
+            {canAddMembers && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenAddMemberDialog}
+                size="small"
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                }}
+              >
+                Add Member
+              </Button>
+            )}
+          </Box>
 
           {members.length === 0 ? (
             <Typography color="text.secondary">{t("noMembers")}</Typography>
@@ -582,26 +672,27 @@ export const MinistryDetailPage = () => {
                   >
                     {t("ministryLeads")}
                   </Typography>
-                    {leads.map((member) => (
-                      <Card
-                        key={member.id}
-                        sx={{
-                          mb: 2,
-                          p: 2.5,
-                          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                          border: "1px solid rgba(30, 58, 138, 0.1)",
-                          borderRadius: 2,
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0 4px 16px rgba(30, 58, 138, 0.12)",
-                            transform: "translateX(4px)",
-                            borderColor: "rgba(30, 58, 138, 0.2)",
-                          },
-                        }}
+                  {leads.map((member) => (
+                    <Card
+                      key={member.id}
+                      sx={{
+                        mb: 2,
+                        p: 2.5,
+                        background:
+                          "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                        border: "1px solid rgba(30, 58, 138, 0.1)",
+                        borderRadius: 2,
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          boxShadow: "0 4px 16px rgba(30, 58, 138, 0.12)",
+                          transform: "translateX(4px)",
+                          borderColor: "rgba(30, 58, 138, 0.2)",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
                       >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                        >
                         <Avatar
                           src={member.member_picture_url}
                           alt={member.member_name}
@@ -658,25 +749,26 @@ export const MinistryDetailPage = () => {
                       {t("otherMembers")}
                     </Typography>
                   )}
-                    {regularMembers.map((member) => (
-                      <Card
-                        key={member.id}
-                        sx={{
-                          mb: 2,
-                          p: 2.5,
-                          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                          border: "1px solid rgba(0, 0, 0, 0.08)",
-                          borderRadius: 2,
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-                            transform: "translateX(4px)",
-                          },
-                        }}
+                  {regularMembers.map((member) => (
+                    <Card
+                      key={member.id}
+                      sx={{
+                        mb: 2,
+                        p: 2.5,
+                        background:
+                          "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                        border: "1px solid rgba(0, 0, 0, 0.08)",
+                        borderRadius: 2,
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+                          transform: "translateX(4px)",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
                       >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                        >
                         <Avatar
                           src={member.member_picture_url}
                           alt={member.member_name}
@@ -727,7 +819,8 @@ export const MinistryDetailPage = () => {
                 fontSize: { xs: "24px", md: "32px" },
                 fontWeight: 700,
                 mb: 3,
-                background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
+                background:
+                  "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -766,11 +859,7 @@ export const MinistryDetailPage = () => {
               {t("joinMinistry")}
             </Button>
             {!user && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 2 }}
-              >
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                 {t("loginRequired") || "Please log in to join this ministry"}
               </Typography>
             )}
@@ -797,12 +886,22 @@ export const MinistryDetailPage = () => {
                   {t("joinConfirmation") ||
                     "Are you sure you want to request to join this ministry?"}
                 </Typography>
-                <Box sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                <Box
+                  sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}
+                >
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     <strong>{t("form.name")}:</strong> {currentMember.name}
                   </Typography>
                   {currentMember.email && (
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
                       <strong>{t("form.email")}:</strong> {currentMember.email}
                     </Typography>
                   )}
@@ -827,7 +926,57 @@ export const MinistryDetailPage = () => {
               variant="contained"
               disabled={submitting || !user || !currentMember}
             >
-              {submitting ? t("form.submitting") : t("form.confirm") || "Confirm"}
+              {submitting
+                ? t("form.submitting")
+                : t("form.confirm") || "Confirm"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Add Member Dialog */}
+        <Dialog
+          open={addMemberDialogOpen}
+          onClose={() => !addingMember && setAddMemberDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Add Member to Ministry</DialogTitle>
+          <DialogContent>
+            {availableMembers.length === 0 ? (
+              <Typography color="text.secondary">
+                All members are already in this ministry.
+              </Typography>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {availableMembers.map((member) => (
+                  <Chip
+                    key={member.id}
+                    label={member.name}
+                    onClick={() => handleAddMember(member.id)}
+                    clickable
+                    color="primary"
+                    variant="outlined"
+                    disabled={addingMember}
+                    sx={{
+                      justifyContent: "flex-start",
+                      height: "auto",
+                      py: 1.5,
+                      "& .MuiChip-label": {
+                        display: "block",
+                        whiteSpace: "normal",
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setAddMemberDialogOpen(false)}
+              disabled={addingMember}
+            >
+              Close
             </Button>
           </DialogActions>
         </Dialog>
@@ -835,4 +984,3 @@ export const MinistryDetailPage = () => {
     </>
   );
 };
-

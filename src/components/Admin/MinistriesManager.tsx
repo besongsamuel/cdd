@@ -31,22 +31,22 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { ImageUpload } from "../common/ImageUpload";
-import { LoadingSpinner } from "../common/LoadingSpinner";
-import { MarkdownEditor } from "../common/MarkdownEditor";
 import { useAuth } from "../../hooks/useAuth";
+import { membersService } from "../../services/membersService";
+import { ministriesService } from "../../services/ministriesService";
 import { ministryJoinRequestsService } from "../../services/ministryJoinRequestsService";
 import { ministryMembersService } from "../../services/ministryMembersService";
-import { ministriesService } from "../../services/ministriesService";
-import { membersService } from "../../services/membersService";
 import { roleService } from "../../services/roleService";
 import type {
+  DepartmentRequestStatus,
+  Member,
   Ministry,
   MinistryJoinRequest,
   MinistryMember,
-  DepartmentRequestStatus,
-  Member,
 } from "../../types";
+import { ImageUpload } from "../common/ImageUpload";
+import { LoadingSpinner } from "../common/LoadingSpinner";
+import { MarkdownEditor } from "../common/MarkdownEditor";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -102,6 +102,7 @@ export const MinistriesManager = () => {
   const [requestAction, setRequestAction] = useState<"approve" | "reject">(
     "approve"
   );
+  const [isMinistryLead, setIsMinistryLead] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -117,10 +118,28 @@ export const MinistriesManager = () => {
     if (tabValue === 1) {
       loadMembers();
       loadAllMembers();
+      checkMinistryLeadStatus();
     } else if (tabValue === 2) {
       loadJoinRequests();
     }
-  }, [tabValue, selectedMinistryId]);
+  }, [tabValue, selectedMinistryId, currentMember]);
+
+  const checkMinistryLeadStatus = async () => {
+    if (!currentMember || !selectedMinistryId) {
+      setIsMinistryLead(false);
+      return;
+    }
+    try {
+      const isLead = await roleService.isMinistryLead(
+        selectedMinistryId,
+        currentMember.id
+      );
+      setIsMinistryLead(isLead);
+    } catch (error) {
+      console.error("Error checking ministry lead status:", error);
+      setIsMinistryLead(false);
+    }
+  };
 
   const checkUserPermissions = async () => {
     if (!currentMember || ministries.length === 0) return;
@@ -134,7 +153,7 @@ export const MinistriesManager = () => {
         currentMember.id
       );
       setFilteredMinistries(userMinistries);
-      
+
       // If they only have one ministry, auto-select it
       if (userMinistries.length === 1) {
         setSelectedMinistryId(userMinistries[0].id);
@@ -174,9 +193,8 @@ export const MinistriesManager = () => {
       return;
     }
     try {
-      const data = await ministryMembersService.getByMinistry(
-        selectedMinistryId
-      );
+      const data =
+        await ministryMembersService.getByMinistry(selectedMinistryId);
       setMinistryMembers(data);
     } catch (error) {
       console.error("Error loading ministry members:", error);
@@ -262,14 +280,16 @@ export const MinistriesManager = () => {
       loadMinistries();
     } catch (error) {
       console.error("Error deleting ministry:", error);
-      alert(
-        error instanceof Error ? error.message : "Error deleting ministry"
-      );
+      alert(error instanceof Error ? error.message : "Error deleting ministry");
     }
   };
 
   const handleAddMember = async (memberId: string) => {
     if (!selectedMinistryId) return;
+    if (!canAddMembers) {
+      alert("Only admins and ministry leads can add members to ministries");
+      return;
+    }
     try {
       await ministryMembersService.addMember(
         selectedMinistryId,
@@ -287,10 +307,7 @@ export const MinistriesManager = () => {
     if (!selectedMinistryId) return;
     if (!confirm("Remove this member from the ministry?")) return;
     try {
-      await ministryMembersService.removeMember(
-        selectedMinistryId,
-        memberId
-      );
+      await ministryMembersService.removeMember(selectedMinistryId, memberId);
       loadMembers();
     } catch (error) {
       console.error("Error removing member:", error);
@@ -373,6 +390,7 @@ export const MinistriesManager = () => {
   );
 
   const canManageAll = isAdmin;
+  const canAddMembers = isAdmin || isMinistryLead;
 
   if (loading && ministries.length === 0) {
     return <LoadingSpinner />;
@@ -481,7 +499,7 @@ export const MinistriesManager = () => {
               <Typography variant="h6" gutterBottom>
                 Current Members
               </Typography>
-              {availableMembers.length > 0 && (
+              {canAddMembers && availableMembers.length > 0 && (
                 <Box sx={{ mb: 2 }}>
                   <Typography
                     variant="body2"
@@ -617,8 +635,8 @@ export const MinistriesManager = () => {
                           request.status === "approved"
                             ? "success"
                             : request.status === "rejected"
-                            ? "error"
-                            : "warning"
+                              ? "error"
+                              : "warning"
                         }
                         size="small"
                       />
@@ -824,4 +842,3 @@ export const MinistriesManager = () => {
     </Box>
   );
 };
-

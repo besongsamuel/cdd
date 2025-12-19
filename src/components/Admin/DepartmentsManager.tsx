@@ -106,6 +106,7 @@ export const DepartmentsManager = () => {
   const [requestAction, setRequestAction] = useState<"approve" | "reject">(
     "approve"
   );
+  const [isDepartmentLead, setIsDepartmentLead] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -123,11 +124,29 @@ export const DepartmentsManager = () => {
     if (tabValue === 1) {
       loadMembers();
       loadAllMembers();
+      checkDepartmentLeadStatus();
     } else if (tabValue === 2) {
       loadJoinRequests();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabValue, selectedDepartmentId]);
+  }, [tabValue, selectedDepartmentId, currentMember]);
+
+  const checkDepartmentLeadStatus = async () => {
+    if (!currentMember || !selectedDepartmentId) {
+      setIsDepartmentLead(false);
+      return;
+    }
+    try {
+      const isLead = await roleService.isDepartmentLead(
+        selectedDepartmentId,
+        currentMember.id
+      );
+      setIsDepartmentLead(isLead);
+    } catch (error) {
+      console.error("Error checking department lead status:", error);
+      setIsDepartmentLead(false);
+    }
+  };
 
   const checkUserPermissions = async () => {
     if (!currentMember) return;
@@ -278,6 +297,10 @@ export const DepartmentsManager = () => {
 
   const handleAddMember = async (memberId: string) => {
     if (!selectedDepartmentId) return;
+    if (!canAddMembers) {
+      alert("Only admins and department leads can add members to departments");
+      return;
+    }
     try {
       await departmentMembersService.addMember(
         selectedDepartmentId,
@@ -381,6 +404,7 @@ export const DepartmentsManager = () => {
   );
 
   const canManageAll = isAdmin;
+  const canAddMembers = isAdmin || isDepartmentLead;
 
   if (loading && departments.length === 0) {
     return <LoadingSpinner />;
@@ -489,7 +513,7 @@ export const DepartmentsManager = () => {
               <Typography variant="h6" gutterBottom>
                 Current Members
               </Typography>
-              {availableMembers.length > 0 && (
+              {canAddMembers && availableMembers.length > 0 && (
                 <Box sx={{ mb: 2 }}>
                   <Typography
                     variant="body2"

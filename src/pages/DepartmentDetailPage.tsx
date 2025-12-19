@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Alert,
@@ -5,6 +6,7 @@ import {
   Box,
   Button,
   Card,
+  Chip,
   Container,
   Dialog,
   DialogActions,
@@ -22,19 +24,25 @@ import { useAuth } from "../hooks/useAuth";
 import { departmentJoinRequestsService } from "../services/departmentJoinRequestsService";
 import { departmentMembersService } from "../services/departmentMembersService";
 import { departmentsService } from "../services/departmentsService";
-import type { Department, DepartmentMember } from "../types";
+import { membersService } from "../services/membersService";
+import { roleService } from "../services/roleService";
+import type { Department, DepartmentMember, Member } from "../types";
 
 export const DepartmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("departments");
   const navigate = useNavigate();
-  const { user, currentMember } = useAuth();
+  const { user, currentMember, isAdmin } = useAuth();
   const [department, setDepartment] = useState<Department | null>(null);
   const [members, setMembers] = useState<DepartmentMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
+  const [isDepartmentLead, setIsDepartmentLead] = useState(false);
+  const [addingMember, setAddingMember] = useState(false);
 
   useEffect(() => {
     const loadDepartment = async () => {
@@ -58,6 +66,26 @@ export const DepartmentDetailPage = () => {
     loadDepartment();
   }, [id, navigate]);
 
+  useEffect(() => {
+    const checkLeadStatus = async () => {
+      if (!currentMember || !id) {
+        setIsDepartmentLead(false);
+        return;
+      }
+      try {
+        const isLead = await roleService.isDepartmentLead(id, currentMember.id);
+        setIsDepartmentLead(isLead);
+      } catch (error) {
+        console.error("Error checking department lead status:", error);
+        setIsDepartmentLead(false);
+      }
+    };
+
+    checkLeadStatus();
+  }, [currentMember, id]);
+
+  const canAddMembers = isAdmin || isDepartmentLead;
+
   const handleJoinConfirm = async () => {
     if (!id || !department || !user || !currentMember) return;
 
@@ -80,6 +108,41 @@ export const DepartmentDetailPage = () => {
       setSubmitting(false);
     }
   };
+
+  const handleOpenAddMemberDialog = async () => {
+    if (!canAddMembers) return;
+    try {
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+      setAddMemberDialogOpen(true);
+    } catch (err) {
+      console.error("Error loading members:", err);
+      alert("Failed to load members");
+    }
+  };
+
+  const handleAddMember = async (memberId: string) => {
+    if (!id || !canAddMembers) return;
+    setAddingMember(true);
+    try {
+      await departmentMembersService.addMember(id, memberId, false);
+      // Reload members
+      const deptMembers = await departmentMembersService.getByDepartment(id);
+      setMembers(deptMembers);
+      // Reload all members to update available list
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+    } catch (err) {
+      console.error("Error adding member:", err);
+      alert(err instanceof Error ? err.message : "Failed to add member");
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
+  const availableMembers = allMembers.filter(
+    (m) => !members.some((dm) => dm.member_id === m.id)
+  );
 
   if (loading) {
     return (
@@ -300,32 +363,53 @@ export const DepartmentDetailPage = () => {
               },
             }}
           >
-            <Typography
-              variant="h5"
-              component="h2"
-              gutterBottom
+            <Box
               sx={{
-                fontSize: { xs: "24px", md: "32px" },
-                fontWeight: 700,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 mb: 3,
-                color: "primary.main",
-                position: "relative",
-                display: "inline-block",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -8,
-                  left: 0,
-                  width: "60px",
-                  height: "4px",
-                  background:
-                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                  borderRadius: 2,
-                },
               }}
             >
-              {t("members")}
-            </Typography>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontSize: { xs: "24px", md: "32px" },
+                  fontWeight: 700,
+                  color: "primary.main",
+                  position: "relative",
+                  display: "inline-block",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: -8,
+                    left: 0,
+                    width: "60px",
+                    height: "4px",
+                    background:
+                      "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                {t("members")}
+              </Typography>
+              {canAddMembers && (
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleOpenAddMemberDialog}
+                  size="small"
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                  }}
+                >
+                  Add Member
+                </Button>
+              )}
+            </Box>
 
             {members.length === 0 ? (
               <Typography color="text.secondary">{t("noMembers")}</Typography>
@@ -581,6 +665,54 @@ export const DepartmentDetailPage = () => {
               {submitting
                 ? t("form.submitting")
                 : t("form.confirm") || "Confirm"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Add Member Dialog */}
+        <Dialog
+          open={addMemberDialogOpen}
+          onClose={() => !addingMember && setAddMemberDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Add Member to Department</DialogTitle>
+          <DialogContent>
+            {availableMembers.length === 0 ? (
+              <Typography color="text.secondary">
+                All members are already in this department.
+              </Typography>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {availableMembers.map((member) => (
+                  <Chip
+                    key={member.id}
+                    label={member.name}
+                    onClick={() => handleAddMember(member.id)}
+                    clickable
+                    color="primary"
+                    variant="outlined"
+                    disabled={addingMember}
+                    sx={{
+                      justifyContent: "flex-start",
+                      height: "auto",
+                      py: 1.5,
+                      "& .MuiChip-label": {
+                        display: "block",
+                        whiteSpace: "normal",
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setAddMemberDialogOpen(false)}
+              disabled={addingMember}
+            >
+              Close
             </Button>
           </DialogActions>
         </Dialog>
