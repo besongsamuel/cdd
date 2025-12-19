@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import {
   Avatar,
   Box,
@@ -15,6 +16,7 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -164,9 +166,29 @@ const LeaderCard = ({
         />
       )}
       <CardContent>
-        <Typography variant="h6" component="h3" gutterBottom>
-          {getDisplayName(leader)}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: leader.bio ? 1 : 0,
+          }}
+        >
+          <Typography variant="h6" component="h3" sx={{ flex: 1 }}>
+            {getDisplayName(leader)}
+          </Typography>
+          {leader.user_id && (
+            <Tooltip title="Verified member" arrow>
+              <VerifiedIcon
+                sx={{
+                  fontSize: 18,
+                  color: "primary.main",
+                  opacity: 0.7,
+                }}
+              />
+            </Tooltip>
+          )}
+        </Box>
         {leader.bio && (
           <Box sx={{ mb: 1 }}>
             <Typography
@@ -840,9 +862,24 @@ export const MembersPage = () => {
                           >
                             {member.name[0].toUpperCase()}
                           </Avatar>
-                          <Typography variant="h6" component="h3">
+                          <Typography
+                            variant="h6"
+                            component="h3"
+                            sx={{ flex: 1 }}
+                          >
                             {getDisplayName(member)}
                           </Typography>
+                          {member.user_id && (
+                            <Tooltip title="Verified member" arrow>
+                              <VerifiedIcon
+                                sx={{
+                                  fontSize: 16,
+                                  color: "primary.main",
+                                  opacity: 0.7,
+                                }}
+                              />
+                            </Tooltip>
+                          )}
                         </Box>
                         {(member.email || member.phone) && (
                           <Box
