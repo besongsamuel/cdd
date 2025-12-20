@@ -74,6 +74,15 @@ export const ThreadDetailPage = () => {
 
         setThread(threadData);
         setMessages(messagesData);
+
+        // Mark thread as seen after successfully loading messages
+        // This is non-blocking - don't fail if marking as seen fails
+        if (user && messagesData.length > 0) {
+          messageBoardsService.markThreadAsSeen(threadId).catch((error) => {
+            console.error("Error marking thread as seen:", error);
+            // Silently fail - this is not critical for thread viewing
+          });
+        }
       } catch (error) {
         console.error("Error loading thread:", error);
       } finally {
@@ -82,7 +91,7 @@ export const ThreadDetailPage = () => {
     };
 
     loadData();
-  }, [threadId]);
+  }, [threadId, user]);
 
   const handleSendMessage = async () => {
     if (!threadId || !newMessage.trim()) return;

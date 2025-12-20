@@ -792,5 +792,57 @@ export const messageBoardsService = {
 
     return data;
   },
-};
 
+  // Message Views
+  async markThreadAsSeen(threadId: string): Promise<number> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Not authenticated");
+
+    // Get member_id
+    const { data: member } = await supabase
+      .from("members")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!member) throw new Error("Member not found");
+
+    const { data, error } = await supabase.rpc("mark_thread_as_seen", {
+      p_thread_id: threadId,
+      p_member_id: member.id,
+    });
+
+    if (error) throw error;
+
+    return data || 0;
+  },
+
+  async getUnseenMessageCount(threadId?: string): Promise<number> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Not authenticated");
+
+    // Get member_id
+    const { data: member } = await supabase
+      .from("members")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!member) throw new Error("Member not found");
+
+    const { data, error } = await supabase.rpc("get_unseen_message_count", {
+      p_member_id: member.id,
+      p_thread_id: threadId || null,
+    });
+
+    if (error) throw error;
+
+    return data || 0;
+  },
+};

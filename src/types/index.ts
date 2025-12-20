@@ -422,3 +422,10 @@ export interface Notification {
   thread_title?: string; // joined from message_threads
   message_preview?: string; // joined from messages
 }
+
+export interface MessageView {
+  id: string;
+  message_id: string;
+  member_id: string;
+  seen_at: string;
+}
