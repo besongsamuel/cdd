@@ -429,3 +429,15 @@ export interface MessageView {
   member_id: string;
   seen_at: string;
 }
+
+export interface Testimony {
+  id: string;
+  content: string;
+  author_name: string;
+  author_email?: string;
+  is_featured: boolean;
+  is_approved: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}

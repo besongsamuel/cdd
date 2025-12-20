@@ -31,6 +31,7 @@ export const AdminLayout = () => {
     { label: "Gallery", path: "/admin/gallery" },
     { label: "Donations", path: "/admin/donations" },
     { label: "Requests", path: "/admin/requests" },
+    { label: "Testimonies", path: "/admin/testimonies" },
     { label: "Suggestions", path: "/admin/suggestions" },
     { label: "Titles", path: "/admin/titles" },
     { label: "Contact Submissions", path: "/admin/contact" },

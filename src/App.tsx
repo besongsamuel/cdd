@@ -13,6 +13,7 @@ import { MembersManager } from "./components/Admin/MembersManager";
 import { MinistriesManager } from "./components/Admin/MinistriesManager";
 import { RequestsManager } from "./components/Admin/RequestsManager";
 import { SuggestionsManager } from "./components/Admin/SuggestionsManager";
+import { TestimoniesManager } from "./components/Admin/TestimoniesManager";
 import { TitlesManager } from "./components/Admin/TitlesManager";
 import { Footer } from "./components/Layout/Footer";
 import { Header } from "./components/Layout/Header";
@@ -44,6 +45,7 @@ import { ServicesPage } from "./pages/ServicesPage";
 import { SignupPage } from "./pages/SignupPage";
 import { SuggestionsPage } from "./pages/SuggestionsPage";
 import { TermsAndConditionsPage } from "./pages/TermsAndConditionsPage";
+import { TestimoniesPage } from "./pages/TestimoniesPage";
 import { ThreadDetailPage } from "./pages/ThreadDetailPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -249,6 +251,18 @@ function App() {
                       }
                     />
                     <Route
+                      path="/testimonies"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <TestimoniesPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
                       path="/donations"
                       element={
                         <>
@@ -434,6 +448,10 @@ function App() {
                       <Route
                         path="suggestions"
                         element={<SuggestionsManager />}
+                      />
+                      <Route
+                        path="testimonies"
+                        element={<TestimoniesManager />}
                       />
                       <Route path="titles" element={<TitlesManager />} />
                       <Route

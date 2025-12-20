@@ -24,6 +24,7 @@ import cddLogo from "../assets/cddLogo.png";
 import dancingImage from "../assets/dancing.jpg";
 import { MissionCard } from "../components/MissionCard";
 import { SEO } from "../components/SEO";
+import { TestimoniesSlider } from "../components/TestimoniesSlider";
 import { YouTubeVideos } from "../components/YouTubeVideos";
 import { CHURCH_PHONE } from "../utils/constants";
 
@@ -493,6 +494,9 @@ export const LandingPage = () => {
             </Box>
           </Container>
         </Box>
+
+        {/* Testimonies Slider Section */}
+        <TestimoniesSlider />
 
         {/* Message Boards Feature Section */}
         <Box

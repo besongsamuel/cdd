@@ -1,0 +1,30 @@
+{
+  "title": "Témoignages",
+  "subtitle": "Partagez votre histoire de la façon dont Dieu a œuvré dans votre vie à travers la Cité de David. Votre témoignage peut inspirer et encourager d'autres dans leur parcours de foi.",
+  "featured": "En vedette",
+  "form": {
+    "title": "Partagez votre témoignage",
+    "name": "Votre nom",
+    "email": "Votre courriel (optionnel)",
+    "testimony": "Votre témoignage",
+    "testimonyPlaceholder": "Partagez votre histoire en 2-3 phrases. Comment la Cité de David a-t-elle eu un impact sur votre vie? Qu'est-ce que Dieu a fait dans votre parcours?",
+    "characters": "caractères",
+    "submit": "Soumettre le témoignage",
+    "submitting": "Envoi en cours...",
+    "success": "Merci d'avoir partagé votre témoignage! Il a été soumis et sera examiné par notre équipe.",
+    "nameRequired": "Veuillez entrer votre nom",
+    "contentRequired": "Veuillez entrer votre témoignage",
+    "contentTooLong": "Le témoignage est trop long. Veuillez le limiter à 2-3 phrases (300 caractères maximum).",
+    "invalidEmail": "Veuillez entrer une adresse courriel valide",
+    "submitError": "Échec de l'envoi du témoignage. Veuillez réessayer."
+  },
+  "approved": {
+    "title": "Ce que les gens disent"
+  },
+  "slider": {
+    "title": "Ce que les gens disent",
+    "previous": "Témoignage précédent",
+    "next": "Témoignage suivant",
+    "goTo": "Aller au témoignage"
+  }
+}

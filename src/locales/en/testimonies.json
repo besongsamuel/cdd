@@ -1,0 +1,30 @@
+{
+  "title": "Testimonies",
+  "subtitle": "Share your story of how God has worked in your life through City of David. Your testimony can inspire and encourage others in their faith journey.",
+  "featured": "Featured",
+  "form": {
+    "title": "Share Your Testimony",
+    "name": "Your Name",
+    "email": "Your Email (Optional)",
+    "testimony": "Your Testimony",
+    "testimonyPlaceholder": "Share your story in 2-3 sentences. How has City of David impacted your life? What has God done in your journey?",
+    "characters": "characters",
+    "submit": "Submit Testimony",
+    "submitting": "Submitting...",
+    "success": "Thank you for sharing your testimony! It has been submitted and will be reviewed by our team.",
+    "nameRequired": "Please enter your name",
+    "contentRequired": "Please enter your testimony",
+    "contentTooLong": "Testimony is too long. Please keep it to 2-3 sentences (300 characters maximum).",
+    "invalidEmail": "Please enter a valid email address",
+    "submitError": "Failed to submit testimony. Please try again."
+  },
+  "approved": {
+    "title": "What People Are Saying"
+  },
+  "slider": {
+    "title": "What People Are Saying",
+    "previous": "Previous testimony",
+    "next": "Next testimony",
+    "goTo": "Go to testimony"
+  }
+}

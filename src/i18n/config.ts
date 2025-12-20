@@ -19,6 +19,7 @@ import enRequests from "../locales/en/requests.json";
 import enSermons from "../locales/en/sermons.json";
 import enServices from "../locales/en/services.json";
 import enSuggestions from "../locales/en/suggestions.json";
+import enTestimonies from "../locales/en/testimonies.json";
 
 import frCommon from "../locales/fr/common.json";
 import frContact from "../locales/fr/contact.json";
@@ -37,6 +38,7 @@ import frRequests from "../locales/fr/requests.json";
 import frSermons from "../locales/fr/sermons.json";
 import frServices from "../locales/fr/services.json";
 import frSuggestions from "../locales/fr/suggestions.json";
+import frTestimonies from "../locales/fr/testimonies.json";
 
 i18n
   .use(LanguageDetector)
@@ -61,6 +63,7 @@ i18n
         services: enServices,
         sermons: enSermons,
         messageBoards: enMessageBoards,
+        testimonies: enTestimonies,
       },
       fr: {
         common: frCommon,
@@ -80,6 +83,7 @@ i18n
         services: frServices,
         sermons: frSermons,
         messageBoards: frMessageBoards,
+        testimonies: frTestimonies,
       },
     },
     fallbackLng: "en",
@@ -102,6 +106,7 @@ i18n
       "services",
       "sermons",
       "messageBoards",
+      "testimonies",
     ],
     interpolation: {
       escapeValue: false,
