@@ -157,10 +157,11 @@ export const membersService = {
     if (member.passions !== undefined)
       edgeFunctionData.passions = member.passions;
     if (member.phone !== undefined) edgeFunctionData.phone = member.phone;
+    if (member.email !== undefined) edgeFunctionData.email = member.email;
     if (member.title_id !== undefined)
       edgeFunctionData.title_id = member.title_id;
 
-    // Note: type, is_admin, email, and user_id are automatically set by the edge function
+    // Note: type, is_admin, and user_id are automatically set by the edge function
     return callEdgeFunction("create", undefined, edgeFunctionData);
   },
 
