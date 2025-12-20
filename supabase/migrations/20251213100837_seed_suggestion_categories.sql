@@ -16,3 +16,4 @@ INSERT INTO suggestion_categories (name, description, display_order, is_active) 
 
 
 
+

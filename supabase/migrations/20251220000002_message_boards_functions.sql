@@ -296,3 +296,4 @@ COMMENT ON FUNCTION get_message_edit_history(UUID) IS 'Returns edit history for 
 COMMENT ON FUNCTION toggle_thread_lock(UUID, BOOLEAN, UUID) IS 'Locks or unlocks a thread (moderator only)';
 COMMENT ON FUNCTION toggle_thread_pin(UUID, BOOLEAN, UUID) IS 'Pins or unpins a thread (moderator only)';
 COMMENT ON FUNCTION create_notification(UUID, TEXT, UUID, UUID, UUID) IS 'Creates an in-app notification';
+

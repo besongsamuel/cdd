@@ -35,5 +35,19 @@
   },
   "latestVideos": "Dernières Vidéos",
   "videosSubtitle": "Regardez nos derniers enseignements et services",
-  "viewAllVideos": "Voir Toutes les Vidéos sur YouTube"
+  "viewAllVideos": "Voir Toutes les Vidéos sur YouTube",
+  "messageBoards": {
+    "title": "Rejoignez la Conversation",
+    "subtitle": "Connectez-vous avec votre famille d'église grâce à nos tableaux de messages communautaires",
+    "description": "Partagez vos réflexions, posez des questions, participez aux discussions et construisez des relations plus profondes avec vos frères et sœurs en Christ. Nos tableaux de messages offrent un espace sûr et respectueux pour des conversations significatives sur la foi, le ministère et la vie.",
+    "cta": "Explorer les Tableaux de Messages",
+    "features": {
+      "discussions": "Discussions Structurées",
+      "discussionsDesc": "Tableaux organisés pour différents sujets et groupes",
+      "community": "Construction de Communauté",
+      "communityDesc": "Connectez-vous avec des membres qui partagent vos intérêts",
+      "safe": "Sûr et Respectueux",
+      "safeDesc": "Environnement modéré pour des conversations édifiantes"
+    }
+  }
 }

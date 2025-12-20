@@ -27,6 +27,7 @@ export interface Member {
   phone?: string;
   user_id?: string;
   is_admin?: boolean;
+  is_verified?: boolean;
   title_id?: string;
   title_name?: string; // Joined field for display
   created_at: string;

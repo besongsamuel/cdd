@@ -104,3 +104,4 @@ WHERE d.name = 'Media'
 ON CONFLICT (department_id, member_id) DO NOTHING;
 
 
+

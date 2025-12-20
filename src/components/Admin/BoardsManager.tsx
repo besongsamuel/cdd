@@ -26,11 +26,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { messageBoardsService } from "../../services/messageBoardsService";
 import type { BoardAccessType, MessageBoard } from "../../types";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 
 export const BoardsManager = () => {
+  const { t } = useTranslation("messageBoards");
   const [boards, setBoards] = useState<MessageBoard[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -102,19 +104,19 @@ export const BoardsManager = () => {
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving board:", error);
-      alert("Failed to save board. Please try again.");
+      alert(t("admin.failedToSaveBoard"));
     }
   };
 
   const handleArchive = async (id: string) => {
-    if (!confirm("Are you sure you want to archive this board?")) return;
+    if (!confirm(t("admin.archiveConfirm"))) return;
 
     try {
       await messageBoardsService.archive(id);
       await loadBoards();
     } catch (error) {
       console.error("Error archiving board:", error);
-      alert("Failed to archive board. Please try again.");
+      alert(t("admin.failedToArchiveBoard"));
     }
   };
 
@@ -125,13 +127,13 @@ export const BoardsManager = () => {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-        <Typography variant="h4">Message Boards</Typography>
+        <Typography variant="h4">{t("admin.title")}</Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
         >
-          New Board
+          {t("admin.newBoard")}
         </Button>
       </Box>
 
@@ -139,12 +141,12 @@ export const BoardsManager = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Access</TableCell>
-              <TableCell>Order</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t("admin.name")}</TableCell>
+              <TableCell>{t("admin.type")}</TableCell>
+              <TableCell>{t("admin.access")}</TableCell>
+              <TableCell>{t("admin.order")}</TableCell>
+              <TableCell>{t("admin.status")}</TableCell>
+              <TableCell align="right">{t("admin.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -152,7 +154,7 @@ export const BoardsManager = () => {
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Typography variant="body2" color="text.secondary">
-                    No boards yet. Create one to get started.
+                    {t("admin.noBoardsYet")}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -170,14 +172,14 @@ export const BoardsManager = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={board.is_public ? "Public" : "Private"}
+                      label={board.is_public ? t("public") : t("private")}
                       size="small"
                       color={board.is_public ? "primary" : "default"}
                     />
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={board.access_type}
+                      label={t(`accessTypes.${board.access_type}`)}
                       size="small"
                       variant="outlined"
                     />
@@ -185,9 +187,17 @@ export const BoardsManager = () => {
                   <TableCell>{board.display_order}</TableCell>
                   <TableCell>
                     {board.archived_at ? (
-                      <Chip label="Archived" size="small" color="default" />
+                      <Chip
+                        label={t("admin.archived")}
+                        size="small"
+                        color="default"
+                      />
                     ) : (
-                      <Chip label="Active" size="small" color="success" />
+                      <Chip
+                        label={t("admin.active")}
+                        size="small"
+                        color="success"
+                      />
                     )}
                   </TableCell>
                   <TableCell align="right">
@@ -220,12 +230,12 @@ export const BoardsManager = () => {
         fullWidth
       >
         <DialogTitle>
-          {editingBoard ? "Edit Board" : "Create New Board"}
+          {editingBoard ? t("admin.editBoard") : t("admin.createNewBoard")}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <TextField
-              label="Board Name"
+              label={t("admin.boardName")}
               fullWidth
               value={boardForm.name}
               onChange={(e) =>
@@ -235,7 +245,7 @@ export const BoardsManager = () => {
             />
 
             <TextField
-              label="Description"
+              label={t("admin.description")}
               fullWidth
               multiline
               rows={3}
@@ -246,10 +256,10 @@ export const BoardsManager = () => {
             />
 
             <FormControl fullWidth>
-              <InputLabel>Access Type</InputLabel>
+              <InputLabel>{t("admin.accessType")}</InputLabel>
               <Select
                 value={boardForm.access_type}
-                label="Access Type"
+                label={t("admin.accessType")}
                 onChange={(e) =>
                   setBoardForm({
                     ...boardForm,
@@ -257,11 +267,19 @@ export const BoardsManager = () => {
                   })
                 }
               >
-                <MenuItem value="public">Public</MenuItem>
-                <MenuItem value="authenticated">Authenticated</MenuItem>
-                <MenuItem value="role_based">Role Based</MenuItem>
-                <MenuItem value="department">Department</MenuItem>
-                <MenuItem value="ministry">Ministry</MenuItem>
+                <MenuItem value="public">{t("accessTypes.public")}</MenuItem>
+                <MenuItem value="authenticated">
+                  {t("accessTypes.authenticated")}
+                </MenuItem>
+                <MenuItem value="role_based">
+                  {t("accessTypes.role_based")}
+                </MenuItem>
+                <MenuItem value="department">
+                  {t("accessTypes.department")}
+                </MenuItem>
+                <MenuItem value="ministry">
+                  {t("accessTypes.ministry")}
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -272,11 +290,11 @@ export const BoardsManager = () => {
                   setBoardForm({ ...boardForm, is_public: e.target.checked })
                 }
               />
-              <Typography>Public Board</Typography>
+              <Typography>{t("admin.publicBoard")}</Typography>
             </Box>
 
             <TextField
-              label="Pinned Announcement (optional)"
+              label={t("admin.pinnedAnnouncement")}
               fullWidth
               multiline
               rows={2}
@@ -287,11 +305,11 @@ export const BoardsManager = () => {
                   pinned_announcement: e.target.value,
                 })
               }
-              helperText="This will be displayed at the top of the board"
+              helperText={t("admin.pinnedAnnouncementHelper")}
             />
 
             <TextField
-              label="Display Order"
+              label={t("admin.displayOrder")}
               type="number"
               fullWidth
               value={boardForm.display_order}
@@ -305,13 +323,13 @@ export const BoardsManager = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>{t("cancel")}</Button>
           <Button
             variant="contained"
             onClick={handleSave}
             disabled={!boardForm.name.trim()}
           >
-            {editingBoard ? "Update" : "Create"}
+            {editingBoard ? t("admin.update") : t("admin.create")}
           </Button>
         </DialogActions>
       </Dialog>

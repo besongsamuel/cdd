@@ -1,10 +1,15 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import ForumIcon from "@mui/icons-material/Forum";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
+import SecurityIcon from "@mui/icons-material/Security";
+import TopicIcon from "@mui/icons-material/Topic";
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -485,6 +490,274 @@ export const LandingPage = () => {
                   icon={mission.icon}
                 />
               ))}
+            </Box>
+          </Container>
+        </Box>
+
+        {/* Message Boards Feature Section */}
+        <Box
+          sx={{
+            bgcolor: "background.default",
+            py: { xs: 12, md: 16 },
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: "center",
+                gap: { xs: 4, md: 6 },
+              }}
+            >
+              {/* Left side - Icon and Title */}
+              <Box
+                sx={{
+                  flex: { xs: "1", md: "0 0 300px" },
+                  textAlign: { xs: "center", md: "left" },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: { xs: 100, md: 120 },
+                    height: { xs: 100, md: 120 },
+                    borderRadius: "50%",
+                    bgcolor: (theme) =>
+                      `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
+                    mb: 4,
+                    boxShadow: (theme) =>
+                      `0 8px 32px ${alpha(theme.palette.primary.main, 0.15)}`,
+                  }}
+                >
+                  <ForumIcon
+                    sx={{
+                      fontSize: { xs: 50, md: 60 },
+                      color: "primary.main",
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h2"
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: "36px", md: "48px" },
+                    fontWeight: 700,
+                    mb: 2,
+                    letterSpacing: "-0.02em",
+                    background: (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {t("messageBoards.title")}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  component="p"
+                  sx={{
+                    fontSize: { xs: "18px", md: "20px" },
+                    fontWeight: 500,
+                    color: "text.secondary",
+                    mb: 3,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {t("messageBoards.subtitle")}
+                </Typography>
+                <Button
+                  component={Link}
+                  to="/message-boards"
+                  variant="contained"
+                  size="large"
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "17px",
+                    fontWeight: 600,
+                    borderRadius: 3,
+                    textTransform: "none",
+                    background: (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                    boxShadow: (theme) =>
+                      `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: (theme) =>
+                        `0 12px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
+                    },
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                >
+                  {t("messageBoards.cta")}
+                </Button>
+              </Box>
+
+              {/* Right side - Description and Features */}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: { xs: "17px", md: "19px" },
+                    lineHeight: 1.7,
+                    color: "text.secondary",
+                    mb: 4,
+                  }}
+                >
+                  {t("messageBoards.description")}
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(3, 1fr)",
+                    },
+                    gap: 3,
+                  }}
+                >
+                  <Card
+                    elevation={0}
+                    sx={{
+                      height: "100%",
+                      p: 3,
+                      borderRadius: 3,
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.03),
+                      border: "1px solid",
+                      borderColor: "divider",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: (theme) =>
+                          `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
+                        borderColor: "primary.main",
+                      },
+                    }}
+                  >
+                    <TopicIcon
+                      sx={{
+                        fontSize: 40,
+                        color: "primary.main",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        fontSize: "18px",
+                      }}
+                    >
+                      {t("messageBoards.features.discussions")}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.6 }}
+                    >
+                      {t("messageBoards.features.discussionsDesc")}
+                    </Typography>
+                  </Card>
+                  <Card
+                    elevation={0}
+                    sx={{
+                      height: "100%",
+                      p: 3,
+                      borderRadius: 3,
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.03),
+                      border: "1px solid",
+                      borderColor: "divider",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: (theme) =>
+                          `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
+                        borderColor: "primary.main",
+                      },
+                    }}
+                  >
+                    <GroupsIcon
+                      sx={{
+                        fontSize: 40,
+                        color: "primary.main",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        fontSize: "18px",
+                      }}
+                    >
+                      {t("messageBoards.features.community")}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.6 }}
+                    >
+                      {t("messageBoards.features.communityDesc")}
+                    </Typography>
+                  </Card>
+                  <Card
+                    elevation={0}
+                    sx={{
+                      height: "100%",
+                      p: 3,
+                      borderRadius: 3,
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.03),
+                      border: "1px solid",
+                      borderColor: "divider",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: (theme) =>
+                          `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
+                        borderColor: "primary.main",
+                      },
+                    }}
+                  >
+                    <SecurityIcon
+                      sx={{
+                        fontSize: 40,
+                        color: "primary.main",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        fontSize: "18px",
+                      }}
+                    >
+                      {t("messageBoards.features.safe")}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.6 }}
+                    >
+                      {t("messageBoards.features.safeDesc")}
+                    </Typography>
+                  </Card>
+                </Box>
+              </Box>
             </Box>
           </Container>
         </Box>

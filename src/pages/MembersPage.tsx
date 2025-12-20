@@ -33,6 +33,8 @@ const LeaderCard = ({
   leader,
   isAdmin,
   onPositionUpdate,
+  isCurrentMemberVerified,
+  currentMemberId,
 }: {
   leader: Member;
   isAdmin: boolean;
@@ -40,6 +42,8 @@ const LeaderCard = ({
     memberId: string,
     position: { x: number; y: number }
   ) => Promise<void>;
+  isCurrentMemberVerified: boolean;
+  currentMemberId?: string;
 }) => {
   const [position, setPosition] = useState(
     leader.profile_picture_position || { x: 50, y: 50 }
@@ -228,12 +232,46 @@ const LeaderCard = ({
             sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
           >
             {leader.email && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  filter:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "blur(8px)"
+                      : "none",
+                  userSelect:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "none"
+                      : "auto",
+                  pointerEvents:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "none"
+                      : "auto",
+                }}
+              >
                 📧 {leader.email}
               </Typography>
             )}
             {leader.phone && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  filter:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "blur(8px)"
+                      : "none",
+                  userSelect:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "none"
+                      : "auto",
+                  pointerEvents:
+                    !isCurrentMemberVerified && leader.id !== currentMemberId
+                      ? "none"
+                      : "auto",
+                }}
+              >
                 📞 {leader.phone}
               </Typography>
             )}
@@ -261,7 +299,8 @@ const LeaderCard = ({
 
 export const MembersPage = () => {
   const { t } = useTranslation("members");
-  const { isAdmin } = useAuth();
+  const { isAdmin, currentMember } = useAuth();
+  const isCurrentMemberVerified = currentMember?.is_verified ?? false;
   const [leaders, setLeaders] = useState<Member[]>([]);
   const [regularMembers, setRegularMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -781,6 +820,8 @@ export const MembersPage = () => {
                           leader={leader}
                           isAdmin={isAdmin}
                           onPositionUpdate={handlePositionUpdate}
+                          isCurrentMemberVerified={isCurrentMemberVerified}
+                          currentMemberId={currentMember?.id}
                         />
                       ))}
                     </Box>
@@ -895,6 +936,23 @@ export const MembersPage = () => {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
+                                sx={{
+                                  filter:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "blur(8px)"
+                                      : "none",
+                                  userSelect:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "none"
+                                      : "auto",
+                                  pointerEvents:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "none"
+                                      : "auto",
+                                }}
                               >
                                 📧 {member.email}
                               </Typography>
@@ -903,6 +961,23 @@ export const MembersPage = () => {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
+                                sx={{
+                                  filter:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "blur(8px)"
+                                      : "none",
+                                  userSelect:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "none"
+                                      : "auto",
+                                  pointerEvents:
+                                    !isCurrentMemberVerified &&
+                                    member.id !== currentMember?.id
+                                      ? "none"
+                                      : "auto",
+                                }}
                               >
                                 📞 {member.phone}
                               </Typography>

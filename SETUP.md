@@ -73,3 +73,4 @@ Email templates are stored in the `email-templates/` folder. To sync them to Res
 - **CORS Issues**: Make sure your Supabase project allows requests from `localhost:5173`
 - **RLS Policies**: If you can't access data, check that RLS policies are correctly set
 - **Image Uploads**: Ensure storage buckets are created and have proper policies
+

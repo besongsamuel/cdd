@@ -8,3 +8,4 @@ COMMENT ON COLUMN suggestions.member_id IS 'ID of the member who submitted the s
 
 
 
+

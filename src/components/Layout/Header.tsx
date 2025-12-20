@@ -64,7 +64,7 @@ export const Header = () => {
       { label: t("eventsPrograms"), path: "/events" },
       { label: t("gallery"), path: "/gallery" },
       { label: t("sermons"), path: "/sermons" },
-      { label: "Message Boards", path: "/message-boards" },
+      { label: t("messageBoards"), path: "/message-boards" },
     ],
     getInvolved: [
       { label: t("donations"), path: "/donations" },

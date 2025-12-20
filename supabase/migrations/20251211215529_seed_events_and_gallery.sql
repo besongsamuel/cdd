@@ -193,3 +193,4 @@ INSERT INTO gallery_photos (image_url, event_id, caption, taken_at) VALUES
   );
 
 
+

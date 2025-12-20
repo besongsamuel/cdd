@@ -18,6 +18,7 @@ interface MemberData {
   title_id?: string;
   type?: "regular" | "leader";
   is_admin?: boolean;
+  is_verified?: boolean;
 }
 
 interface RequestPayload {
@@ -30,6 +31,7 @@ interface CreateMemberData {
   name: string;
   type: "regular" | "leader";
   is_admin: boolean;
+  is_verified?: boolean;
   user_id?: string;
   email?: string | null;
   bio?: string;
@@ -50,6 +52,7 @@ interface UpdateMemberData {
   title_id?: string;
   type?: "regular" | "leader";
   is_admin?: boolean;
+  is_verified?: boolean;
   email?: string;
   profile_picture_position?: { x: number; y: number };
 }
@@ -169,6 +172,13 @@ serve(async (req) => {
         type: payload.data.type || "regular",
         is_admin: payload.data.is_admin || false,
       };
+
+      // Set verification status based on who is creating the member
+      if (isAdmin) {
+        memberData.is_verified = true; // Admin-created members are verified
+      } else {
+        memberData.is_verified = false; // User signup members are unverified
+      }
 
       if (isAdmin) {
         // Admin can create members for others
@@ -371,6 +381,8 @@ serve(async (req) => {
           updateData.is_admin = payload.data.is_admin;
         if (payload.data.email !== undefined)
           updateData.email = payload.data.email;
+        if (payload.data.is_verified !== undefined)
+          updateData.is_verified = payload.data.is_verified;
         if (payload.data.profile_picture_position !== undefined)
           updateData.profile_picture_position =
             payload.data.profile_picture_position;

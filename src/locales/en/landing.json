@@ -35,5 +35,19 @@
   },
   "latestVideos": "Latest Videos",
   "videosSubtitle": "Watch our latest teachings and services",
-  "viewAllVideos": "View All Videos on YouTube"
+  "viewAllVideos": "View All Videos on YouTube",
+  "messageBoards": {
+    "title": "Join the Conversation",
+    "subtitle": "Connect with your church family through our community message boards",
+    "description": "Share insights, ask questions, participate in discussions, and build deeper relationships with fellow believers. Our message boards provide a safe, respectful space for meaningful conversations about faith, ministry, and life.",
+    "cta": "Explore Message Boards",
+    "features": {
+      "discussions": "Structured Discussions",
+      "discussionsDesc": "Organized boards for different topics and groups",
+      "community": "Community Building",
+      "communityDesc": "Connect with members who share your interests",
+      "safe": "Safe & Respectful",
+      "safeDesc": "Moderated environment for edifying conversations"
+    }
+  }
 }

@@ -12,12 +12,14 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -51,6 +53,7 @@ export const MembersManager = () => {
     phone: "",
     passions: [] as string[],
     title_id: "" as string | undefined,
+    is_verified: false,
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [uploadingProfile, setUploadingProfile] = useState(false);
@@ -91,6 +94,7 @@ export const MembersManager = () => {
         phone: member.phone || "",
         passions: member.passions || [],
         title_id: member.title_id || undefined,
+        is_verified: member.is_verified ?? false,
       });
     } else {
       setEditingMember(null);
@@ -102,6 +106,7 @@ export const MembersManager = () => {
         phone: "",
         passions: [],
         title_id: undefined,
+        is_verified: false,
       });
     }
     setDialogOpen(true);
@@ -182,6 +187,20 @@ export const MembersManager = () => {
     }
   };
 
+  const handleToggleVerified = async (
+    memberId: string,
+    newVerifiedStatus: boolean
+  ) => {
+    try {
+      await membersService.update(memberId, { is_verified: newVerifiedStatus });
+      // Reload members to get updated data
+      loadMembers();
+    } catch (error) {
+      console.error("Error toggling verification status:", error);
+      alert("Failed to update verification status");
+    }
+  };
+
   const handleProfilePictureSelected = (file: File) => {
     setProfilePicture(file);
   };
@@ -249,13 +268,14 @@ export const MembersManager = () => {
               <TableCell>Title</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell>Passions</TableCell>
+              <TableCell>Verified</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center">
+                <TableCell colSpan={10} align="center">
                   {searchQuery
                     ? "No members found matching your search"
                     : "No members found"}
@@ -285,6 +305,15 @@ export const MembersManager = () => {
                     {member.passions && member.passions.length > 0
                       ? member.passions.join(", ")
                       : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={member.is_verified ?? false}
+                      onChange={(e) =>
+                        handleToggleVerified(member.id, e.target.checked)
+                      }
+                      size="small"
+                    />
                   </TableCell>
                   <TableCell>
                     <IconButton
@@ -407,6 +436,18 @@ export const MembersManager = () => {
               rows={3}
             />
           )}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.is_verified}
+                onChange={(e) =>
+                  setFormData({ ...formData, is_verified: e.target.checked })
+                }
+              />
+            }
+            label="Verified"
+            sx={{ mt: 2 }}
+          />
           <Box margin="normal">
             <PassionsAutocomplete
               value={formData.passions}

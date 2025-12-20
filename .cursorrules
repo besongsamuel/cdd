@@ -23,3 +23,4 @@ When adding new database migrations, follow this procedure:
 - Always test migrations in a development environment before applying to production
 
 
+

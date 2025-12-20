@@ -32,3 +32,4 @@ CREATE POLICY "Admins can insert members" ON members
 -- - "Admins can delete any member" (DELETE) - allows admins to delete any member
 
 
+

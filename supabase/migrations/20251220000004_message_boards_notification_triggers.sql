@@ -164,3 +164,4 @@ CREATE TRIGGER trigger_notify_message_reported
 COMMENT ON FUNCTION notify_thread_reply() IS 'Creates notifications when a new message is posted in a thread';
 COMMENT ON FUNCTION notify_thread_created() IS 'Creates notifications when a new thread is created';
 COMMENT ON FUNCTION notify_message_reported() IS 'Notifies moderators when a message is reported';
+

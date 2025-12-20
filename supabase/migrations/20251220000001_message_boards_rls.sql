@@ -377,7 +377,7 @@ CREATE POLICY "Users can read own reports" ON message_reports
     (
       reported_by = get_member_id(auth.uid()) OR
       is_board_moderator(
-        (SELECT board_id FROM message_threads 
+        (SELECT message_threads.board_id FROM message_threads 
          INNER JOIN messages ON messages.thread_id = message_threads.id
          WHERE messages.id = message_reports.message_id),
         auth.uid()
@@ -392,7 +392,7 @@ CREATE POLICY "Moderators can update reports" ON message_reports
     auth.role() = 'authenticated' AND
     (
       is_board_moderator(
-        (SELECT board_id FROM message_threads 
+        (SELECT message_threads.board_id FROM message_threads 
          INNER JOIN messages ON messages.thread_id = message_threads.id
          WHERE messages.id = message_reports.message_id),
         auth.uid()
@@ -461,3 +461,4 @@ CREATE POLICY "Users can update own notifications" ON notifications
 -- System can insert notifications (via triggers/functions)
 CREATE POLICY "System can insert notifications" ON notifications
   FOR INSERT WITH CHECK (true);
+

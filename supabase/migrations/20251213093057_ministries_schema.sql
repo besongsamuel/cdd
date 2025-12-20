@@ -96,3 +96,4 @@ CREATE POLICY "Authenticated users can delete ministry join requests" ON ministr
 
 
 
+

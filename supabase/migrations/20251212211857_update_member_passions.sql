@@ -108,3 +108,4 @@ UPDATE members SET passions = ARRAY['Men''s Ministry', 'Accountability', 'Discip
 WHERE name = 'Luc Dubois';
 
 
+

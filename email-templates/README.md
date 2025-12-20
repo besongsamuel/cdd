@@ -51,3 +51,4 @@ The following variable names are reserved by Resend and cannot be used:
 ```
 
 Save this as `welcome.html` and run `npm run sync-templates` to sync it to Resend as a template named "welcome".
+

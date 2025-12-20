@@ -8,3 +8,4 @@ COMMENT ON COLUMN members.email IS 'Optional email address for member contact';
 COMMENT ON COLUMN members.phone IS 'Optional phone number for member contact';
 
 
+

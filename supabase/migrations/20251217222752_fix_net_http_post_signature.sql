@@ -57,3 +57,4 @@ EXCEPTION WHEN OTHERS THEN
     SQLERRM, SQLSTATE, edge_function_url;
 END;
 $$ LANGUAGE plpgsql;
+
