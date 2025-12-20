@@ -265,3 +265,159 @@ export interface Suggestion {
   updated_at: string;
   category_name?: string; // joined from suggestion_categories
 }
+
+// Message Board Types
+export type BoardAccessType =
+  | "public"
+  | "authenticated"
+  | "role_based"
+  | "department"
+  | "ministry";
+export type BoardAccessRuleType =
+  | "title"
+  | "department"
+  | "ministry"
+  | "member";
+export type BoardAccessLevel = "read" | "write" | "moderate";
+export type MessageReactionType = "like" | "love" | "prayer" | "check";
+export type MessageReportStatus =
+  | "pending"
+  | "reviewed"
+  | "resolved"
+  | "dismissed";
+
+export interface MessageBoard {
+  id: string;
+  name: string;
+  description?: string;
+  is_public: boolean;
+  access_type: BoardAccessType;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  archived_at?: string;
+  display_order: number;
+  pinned_announcement?: string;
+  created_by_name?: string; // joined from members
+}
+
+export interface BoardAccessRule {
+  id: string;
+  board_id: string;
+  rule_type: BoardAccessRuleType;
+  rule_value: string;
+  access_level: BoardAccessLevel;
+  created_at: string;
+  rule_value_name?: string; // joined from titles/departments/ministries/members
+}
+
+export interface BoardModerator {
+  id: string;
+  board_id: string;
+  member_id: string;
+  assigned_by?: string;
+  assigned_at: string;
+  member_name?: string; // joined from members
+  member_picture_url?: string; // joined from members
+}
+
+export interface MessageThread {
+  id: string;
+  board_id: string;
+  title: string;
+  created_by?: string;
+  is_locked: boolean;
+  is_pinned: boolean;
+  locked_by?: string;
+  locked_at?: string;
+  archived_at?: string;
+  last_message_at?: string;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+  created_by_name?: string; // joined from members
+  created_by_picture_url?: string; // joined from members
+}
+
+export interface Message {
+  id: string;
+  thread_id: string;
+  author_id?: string;
+  content: string;
+  content_html?: string;
+  reply_to_id?: string;
+  is_deleted: boolean;
+  deleted_at?: string;
+  deleted_by?: string;
+  edited_at?: string;
+  created_at: string;
+  updated_at: string;
+  author_name?: string; // joined from members
+  author_picture_url?: string; // joined from members
+  reply_to?: Message; // nested reply
+  reactions?: MessageReaction[]; // joined reactions
+}
+
+export interface MessageEdit {
+  id: string;
+  message_id: string;
+  content: string;
+  edited_at: string;
+}
+
+export interface MessageReaction {
+  id: string;
+  message_id: string;
+  member_id: string;
+  reaction_type: MessageReactionType;
+  created_at: string;
+  member_name?: string; // joined from members
+}
+
+export interface MessageReport {
+  id: string;
+  message_id: string;
+  reported_by?: string;
+  reason: string;
+  status: MessageReportStatus;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  reported_by_name?: string; // joined from members
+  message?: Message; // joined message
+}
+
+export interface BoardNotificationPreference {
+  id: string;
+  member_id: string;
+  board_id: string;
+  email_notifications: boolean;
+  in_app_notifications: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ModerationLog {
+  id: string;
+  action: string;
+  target_type: string;
+  target_id: string;
+  moderator_id?: string;
+  reason?: string;
+  created_at: string;
+  moderator_name?: string; // joined from members
+}
+
+export interface Notification {
+  id: string;
+  member_id: string;
+  type: string;
+  board_id?: string;
+  thread_id?: string;
+  message_id?: string;
+  is_read: boolean;
+  created_at: string;
+  board_name?: string; // joined from message_boards
+  thread_title?: string; // joined from message_threads
+  message_preview?: string; // joined from messages
+}

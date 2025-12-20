@@ -2,6 +2,7 @@ import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/Admin/AdminLayout";
+import { BoardsManager } from "./components/Admin/BoardsManager";
 import { ContactSubmissionsManager } from "./components/Admin/ContactSubmissionsManager";
 import { DepartmentsManager } from "./components/Admin/DepartmentsManager";
 import { DonationsManager } from "./components/Admin/DonationsManager";
@@ -20,6 +21,7 @@ import { ProfileRedirect } from "./components/common/ProfileRedirect";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./i18n/config";
+import { BoardDetailPage } from "./pages/BoardDetailPage";
 import { CompleteProfilePage } from "./pages/CompleteProfilePage";
 import { ContactPage } from "./pages/ContactPage";
 import { DepartmentDetailPage } from "./pages/DepartmentDetailPage";
@@ -32,6 +34,7 @@ import { GalleryPage } from "./pages/GalleryPage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MembersPage } from "./pages/MembersPage";
+import { MessageBoardPage } from "./pages/MessageBoardPage";
 import { MinistriesPage } from "./pages/MinistriesPage";
 import { MinistryDetailPage } from "./pages/MinistryDetailPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
@@ -41,6 +44,7 @@ import { ServicesPage } from "./pages/ServicesPage";
 import { SignupPage } from "./pages/SignupPage";
 import { SuggestionsPage } from "./pages/SuggestionsPage";
 import { TermsAndConditionsPage } from "./pages/TermsAndConditionsPage";
+import { ThreadDetailPage } from "./pages/ThreadDetailPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
 
@@ -269,6 +273,42 @@ function App() {
                       }
                     />
                     <Route
+                      path="/message-boards"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <MessageBoardPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/message-boards/:boardId"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <BoardDetailPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/message-boards/:boardId/threads/:threadId"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <ThreadDetailPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
                       path="/departments"
                       element={
                         <>
@@ -383,6 +423,10 @@ function App() {
                       <Route
                         path="ministries"
                         element={<MinistriesManager />}
+                      />
+                      <Route
+                        path="message-boards"
+                        element={<BoardsManager />}
                       />
                       <Route path="gallery" element={<GalleryManager />} />
                       <Route path="donations" element={<DonationsManager />} />

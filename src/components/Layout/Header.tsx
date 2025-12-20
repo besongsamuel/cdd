@@ -64,6 +64,7 @@ export const Header = () => {
       { label: t("eventsPrograms"), path: "/events" },
       { label: t("gallery"), path: "/gallery" },
       { label: t("sermons"), path: "/sermons" },
+      { label: "Message Boards", path: "/message-boards" },
     ],
     getInvolved: [
       { label: t("donations"), path: "/donations" },
@@ -302,7 +303,7 @@ export const Header = () => {
             <ListItemButton component={Link} to="/login">
               <ListItemText
                 primary="Member Login"
-                primaryTypographyProps={{ 
+                primaryTypographyProps={{
                   fontSize: "15px",
                   color: "text.secondary",
                   fontWeight: 400,
