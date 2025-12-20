@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unseen Replies - City of David</title>
+  </head>
+  <body
+    style="
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    "
+  >
+    <table
+      role="presentation"
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #f5f5f5;
+        padding: 40px 20px;
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 0">
+          <table
+            role="presentation"
+            style="
+              max-width: 600px;
+              width: 100%;
+              border-collapse: collapse;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  padding: 30px;
+                  text-align: center;
+                  border-radius: 8px 8px 0 0;
+                "
+              >
+                <h1
+                  style="
+                    color: #ffffff;
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin: 0;
+                  "
+                >
+                  New Replies Awaiting You
+                </h1>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 30px">
+                <p style="color: #333333; font-size: 16px; margin: 0 0 25px 0">
+                  Hello {{{MEMBER_NAME}}},
+                </p>
+                <p style="color: #555555; font-size: 15px; margin: 0 0 30px 0">
+                  You have <strong>{{{UNSEEN_COUNT}}}</strong> unseen replies in
+                  the message boards.
+                </p>
+
+                <!-- Summary Box -->
+                <div
+                  style="
+                    background-color: #f8f9fa;
+                    border-left: 4px solid #667eea;
+                    padding: 25px;
+                    border-radius: 4px;
+                    margin-bottom: 25px;
+                  "
+                >
+                  <table role="presentation" style="width: 100%">
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Board
+                        </div>
+                        <div
+                          style="
+                            color: #2c3e50;
+                            font-size: 16px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{{BOARD_NAME}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 15px">
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                          "
+                        >
+                          Threads with New Replies
+                        </div>
+                        <div
+                          style="
+                            color: #2c3e50;
+                            font-size: 16px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{{THREADS_SUMMARY}}}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div
+                          style="
+                            color: #666666;
+                            font-size: 12px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                          "
+                        >
+                          Total Unseen Replies
+                        </div>
+                        <div
+                          style="
+                            background-color: #ffffff;
+                            padding: 15px;
+                            border-radius: 4px;
+                            color: #667eea;
+                            font-size: 24px;
+                            font-weight: 700;
+                            text-align: center;
+                          "
+                        >
+                          {{{UNSEEN_COUNT}}}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Call to Action Button -->
+                <table
+                  role="presentation"
+                  style="width: 100%; margin-bottom: 30px"
+                >
+                  <tr>
+                    <td align="center">
+                      <a
+                        href="{{{VIEW_URL}}}"
+                        style="
+                          display: inline-block;
+                          background: linear-gradient(
+                            135deg,
+                            #667eea 0%,
+                            #764ba2 100%
+                          );
+                          color: #ffffff;
+                          text-decoration: none;
+                          padding: 14px 32px;
+                          border-radius: 6px;
+                          font-weight: 600;
+                          font-size: 16px;
+                          text-align: center;
+                        "
+                      >
+                        View Replies
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="
+                    color: #777777;
+                    font-size: 14px;
+                    margin: 0;
+                    text-align: center;
+                  "
+                >
+                  Visit the message boards to see all your new replies.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #f8f9fa;
+                  padding: 25px 30px;
+                  text-align: center;
+                  border-top: 1px solid #e9ecef;
+                  border-radius: 0 0 8px 8px;
+                "
+              >
+                <p
+                  style="
+                    color: #2c3e50;
+                    font-size: 15px;
+                    font-weight: 500;
+                    margin: 0 0 5px 0;
+                  "
+                >
+                  City of David Church
+                </p>
+                <p style="color: #888888; font-size: 12px; margin: 0">
+                  Automated notification from message boards
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
