@@ -50,7 +50,7 @@ BEGIN
       tp.member_id,
       tp.board_id,
       COUNT(DISTINCT tp.message_id) AS unseen_count,
-      MIN(tp.thread_id) AS first_thread_id
+      (array_agg(tp.thread_id ORDER BY tp.thread_id))[1] AS first_thread_id
     FROM thread_participants tp
     -- Only for members with in-app notifications enabled
     INNER JOIN board_notification_preferences bnp 
@@ -110,3 +110,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Comments
 COMMENT ON FUNCTION check_unseen_replies() IS 'Checks for unseen replies and creates batched notifications per user';
+

@@ -5,13 +5,12 @@
 CREATE OR REPLACE FUNCTION notify_thread_reply()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_thread_record RECORD;
   v_board_id UUID;
   v_author_member_id UUID;
 BEGIN
   -- Get thread and board info
-  SELECT mt.board_id, mt.created_by
-  INTO v_board_id, v_thread_record.created_by
+  SELECT mt.board_id
+  INTO v_board_id
   FROM message_threads mt
   WHERE mt.id = NEW.thread_id;
   
@@ -56,3 +55,5 @@ $$ LANGUAGE plpgsql;
 
 -- Comments
 COMMENT ON FUNCTION notify_thread_reply() IS 'Modified to disable immediate notifications - batched system handles these now';
+
+
