@@ -57,3 +57,4 @@ COMMENT ON COLUMN members.landscape_picture_url IS 'Landscape image for leaders'
 
 
 
+

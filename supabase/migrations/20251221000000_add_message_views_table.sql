@@ -34,3 +34,4 @@ CREATE POLICY "Members can insert their own message views" ON message_views
 
 -- Comments
 COMMENT ON TABLE message_views IS 'Tracks which messages have been seen by which members for batched notifications';
+

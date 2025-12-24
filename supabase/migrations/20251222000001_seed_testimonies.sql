@@ -51,3 +51,4 @@ INSERT INTO testimonies (content, author_name, is_featured, is_approved, display
   true,
   7
 );
+

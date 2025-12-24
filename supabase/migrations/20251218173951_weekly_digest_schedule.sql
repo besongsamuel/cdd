@@ -13,3 +13,4 @@ SELECT cron.schedule(
 -- Comment
 COMMENT ON EXTENSION pg_cron IS 'Enables scheduled jobs. Weekly digest runs every Saturday at 8am.';
 
+

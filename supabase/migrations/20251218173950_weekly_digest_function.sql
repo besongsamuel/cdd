@@ -421,3 +421,4 @@ COMMENT ON FUNCTION get_weekly_digest_data(TIMESTAMP WITH TIME ZONE, TIMESTAMP W
 COMMENT ON FUNCTION build_digest_html_sections(JSONB) IS 'Builds HTML sections for weekly digest email template';
 COMMENT ON FUNCTION send_weekly_digest() IS 'Sends weekly digest email to Elders and Apostles every Saturday at 8am';
 
+

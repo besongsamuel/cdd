@@ -29,3 +29,4 @@ CREATE POLICY "Authenticated users can delete gallery_photos" ON gallery_photos
 
 
 
+

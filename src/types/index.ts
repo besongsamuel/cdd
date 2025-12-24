@@ -357,6 +357,8 @@ export interface Message {
   author_picture_url?: string; // joined from members
   reply_to?: Message; // nested reply
   reactions?: MessageReaction[]; // joined reactions
+  replies?: Message[]; // nested replies for threaded view
+  replyCount?: number; // count of direct replies
 }
 
 export interface MessageEdit {

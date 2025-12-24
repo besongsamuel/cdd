@@ -99,3 +99,4 @@ CREATE POLICY "Authenticated users can delete donations" ON donations
 
 
 
+

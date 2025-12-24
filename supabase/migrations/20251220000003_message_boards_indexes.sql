@@ -57,3 +57,4 @@ CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(member_id,
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
 
+

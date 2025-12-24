@@ -256,3 +256,4 @@ COMMENT ON FUNCTION create_ministry_board() IS 'Automatically creates a board wh
 COMMENT ON TRIGGER trigger_create_department_board ON departments IS 'Creates a message board automatically when a department is created';
 COMMENT ON TRIGGER trigger_create_ministry_board ON ministries IS 'Creates a message board automatically when a ministry is created';
 
+

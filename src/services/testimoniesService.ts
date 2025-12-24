@@ -111,3 +111,4 @@ export const testimoniesService = {
     return this.update(id, { is_approved: false, is_featured: false });
   },
 };
+

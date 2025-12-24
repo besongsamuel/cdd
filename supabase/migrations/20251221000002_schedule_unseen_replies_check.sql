@@ -14,3 +14,4 @@ SELECT cron.schedule(
 
 -- Comments
 COMMENT ON FUNCTION check_unseen_replies() IS 'Scheduled to run hourly via pg_cron to check for unseen replies';
+

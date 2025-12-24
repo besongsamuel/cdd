@@ -23,3 +23,4 @@ $$ LANGUAGE plpgsql;
 -- Update comment to reflect the default behavior
 COMMENT ON FUNCTION get_edge_function_url() IS 'Returns the URL for the send-email edge function. Uses app.settings.supabase_url if set, otherwise defaults to https://orfqogsarfztvfsthmtz.supabase.co';
 
+

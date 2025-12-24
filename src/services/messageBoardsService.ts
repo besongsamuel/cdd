@@ -846,3 +846,4 @@ export const messageBoardsService = {
     return data || 0;
   },
 };
+

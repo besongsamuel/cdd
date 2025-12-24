@@ -297,3 +297,4 @@ COMMENT ON FUNCTION toggle_thread_lock(UUID, BOOLEAN, UUID) IS 'Locks or unlocks
 COMMENT ON FUNCTION toggle_thread_pin(UUID, BOOLEAN, UUID) IS 'Pins or unpins a thread (moderator only)';
 COMMENT ON FUNCTION create_notification(UUID, TEXT, UUID, UUID, UUID) IS 'Creates an in-app notification';
 
+

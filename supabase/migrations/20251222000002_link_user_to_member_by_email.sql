@@ -92,3 +92,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Comments
 COMMENT ON FUNCTION link_user_to_member_by_email(UUID, TEXT) IS 'Links an auth user to an existing member by matching email. Returns true if linked, false otherwise. Call with user_id and email.';
 COMMENT ON FUNCTION link_current_user_to_member_by_email() IS 'Links the currently authenticated user to an existing member by matching email. Can be called from application code after login.';
+

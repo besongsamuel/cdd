@@ -9,3 +9,4 @@ COMMENT ON COLUMN donations.member_id IS 'ID of the member who made the donation
 
 
 
+

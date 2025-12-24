@@ -71,3 +71,4 @@ INSERT INTO members (name, type, passions) VALUES
 
 
 
+

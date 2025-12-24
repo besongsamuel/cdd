@@ -69,3 +69,4 @@ COMMENT ON COLUMN testimonies.content IS 'The testimony text (2-3 lines recommen
 COMMENT ON COLUMN testimonies.is_featured IS 'Whether this testimony appears in the landing page slider';
 COMMENT ON COLUMN testimonies.is_approved IS 'Whether this testimony has been approved by an admin';
 COMMENT ON COLUMN testimonies.display_order IS 'Order in which testimonies appear in the slider';
+
