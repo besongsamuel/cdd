@@ -1,4 +1,7 @@
+import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import {
@@ -11,10 +14,16 @@ import {
   CircularProgress,
   Container,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
+  Fab,
+  FormControl,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Tooltip,
   Typography,
@@ -27,7 +36,8 @@ import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
 import { useHasPermission } from "../hooks/usePermissions";
 import { membersService } from "../services/membersService";
-import type { Member } from "../types";
+import { titlesService } from "../services/titlesService";
+import type { Member, MemberType, Title } from "../types";
 
 // Component for Leader Card with image error handling
 const LeaderCard = ({
@@ -36,6 +46,8 @@ const LeaderCard = ({
   onPositionUpdate,
   isCurrentMemberVerified,
   currentMemberId,
+  onEdit,
+  onDelete,
 }: {
   leader: Member;
   canManageMembers: boolean;
@@ -45,6 +57,8 @@ const LeaderCard = ({
   ) => Promise<void>;
   isCurrentMemberVerified: boolean;
   currentMemberId?: string;
+  onEdit?: (member: Member) => void;
+  onDelete?: (memberId: string) => void;
 }) => {
   const [position, setPosition] = useState(
     leader.profile_picture_position || { x: 50, y: 50 }
@@ -193,6 +207,28 @@ const LeaderCard = ({
               />
             </Tooltip>
           )}
+          {canManageMembers && (
+            <Box sx={{ display: "flex", gap: 0.5 }}>
+              {onEdit && (
+                <IconButton
+                  size="small"
+                  onClick={() => onEdit(leader)}
+                  sx={{ color: "primary.main" }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              )}
+              {onDelete && (
+                <IconButton
+                  size="small"
+                  onClick={() => onDelete(leader.id)}
+                  sx={{ color: "error.main" }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
+            </Box>
+          )}
         </Box>
         {leader.bio && (
           <Box sx={{ mb: 1 }}>
@@ -312,16 +348,29 @@ export const MembersPage = () => {
     null
   );
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [titles, setTitles] = useState<Title[]>([]);
+  const [memberFormData, setMemberFormData] = useState({
+    name: "",
+    type: "regular" as MemberType,
+    bio: "",
+    email: "",
+    phone: "",
+    title_id: "" as string | undefined,
+  });
 
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const [leadersData, regularData] = await Promise.all([
+        const [leadersData, regularData, titlesData] = await Promise.all([
           membersService.getLeaders(),
           membersService.getRegularMembers(),
+          titlesService.getAll(),
         ]);
         setLeaders(leadersData);
         setRegularMembers(regularData);
+        setTitles(titlesData);
       } catch (error) {
         console.error("Error loading members:", error);
       } finally {
@@ -342,6 +391,76 @@ export const MembersPage = () => {
     // Refresh leaders list to get updated data
     const leadersData = await membersService.getLeaders();
     setLeaders(leadersData);
+  };
+
+  const handleOpenMemberDialog = (member?: Member) => {
+    if (member) {
+      setEditingMember(member);
+      setMemberFormData({
+        name: member.name,
+        type: member.type,
+        bio: member.bio || "",
+        email: member.email || "",
+        phone: member.phone || "",
+        title_id: member.title_id || undefined,
+      });
+    } else {
+      setEditingMember(null);
+      setMemberFormData({
+        name: "",
+        type: "regular",
+        bio: "",
+        email: "",
+        phone: "",
+        title_id: undefined,
+      });
+    }
+    setMemberDialogOpen(true);
+  };
+
+  const handleCloseMemberDialog = () => {
+    setMemberDialogOpen(false);
+    setEditingMember(null);
+  };
+
+  const handleSaveMember = async () => {
+    try {
+      if (editingMember) {
+        await membersService.update(editingMember.id, memberFormData);
+      } else {
+        await membersService.create(memberFormData);
+      }
+      handleCloseMemberDialog();
+      // Reload members
+      const [leadersData, regularData] = await Promise.all([
+        membersService.getLeaders(),
+        membersService.getRegularMembers(),
+      ]);
+      setLeaders(leadersData);
+      setRegularMembers(regularData);
+    } catch (error) {
+      console.error("Error saving member:", error);
+      alert("Failed to save member");
+    }
+  };
+
+  const handleDeleteMember = async (memberId: string) => {
+    if (!window.confirm("Are you sure you want to delete this member?")) {
+      return;
+    }
+    try {
+      await membersService.delete(memberId);
+      // Reload members
+      const [leadersData, regularData] = await Promise.all([
+        membersService.getLeaders(),
+        membersService.getRegularMembers(),
+      ]);
+      setLeaders(leadersData);
+      setRegularMembers(regularData);
+    } catch (error) {
+      console.error("Error deleting member:", error);
+      alert("Failed to delete member");
+    }
   };
 
   // Calculate passion frequencies for word cloud
@@ -824,6 +943,8 @@ export const MembersPage = () => {
                           onPositionUpdate={handlePositionUpdate}
                           isCurrentMemberVerified={isCurrentMemberVerified}
                           currentMemberId={currentMember?.id}
+                          onEdit={canManageMembers ? handleOpenMemberDialog : undefined}
+                          onDelete={canManageMembers ? handleDeleteMember : undefined}
                         />
                       ))}
                     </Box>
@@ -922,6 +1043,24 @@ export const MembersPage = () => {
                                 }}
                               />
                             </Tooltip>
+                          )}
+                          {canManageMembers && (
+                            <Box sx={{ display: "flex", gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpenMemberDialog(member)}
+                                sx={{ color: "primary.main" }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteMember(member.id)}
+                                sx={{ color: "error.main" }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
                           )}
                         </Box>
                         {(member.email || member.phone) && (
@@ -1196,6 +1335,122 @@ export const MembersPage = () => {
             </>
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Add Member FAB */}
+      {canManageMembers && (
+        <Fab
+          color="primary"
+          aria-label="add member"
+          sx={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+          }}
+          onClick={() => handleOpenMemberDialog()}
+        >
+          <AddIcon />
+        </Fab>
+      )}
+
+      {/* Member Create/Edit Dialog */}
+      <Dialog
+        open={memberDialogOpen}
+        onClose={handleCloseMemberDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingMember ? "Edit Member" : "Add Member"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Name"
+            value={memberFormData.name}
+            onChange={(e) =>
+              setMemberFormData({ ...memberFormData, name: e.target.value })
+            }
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Email"
+            type="email"
+            value={memberFormData.email}
+            onChange={(e) =>
+              setMemberFormData({ ...memberFormData, email: e.target.value })
+            }
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Phone"
+            value={memberFormData.phone}
+            onChange={(e) =>
+              setMemberFormData({ ...memberFormData, phone: e.target.value })
+            }
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={memberFormData.type}
+              onChange={(e) =>
+                setMemberFormData({
+                  ...memberFormData,
+                  type: e.target.value as MemberType,
+                })
+              }
+              label="Type"
+            >
+              <MenuItem value="leader">Leader</MenuItem>
+              <MenuItem value="regular">Regular</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Title</InputLabel>
+            <Select
+              value={memberFormData.title_id || ""}
+              onChange={(e) =>
+                setMemberFormData({
+                  ...memberFormData,
+                  title_id: e.target.value || undefined,
+                })
+              }
+              label="Title"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {titles.map((title) => (
+                <MenuItem key={title.id} value={title.id}>
+                  {title.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {memberFormData.type === "leader" && (
+            <TextField
+              fullWidth
+              label="Bio"
+              value={memberFormData.bio}
+              onChange={(e) =>
+                setMemberFormData({ ...memberFormData, bio: e.target.value })
+              }
+              margin="normal"
+              multiline
+              rows={3}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseMemberDialog}>Cancel</Button>
+          <Button onClick={handleSaveMember} variant="contained">
+            {editingMember ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );

@@ -25,12 +25,14 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+// import { useHasPermission } from "../hooks/usePermissions"; // Reserved for future use
 import { messageBoardsService } from "../services/messageBoardsService";
 import type { MessageBoard } from "../types";
 
 export const MessageBoardPage = () => {
   const { t } = useTranslation("messageBoards");
   const { user } = useAuth();
+  // const canManageBoards = useHasPermission("manage:message-boards"); // Reserved for future use
   const [boards, setBoards] = useState<MessageBoard[]>([]);
   const [loading, setLoading] = useState(true);
   const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);

@@ -2,6 +2,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DeleteIcon from "@mui/icons-material/Delete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
   Alert,
@@ -15,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -142,6 +144,25 @@ export const MinistryDetailPage = () => {
       alert(err instanceof Error ? err.message : "Failed to add member");
     } finally {
       setAddingMember(false);
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!id || !canAddMembers) return;
+    if (!window.confirm("Are you sure you want to remove this member from the ministry?")) {
+      return;
+    }
+    try {
+      await ministryMembersService.removeMember(id, memberId);
+      // Reload members
+      const minMembers = await ministryMembersService.getByMinistry(id);
+      setMembers(minMembers);
+      // Reload all members to update available list
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+    } catch (err) {
+      console.error("Error removing member:", err);
+      alert(err instanceof Error ? err.message : "Failed to remove member");
     }
   };
 
@@ -734,6 +755,16 @@ export const MinistryDetailPage = () => {
                             </Box>
                           )}
                         </Box>
+                        {canAddMembers && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemoveMember(member.member_id)}
+                            sx={{ color: "error.main" }}
+                            title="Remove member"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Box>
                     </Card>
                   ))}
@@ -783,6 +814,16 @@ export const MinistryDetailPage = () => {
                             {member.member_name}
                           </Typography>
                         </Box>
+                        {canAddMembers && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemoveMember(member.member_id)}
+                            sx={{ color: "error.main" }}
+                            title="Remove member"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Box>
                     </Card>
                   ))}

@@ -6,23 +6,27 @@ import {
   Box,
   Container,
   Divider,
+  Fab,
   List,
   ListItem,
   ListItemText,
   Paper,
   Typography,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EventDetailDialog } from "../components/common/EventDetailDialog";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
+import { useHasPermission } from "../hooks/usePermissions";
 import { eventsService } from "../services/eventsService";
 import { regularProgramsService } from "../services/regularProgramsService";
 import type { Event, RegularProgram } from "../types";
 
 export const EventsPage = () => {
   const { t } = useTranslation("events");
+  const canManageEvents = useHasPermission("manage:events");
   const [regularPrograms, setRegularPrograms] = useState<RegularProgram[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -397,6 +401,25 @@ export const EventsPage = () => {
             </Box>
           </Box>
         </Container>
+
+        {/* Add Event FAB */}
+        {canManageEvents && (
+          <Fab
+            color="primary"
+            aria-label="add event"
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+            onClick={() => {
+              // Navigate to admin events page for now, or could open a dialog
+              window.location.href = "/admin/events";
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
       </Box>
 
       <EventDetailDialog

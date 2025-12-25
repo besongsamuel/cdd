@@ -1,10 +1,21 @@
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
   CardContent,
   CardMedia,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fab,
+  IconButton,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -12,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
+import { useHasPermission } from "../hooks/usePermissions";
 import { departmentMembersService } from "../services/departmentMembersService";
 import { departmentsService } from "../services/departmentsService";
 import type { Department } from "../types";
@@ -19,9 +31,19 @@ import type { Department } from "../types";
 export const DepartmentsPage = () => {
   const { t } = useTranslation("departments");
   const navigate = useNavigate();
+  const canManageDepartments = useHasPermission("manage:departments");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
+  const [departmentFormData, setDepartmentFormData] = useState({
+    name: "",
+    description: "",
+    image_url: "",
+    display_order: 0,
+    is_active: true,
+  });
 
   useEffect(() => {
     const loadDepartments = async () => {
@@ -47,6 +69,80 @@ export const DepartmentsPage = () => {
 
     loadDepartments();
   }, []);
+
+  const handleOpenDepartmentDialog = (department?: Department) => {
+    if (department) {
+      setEditingDepartment(department);
+      setDepartmentFormData({
+        name: department.name,
+        description: department.description || "",
+        image_url: department.image_url || "",
+        display_order: department.display_order,
+        is_active: department.is_active,
+      });
+    } else {
+      setEditingDepartment(null);
+      setDepartmentFormData({
+        name: "",
+        description: "",
+        image_url: "",
+        display_order: departments.length,
+        is_active: true,
+      });
+    }
+    setDepartmentDialogOpen(true);
+  };
+
+  const handleCloseDepartmentDialog = () => {
+    setDepartmentDialogOpen(false);
+    setEditingDepartment(null);
+  };
+
+  const handleSaveDepartment = async () => {
+    try {
+      if (editingDepartment) {
+        await departmentsService.update(editingDepartment.id, departmentFormData);
+      } else {
+        await departmentsService.create(departmentFormData);
+      }
+      handleCloseDepartmentDialog();
+      // Reload departments
+      const activeDepartments = await departmentsService.getActive();
+      setDepartments(activeDepartments);
+      // Reload member counts
+      const counts: Record<string, number> = {};
+      for (const dept of activeDepartments) {
+        const members = await departmentMembersService.getByDepartment(dept.id);
+        counts[dept.id] = members.length;
+      }
+      setMemberCounts(counts);
+    } catch (error) {
+      console.error("Error saving department:", error);
+      alert("Failed to save department");
+    }
+  };
+
+  const handleDeleteDepartment = async (departmentId: string) => {
+    if (!window.confirm("Are you sure you want to delete this department?")) {
+      return;
+    }
+    try {
+      await departmentsService.delete(departmentId);
+      // Reload departments
+      const activeDepartments = await departmentsService.getActive();
+      setDepartments(activeDepartments);
+      // Reload member counts
+      const counts: Record<string, number> = {};
+      for (const dept of activeDepartments) {
+        const members = await departmentMembersService.getByDepartment(dept.id);
+        counts[dept.id] = members.length;
+      }
+      setMemberCounts(counts);
+    } catch (error) {
+      console.error("Error deleting department:", error);
+      alert("Failed to delete department");
+    }
+  };
 
   if (loading) {
     return (
@@ -286,7 +382,43 @@ export const DepartmentsPage = () => {
               }}
             >
               {departments.map((department) => (
-                <Box key={department.id}>
+                <Box key={department.id} sx={{ position: "relative" }}>
+                  {canManageDepartments && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 10,
+                        display: "flex",
+                        gap: 0.5,
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        borderRadius: 1,
+                        p: 0.5,
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenDepartmentDialog(department);
+                        }}
+                        sx={{ color: "primary.main" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDepartment(department.id);
+                        }}
+                        sx={{ color: "error.main" }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )}
                   <Card
                     sx={{
                       height: "100%",
@@ -390,10 +522,100 @@ export const DepartmentsPage = () => {
             </Box>
           )}
         </Container>
+
+        {/* Add Department FAB */}
+        {canManageDepartments && (
+          <Fab
+            color="primary"
+            aria-label="add department"
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+            onClick={() => handleOpenDepartmentDialog()}
+          >
+            <AddIcon />
+          </Fab>
+        )}
+
+        {/* Department Create/Edit Dialog */}
+        <Dialog
+          open={departmentDialogOpen}
+          onClose={handleCloseDepartmentDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {editingDepartment ? "Edit Department" : "Add Department"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Name"
+              value={departmentFormData.name}
+              onChange={(e) =>
+                setDepartmentFormData({
+                  ...departmentFormData,
+                  name: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={departmentFormData.description}
+              onChange={(e) =>
+                setDepartmentFormData({
+                  ...departmentFormData,
+                  description: e.target.value,
+                })
+              }
+              margin="normal"
+              multiline
+              rows={4}
+            />
+            <TextField
+              fullWidth
+              label="Image URL"
+              value={departmentFormData.image_url}
+              onChange={(e) =>
+                setDepartmentFormData({
+                  ...departmentFormData,
+                  image_url: e.target.value,
+                })
+              }
+              margin="normal"
+              helperText="URL to department image"
+            />
+            <TextField
+              fullWidth
+              label="Display Order"
+              type="number"
+              value={departmentFormData.display_order}
+              onChange={(e) =>
+                setDepartmentFormData({
+                  ...departmentFormData,
+                  display_order: parseInt(e.target.value) || 0,
+                })
+              }
+              margin="normal"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDepartmentDialog}>Cancel</Button>
+            <Button onClick={handleSaveDepartment} variant="contained">
+              {editingDepartment ? "Update" : "Create"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );
 };
+
 
 
 

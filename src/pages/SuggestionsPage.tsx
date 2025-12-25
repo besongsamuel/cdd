@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
+// import { useHasPermission } from "../hooks/usePermissions"; // Reserved for future use
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { suggestionCategoriesService } from "../services/suggestionCategoriesService";
@@ -25,6 +26,7 @@ import type { SuggestionCategory } from "../types";
 export const SuggestionsPage = () => {
   const { t } = useTranslation("suggestions");
   const { currentMember, user } = useAuth();
+  // const canModerateSuggestions = useHasPermission("moderate:suggestions"); // Reserved for future use
   const [categories, setCategories] = useState<SuggestionCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({

@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+// import { useHasPermission } from "../hooks/usePermissions"; // Reserved for future use
 import { requestsService } from "../services/requestsService";
 import type { RequestType } from "../types";
 
@@ -23,6 +24,7 @@ export const RequestsPage = () => {
   const { t } = useTranslation("requests");
   const navigate = useNavigate();
   const { user, currentMember } = useAuth();
+  // const canModerateRequests = useHasPermission("moderate:requests"); // Reserved for future use
   const [formData, setFormData] = useState({
     type: "prayer" as RequestType,
     name: "",

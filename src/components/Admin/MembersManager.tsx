@@ -2,38 +2,41 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
+import SecurityIcon from "@mui/icons-material/Security";
 import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
+    Avatar,
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { membersService } from "../../services/membersService";
+import { permissionsService } from "../../services/permissionsService";
 import { profileService } from "../../services/profileService";
+import { roleService } from "../../services/roleService";
 import { titlesService } from "../../services/titlesService";
-import type { Member, MemberType, Title } from "../../types";
+import type { Member, MemberType, Permission, Role, Title } from "../../types";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { PassionsAutocomplete } from "../common/PassionsAutocomplete";
 import { ProfilePictureUpload } from "../common/ProfilePictureUpload";
@@ -57,11 +60,33 @@ export const MembersManager = () => {
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [uploadingProfile, setUploadingProfile] = useState(false);
+  const [rolesPermissionsDialogOpen, setRolesPermissionsDialogOpen] = useState(false);
+  const [selectedMemberForRoles, setSelectedMemberForRoles] = useState<Member | null>(null);
+  const [allRoles, setAllRoles] = useState<Role[]>([]);
+  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+  const [memberRoles, setMemberRoles] = useState<Role[]>([]);
+  const [memberDirectPermissions, setMemberDirectPermissions] = useState<Permission[]>([]);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+  const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
 
   useEffect(() => {
     loadMembers();
     loadTitles();
+    loadRolesAndPermissions();
   }, []);
+
+  const loadRolesAndPermissions = async () => {
+    try {
+      const [rolesData, permissionsData] = await Promise.all([
+        roleService.getAllRoles(),
+        permissionsService.getAll(),
+      ]);
+      setAllRoles(rolesData);
+      setAllPermissions(permissionsData);
+    } catch (error) {
+      console.error("Error loading roles and permissions:", error);
+    }
+  };
 
   const loadTitles = async () => {
     try {
@@ -209,6 +234,76 @@ export const MembersManager = () => {
     setProfilePicture(null);
   };
 
+  const handleOpenRolesPermissionsDialog = async (member: Member) => {
+    setSelectedMemberForRoles(member);
+    try {
+      const [roles, directPermissions] = await Promise.all([
+        roleService.getMemberRoles(member.id),
+        roleService.getMemberDirectPermissions(member.id),
+      ]);
+      setMemberRoles(roles);
+      setMemberDirectPermissions(directPermissions);
+      setSelectedRoleIds(roles.map((r) => r.id));
+      setSelectedPermissionIds(directPermissions.map((p) => p.id));
+      setRolesPermissionsDialogOpen(true);
+    } catch (error) {
+      console.error("Error loading member roles and permissions:", error);
+      alert("Failed to load roles and permissions");
+    }
+  };
+
+  const handleCloseRolesPermissionsDialog = () => {
+    setRolesPermissionsDialogOpen(false);
+    setSelectedMemberForRoles(null);
+    setMemberRoles([]);
+    setMemberDirectPermissions([]);
+    setSelectedRoleIds([]);
+    setSelectedPermissionIds([]);
+  };
+
+  const handleSaveRolesPermissions = async () => {
+    if (!selectedMemberForRoles) return;
+
+    try {
+      // Get current roles and permissions
+      const currentRoleIds = memberRoles.map((r) => r.id);
+      const currentPermissionIds = memberDirectPermissions.map((p) => p.id);
+
+      // Find roles to add and remove
+      const rolesToAdd = selectedRoleIds.filter((id) => !currentRoleIds.includes(id));
+      const rolesToRemove = currentRoleIds.filter((id) => !selectedRoleIds.includes(id));
+
+      // Find permissions to add and remove
+      const permissionsToAdd = selectedPermissionIds.filter(
+        (id) => !currentPermissionIds.includes(id)
+      );
+      const permissionsToRemove = currentPermissionIds.filter(
+        (id) => !selectedPermissionIds.includes(id)
+      );
+
+      // Apply changes
+      for (const roleId of rolesToAdd) {
+        await roleService.assignRole(selectedMemberForRoles.id, roleId);
+      }
+      for (const roleId of rolesToRemove) {
+        await roleService.removeRole(selectedMemberForRoles.id, roleId);
+      }
+
+      for (const permissionId of permissionsToAdd) {
+        await roleService.assignPermission(selectedMemberForRoles.id, permissionId);
+      }
+      for (const permissionId of permissionsToRemove) {
+        await roleService.removePermission(selectedMemberForRoles.id, permissionId);
+      }
+
+      await loadMembers();
+      handleCloseRolesPermissionsDialog();
+    } catch (error) {
+      console.error("Error saving roles and permissions:", error);
+      alert("Failed to save roles and permissions");
+    }
+  };
+
   const filteredMembers = members.filter((member) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
@@ -319,12 +414,22 @@ export const MembersManager = () => {
                     <IconButton
                       size="small"
                       onClick={() => handleOpenDialog(member)}
+                      title="Edit Member"
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       size="small"
+                      onClick={() => handleOpenRolesPermissionsDialog(member)}
+                      title="Manage Roles & Permissions"
+                      color="primary"
+                    >
+                      <SecurityIcon />
+                    </IconButton>
+                    <IconButton
+                      size="small"
                       onClick={() => handleDelete(member.id)}
+                      title="Delete Member"
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -464,6 +569,118 @@ export const MembersManager = () => {
             disabled={uploadingProfile}
           >
             {uploadingProfile ? "Uploading..." : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Roles & Permissions Dialog */}
+      <Dialog
+        open={rolesPermissionsDialogOpen}
+        onClose={handleCloseRolesPermissionsDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Roles & Permissions: {selectedMemberForRoles?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Roles
+            </Typography>
+            <Box sx={{ maxHeight: 200, overflow: "auto", mb: 3 }}>
+              {allRoles.map((role) => (
+                <FormControlLabel
+                  key={role.id}
+                  control={
+                    <Switch
+                      checked={selectedRoleIds.includes(role.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedRoleIds([...selectedRoleIds, role.id]);
+                        } else {
+                          setSelectedRoleIds(
+                            selectedRoleIds.filter((id) => id !== role.id)
+                          );
+                        }
+                      }}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                        {role.name}
+                        {role.is_superuser && (
+                          <Chip
+                            label="Superuser"
+                            size="small"
+                            color="primary"
+                            sx={{ ml: 1 }}
+                          />
+                        )}
+                      </Typography>
+                      {role.description && (
+                        <Typography variant="caption" color="text.secondary">
+                          {role.description}
+                        </Typography>
+                      )}
+                    </Box>
+                  }
+                />
+              ))}
+            </Box>
+
+            <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+              Direct Permissions
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Permissions assigned directly to this member (in addition to permissions from roles)
+            </Typography>
+            <Box sx={{ maxHeight: 300, overflow: "auto" }}>
+              {allPermissions.map((permission) => (
+                <FormControlLabel
+                  key={permission.id}
+                  control={
+                    <Switch
+                      checked={selectedPermissionIds.includes(permission.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedPermissionIds([
+                            ...selectedPermissionIds,
+                            permission.id,
+                          ]);
+                        } else {
+                          setSelectedPermissionIds(
+                            selectedPermissionIds.filter((id) => id !== permission.id)
+                          );
+                        }
+                      }}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily: "monospace", fontWeight: "bold" }}
+                      >
+                        {permission.name}
+                      </Typography>
+                      {permission.description && (
+                        <Typography variant="caption" color="text.secondary">
+                          {permission.description}
+                        </Typography>
+                      )}
+                    </Box>
+                  }
+                />
+              ))}
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRolesPermissionsDialog}>Cancel</Button>
+          <Button onClick={handleSaveRolesPermissions} variant="contained">
+            Save
           </Button>
         </DialogActions>
       </Dialog>

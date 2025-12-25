@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import {
@@ -5,6 +6,7 @@ import {
   Container,
   Dialog,
   DialogContent,
+  Fab,
   IconButton,
   ImageList,
   ImageListItem,
@@ -19,6 +21,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
+import { useHasPermission } from "../hooks/usePermissions";
 import { eventsService } from "../services/eventsService";
 import { galleryService } from "../services/galleryService";
 import type { Event, GalleryPhoto } from "../types";
@@ -47,6 +50,7 @@ function TabPanel(props: TabPanelProps) {
 
 export const GalleryPage = () => {
   const { t } = useTranslation("gallery");
+  const canManageGallery = useHasPermission("manage:gallery");
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.only("xs"));
   const isSm = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -490,6 +494,25 @@ export const GalleryPage = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Upload Photo FAB */}
+        {canManageGallery && (
+          <Fab
+            color="primary"
+            aria-label="upload photo"
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+            onClick={() => {
+              // Navigate to admin gallery page for now
+              window.location.href = "/admin/gallery";
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
       </Container>
     </>
   );

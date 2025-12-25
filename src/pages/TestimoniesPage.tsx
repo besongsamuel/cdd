@@ -15,11 +15,14 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SEO } from "../components/SEO";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
+import { useHasPermission } from "../hooks/usePermissions";
 import { testimoniesService } from "../services/testimoniesService";
 import type { Testimony } from "../types";
 
 export const TestimoniesPage = () => {
   const { t } = useTranslation("testimonies");
+  const canModerateTestimonies = useHasPermission("moderate:testimonies");
+  // const canManageTestimonies = useHasPermission("manage:testimonies"); // Reserved for future use
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -35,11 +38,16 @@ export const TestimoniesPage = () => {
 
   useEffect(() => {
     loadTestimonies();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canModerateTestimonies]);
 
   const loadTestimonies = async () => {
     try {
-      const data = await testimoniesService.getApproved();
+      // If user can moderate, show all testimonies (including pending)
+      // Otherwise, show only approved
+      const data = canModerateTestimonies
+        ? await testimoniesService.getAll()
+        : await testimoniesService.getApproved();
       setTestimonies(data);
     } catch (err) {
       console.error("Error loading testimonies:", err);
@@ -366,4 +374,5 @@ export const TestimoniesPage = () => {
     </>
   );
 };
+
 

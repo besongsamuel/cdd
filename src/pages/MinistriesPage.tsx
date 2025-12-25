@@ -1,12 +1,23 @@
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import GroupsIcon from "@mui/icons-material/Groups";
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
   CardContent,
   CardMedia,
   Chip,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fab,
+  IconButton,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -14,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
+import { useHasPermission } from "../hooks/usePermissions";
 import { ministryMembersService } from "../services/ministryMembersService";
 import { ministriesService } from "../services/ministriesService";
 import type { Ministry } from "../types";
@@ -21,9 +33,19 @@ import type { Ministry } from "../types";
 export const MinistriesPage = () => {
   const { t } = useTranslation("ministries");
   const navigate = useNavigate();
+  const canManageMinistries = useHasPermission("manage:ministries");
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [ministryDialogOpen, setMinistryDialogOpen] = useState(false);
+  const [editingMinistry, setEditingMinistry] = useState<Ministry | null>(null);
+  const [ministryFormData, setMinistryFormData] = useState({
+    name: "",
+    description: "",
+    image_url: "",
+    display_order: 0,
+    is_active: true,
+  });
 
   useEffect(() => {
     const loadMinistries = async () => {
@@ -49,6 +71,80 @@ export const MinistriesPage = () => {
 
     loadMinistries();
   }, []);
+
+  const handleOpenMinistryDialog = (ministry?: Ministry) => {
+    if (ministry) {
+      setEditingMinistry(ministry);
+      setMinistryFormData({
+        name: ministry.name,
+        description: ministry.description || "",
+        image_url: ministry.image_url || "",
+        display_order: ministry.display_order,
+        is_active: ministry.is_active,
+      });
+    } else {
+      setEditingMinistry(null);
+      setMinistryFormData({
+        name: "",
+        description: "",
+        image_url: "",
+        display_order: ministries.length,
+        is_active: true,
+      });
+    }
+    setMinistryDialogOpen(true);
+  };
+
+  const handleCloseMinistryDialog = () => {
+    setMinistryDialogOpen(false);
+    setEditingMinistry(null);
+  };
+
+  const handleSaveMinistry = async () => {
+    try {
+      if (editingMinistry) {
+        await ministriesService.update(editingMinistry.id, ministryFormData);
+      } else {
+        await ministriesService.create(ministryFormData);
+      }
+      handleCloseMinistryDialog();
+      // Reload ministries
+      const activeMinistries = await ministriesService.getActive();
+      setMinistries(activeMinistries);
+      // Reload member counts
+      const counts: Record<string, number> = {};
+      for (const ministry of activeMinistries) {
+        const members = await ministryMembersService.getByMinistry(ministry.id);
+        counts[ministry.id] = members.length;
+      }
+      setMemberCounts(counts);
+    } catch (error) {
+      console.error("Error saving ministry:", error);
+      alert("Failed to save ministry");
+    }
+  };
+
+  const handleDeleteMinistry = async (ministryId: string) => {
+    if (!window.confirm("Are you sure you want to delete this ministry?")) {
+      return;
+    }
+    try {
+      await ministriesService.delete(ministryId);
+      // Reload ministries
+      const activeMinistries = await ministriesService.getActive();
+      setMinistries(activeMinistries);
+      // Reload member counts
+      const counts: Record<string, number> = {};
+      for (const ministry of activeMinistries) {
+        const members = await ministryMembersService.getByMinistry(ministry.id);
+        counts[ministry.id] = members.length;
+      }
+      setMemberCounts(counts);
+    } catch (error) {
+      console.error("Error deleting ministry:", error);
+      alert("Failed to delete ministry");
+    }
+  };
 
   if (loading) {
     return (
@@ -394,8 +490,45 @@ export const MinistriesPage = () => {
                         transform: "translateY(0)",
                       },
                     },
+                    position: "relative",
                   }}
                 >
+                  {canManageMinistries && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 10,
+                        display: "flex",
+                        gap: 0.5,
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        borderRadius: 1,
+                        p: 0.5,
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenMinistryDialog(ministry);
+                        }}
+                        sx={{ color: "primary.main" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMinistry(ministry.id);
+                        }}
+                        sx={{ color: "error.main" }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )}
                   <Card
                     sx={{
                       height: "100%",
@@ -614,6 +747,95 @@ export const MinistriesPage = () => {
             </Box>
           )}
         </Container>
+
+        {/* Add Ministry FAB */}
+        {canManageMinistries && (
+          <Fab
+            color="primary"
+            aria-label="add ministry"
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+            onClick={() => handleOpenMinistryDialog()}
+          >
+            <AddIcon />
+          </Fab>
+        )}
+
+        {/* Ministry Create/Edit Dialog */}
+        <Dialog
+          open={ministryDialogOpen}
+          onClose={handleCloseMinistryDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {editingMinistry ? "Edit Ministry" : "Add Ministry"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Name"
+              value={ministryFormData.name}
+              onChange={(e) =>
+                setMinistryFormData({
+                  ...ministryFormData,
+                  name: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={ministryFormData.description}
+              onChange={(e) =>
+                setMinistryFormData({
+                  ...ministryFormData,
+                  description: e.target.value,
+                })
+              }
+              margin="normal"
+              multiline
+              rows={4}
+            />
+            <TextField
+              fullWidth
+              label="Image URL"
+              value={ministryFormData.image_url}
+              onChange={(e) =>
+                setMinistryFormData({
+                  ...ministryFormData,
+                  image_url: e.target.value,
+                })
+              }
+              margin="normal"
+              helperText="URL to ministry image"
+            />
+            <TextField
+              fullWidth
+              label="Display Order"
+              type="number"
+              value={ministryFormData.display_order}
+              onChange={(e) =>
+                setMinistryFormData({
+                  ...ministryFormData,
+                  display_order: parseInt(e.target.value) || 0,
+                })
+              }
+              margin="normal"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseMinistryDialog}>Cancel</Button>
+            <Button onClick={handleSaveMinistry} variant="contained">
+              {editingMinistry ? "Update" : "Create"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );

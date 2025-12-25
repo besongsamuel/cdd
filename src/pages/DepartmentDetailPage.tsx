@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
   Avatar,
@@ -12,6 +13,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -139,6 +141,25 @@ export const DepartmentDetailPage = () => {
       alert(err instanceof Error ? err.message : "Failed to add member");
     } finally {
       setAddingMember(false);
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!id || !canAddMembers) return;
+    if (!window.confirm("Are you sure you want to remove this member from the department?")) {
+      return;
+    }
+    try {
+      await departmentMembersService.removeMember(id, memberId);
+      // Reload members
+      const deptMembers = await departmentMembersService.getByDepartment(id);
+      setMembers(deptMembers);
+      // Reload all members to update available list
+      const allMembersData = await membersService.getAll();
+      setAllMembers(allMembersData);
+    } catch (err) {
+      console.error("Error removing member:", err);
+      alert(err instanceof Error ? err.message : "Failed to remove member");
     }
   };
 
@@ -486,6 +507,16 @@ export const DepartmentDetailPage = () => {
                               </Box>
                             )}
                           </Box>
+                          {canAddMembers && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRemoveMember(member.member_id)}
+                              sx={{ color: "error.main" }}
+                              title="Remove member"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          )}
                         </Box>
                       </Card>
                     ))}
@@ -535,6 +566,16 @@ export const DepartmentDetailPage = () => {
                               {member.member_name}
                             </Typography>
                           </Box>
+                          {canAddMembers && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRemoveMember(member.member_id)}
+                              sx={{ color: "error.main" }}
+                              title="Remove member"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          )}
                         </Box>
                       </Card>
                     ))}
