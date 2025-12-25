@@ -160,6 +160,8 @@ export const membersService = {
     if (member.email !== undefined) edgeFunctionData.email = member.email;
     if (member.title_id !== undefined)
       edgeFunctionData.title_id = member.title_id;
+    if (member.is_verified !== undefined)
+      edgeFunctionData.is_verified = member.is_verified;
 
     // Note: type, is_admin, and user_id are automatically set by the edge function
     return callEdgeFunction("create", undefined, edgeFunctionData);
@@ -184,6 +186,8 @@ export const membersService = {
     if (member.type !== undefined) edgeFunctionData.type = member.type;
     if (member.is_admin !== undefined)
       edgeFunctionData.is_admin = member.is_admin;
+    if (member.is_verified !== undefined)
+      edgeFunctionData.is_verified = member.is_verified;
     if (member.email !== undefined) edgeFunctionData.email = member.email;
     if (member.profile_picture_position !== undefined)
       edgeFunctionData.profile_picture_position =

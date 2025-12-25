@@ -1,12 +1,15 @@
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  IconButton,
+  Typography,
 } from "@mui/material";
 import type { Event } from "../../types";
 
@@ -14,14 +17,27 @@ interface EventDetailDialogProps {
   open: boolean;
   event: Event | null;
   onClose: () => void;
+  onEdit?: (event: Event) => void;
+  onDelete?: (eventId: string) => void;
+  canManage?: boolean;
 }
 
 export const EventDetailDialog = ({
   open,
   event,
   onClose,
+  onEdit,
+  onDelete,
+  canManage = false,
 }: EventDetailDialogProps) => {
   if (!event) return null;
+
+  const handleDelete = () => {
+    if (onDelete && window.confirm("Are you sure you want to delete this event?")) {
+      onDelete(event.id);
+      onClose();
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -34,10 +50,37 @@ export const EventDetailDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h5" component="div">
           {event.title}
         </Typography>
+        {canManage && (
+          <Box>
+            {onEdit && (
+              <IconButton
+                onClick={() => {
+                  onEdit(event);
+                  onClose();
+                }}
+                color="primary"
+                size="small"
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            {onDelete && (
+              <IconButton onClick={handleDelete} color="error" size="small">
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
+        )}
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

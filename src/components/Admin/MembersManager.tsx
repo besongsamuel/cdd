@@ -29,6 +29,7 @@ import {
     TableRow,
     TextField,
     Typography,
+    alpha,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { membersService } from "../../services/membersService";
@@ -68,6 +69,7 @@ export const MembersManager = () => {
   const [memberDirectPermissions, setMemberDirectPermissions] = useState<Permission[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
+  const [memberRolesMap, setMemberRolesMap] = useState<Record<string, Role[]>>({});
 
   useEffect(() => {
     loadMembers();
@@ -101,6 +103,11 @@ export const MembersManager = () => {
     try {
       const data = await membersService.getAll();
       setMembers(data);
+      
+      // Load roles for all members in a single query
+      const memberIds = data.map((member) => member.id);
+      const rolesMap = await roleService.getAllMemberRoles(memberIds);
+      setMemberRolesMap(rolesMap);
     } catch (error) {
       console.error("Error loading members:", error);
     } finally {
@@ -361,6 +368,7 @@ export const MembersManager = () => {
               <TableCell>Phone</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Title</TableCell>
+              <TableCell>Roles</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell>Passions</TableCell>
               <TableCell>Verified</TableCell>
@@ -370,7 +378,7 @@ export const MembersManager = () => {
           <TableBody>
             {filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} align="center">
+                <TableCell colSpan={11} align="center">
                   {searchQuery
                     ? "No members found matching your search"
                     : "No members found"}
@@ -395,6 +403,23 @@ export const MembersManager = () => {
                     <Chip label={member.type} size="small" />
                   </TableCell>
                   <TableCell>{member.title_name || "-"}</TableCell>
+                  <TableCell>
+                    {memberRolesMap[member.id] && memberRolesMap[member.id].length > 0 ? (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {memberRolesMap[member.id].map((role) => (
+                          <Chip
+                            key={role.id}
+                            label={role.name}
+                            size="small"
+                            color={role.is_superuser ? "primary" : "default"}
+                            variant={role.is_superuser ? "filled" : "outlined"}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
                   <TableCell>{member.bio || "-"}</TableCell>
                   <TableCell>
                     {member.passions && member.passions.length > 0
@@ -585,6 +610,31 @@ export const MembersManager = () => {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
+            <Box
+              sx={{
+                mb: 3,
+                p: 2,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                borderRadius: 1,
+                border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+              }}
+            >
+              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                Effective Permissions
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                This member has access to all permissions from their assigned roles plus any direct permissions.
+                {selectedMemberForRoles && memberRoles.some((r) => r.is_superuser) && (
+                  <Chip
+                    label="Superuser - Has all permissions"
+                    size="small"
+                    color="primary"
+                    sx={{ ml: 1, mt: 0.5 }}
+                  />
+                )}
+              </Typography>
+            </Box>
+            
             <Typography variant="h6" gutterBottom>
               Roles
             </Typography>

@@ -1,24 +1,34 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
+  alpha,
   Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
   Container,
   Dialog,
+  DialogActions,
   DialogContent,
+  DialogTitle,
   Fab,
+  FormControl,
   IconButton,
-  ImageList,
-  ImageListItem,
-  ImageListItemBar,
+  InputLabel,
+  MenuItem,
+  Select,
   Tab,
   Tabs,
+  TextField,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ImageUpload } from "../components/common/ImageUpload";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useHasPermission } from "../hooks/usePermissions";
@@ -51,11 +61,6 @@ function TabPanel(props: TabPanelProps) {
 export const GalleryPage = () => {
   const { t } = useTranslation("gallery");
   const canManageGallery = useHasPermission("manage:gallery");
-  const theme = useTheme();
-  const isXs = useMediaQuery(theme.breakpoints.only("xs"));
-  const isSm = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
-  const imageListCols = isXs ? 1 : isSm ? 2 : 3;
 
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -64,6 +69,15 @@ export const GalleryPage = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [photoFormData, setPhotoFormData] = useState({
+    image_url: "",
+    caption: "",
+    event_id: "" as string | undefined,
+    taken_at: "",
+  });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -105,6 +119,83 @@ export const GalleryPage = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setSelectedPhoto(null);
+  };
+
+  const handleOpenPhotoDialog = (photo?: GalleryPhoto) => {
+    if (photo) {
+      setEditingPhoto(photo);
+      setPhotoFormData({
+        image_url: photo.image_url,
+        caption: photo.caption || "",
+        event_id: photo.event_id || undefined,
+        taken_at: photo.taken_at || "",
+      });
+    } else {
+      setEditingPhoto(null);
+      setPhotoFormData({
+        image_url: "",
+        caption: "",
+        event_id: undefined,
+        taken_at: "",
+      });
+    }
+    setPhotoDialogOpen(true);
+  };
+
+  const handleClosePhotoDialog = () => {
+    setPhotoDialogOpen(false);
+    setEditingPhoto(null);
+    setPhotoFormData({
+      image_url: "",
+      caption: "",
+      event_id: undefined,
+      taken_at: "",
+    });
+  };
+
+  const handleSavePhoto = async () => {
+    if (!photoFormData.image_url) {
+      alert("Please upload an image");
+      return;
+    }
+    setUploading(true);
+    try {
+      const photoData = {
+        image_url: photoFormData.image_url,
+        caption: photoFormData.caption || undefined,
+        event_id: photoFormData.event_id || undefined,
+        taken_at: photoFormData.taken_at || undefined,
+      };
+      if (editingPhoto) {
+        await galleryService.update(editingPhoto.id, photoData);
+      } else {
+        await galleryService.create(photoData);
+      }
+      handleClosePhotoDialog();
+      // Reload photos
+      const photosData = await galleryService.getAll();
+      setPhotos(photosData);
+    } catch (error) {
+      console.error("Error saving photo:", error);
+      alert("Failed to save photo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!window.confirm("Are you sure you want to delete this photo?")) {
+      return;
+    }
+    try {
+      await galleryService.delete(photoId);
+      // Reload photos
+      const photosData = await galleryService.getAll();
+      setPhotos(photosData);
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      alert("Failed to delete photo");
+    }
   };
 
   // Group photos by event
@@ -197,42 +288,106 @@ export const GalleryPage = () => {
               {t("noPhotos")}
             </Typography>
           ) : (
-            <ImageList
-              variant="masonry"
-              cols={imageListCols}
-              gap={isXs ? 16 : isSm ? 24 : 32}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 3,
+              }}
             >
               {photos.map((photo) => (
-                <ImageListItem key={photo.id}>
-                  <img
-                    src={photo.image_url}
-                    alt={photo.caption || "Gallery photo"}
-                    loading="lazy"
-                    style={{ cursor: "pointer", width: "100%", height: "auto" }}
-                    onClick={() => handlePhotoClick(photo)}
-                  />
-                  {(photo.caption || photo.event_name) && (
-                    <ImageListItemBar
-                      title={photo.caption || photo.event_name}
-                      subtitle={
-                        photo.event_name && photo.caption
-                          ? photo.event_name
-                          : undefined
-                      }
-                      actionIcon={
-                        <IconButton
-                          sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-                          onClick={() => handlePhotoClick(photo)}
-                          size="small"
-                        >
-                          <ZoomInIcon />
-                        </IconButton>
-                      }
-                    />
+                <Card
+                  key={photo.id}
+                  sx={{
+                    position: "relative",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 4,
+                      "& .photo-actions": {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                >
+                  {canManageGallery && (
+                    <Box
+                      className="photo-actions"
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 10,
+                        display: "flex",
+                        gap: 0.5,
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        borderRadius: 1,
+                        p: 0.5,
+                        opacity: 0,
+                        transition: "opacity 0.2s",
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenPhotoDialog(photo);
+                        }}
+                        sx={{ color: "primary.main" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePhoto(photo.id);
+                        }}
+                        sx={{ color: "error.main" }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   )}
-                </ImageListItem>
+                  <CardActionArea onClick={() => handlePhotoClick(photo)}>
+                    <CardMedia
+                      component="img"
+                      image={photo.image_url}
+                      alt={photo.caption || "Gallery photo"}
+                      sx={{
+                        height: 280,
+                        objectFit: "cover",
+                      }}
+                    />
+                    {(photo.caption || photo.event_name) && (
+                      <CardContent sx={{ p: 1.5 }}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={500}
+                          noWrap
+                          title={photo.caption || photo.event_name}
+                        >
+                          {photo.caption || photo.event_name}
+                        </Typography>
+                        {photo.event_name && photo.caption && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            noWrap
+                          >
+                            {photo.event_name}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    )}
+                  </CardActionArea>
+                </Card>
               ))}
-            </ImageList>
+            </Box>
           )}
         </TabPanel>
 
@@ -260,41 +415,97 @@ export const GalleryPage = () => {
                     >
                       {new Date(event.event_date).toLocaleDateString()}
                     </Typography>
-                    <ImageList
-                      variant="masonry"
-                      cols={imageListCols}
-                      gap={isXs ? 16 : isSm ? 24 : 32}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "1fr",
+                          sm: "repeat(2, 1fr)",
+                          md: "repeat(3, 1fr)",
+                        },
+                        gap: 3,
+                      }}
                     >
                       {eventPhotos.map((photo) => (
-                        <ImageListItem key={photo.id}>
-                          <img
-                            src={photo.image_url}
-                            alt={photo.caption || event.title}
-                            loading="lazy"
-                            style={{
-                              cursor: "pointer",
-                              width: "100%",
-                              height: "auto",
-                            }}
-                            onClick={() => handlePhotoClick(photo)}
-                          />
-                          {photo.caption && (
-                            <ImageListItemBar
-                              title={photo.caption}
-                              actionIcon={
-                                <IconButton
-                                  sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-                                  onClick={() => handlePhotoClick(photo)}
-                                  size="small"
-                                >
-                                  <ZoomInIcon />
-                                </IconButton>
-                              }
-                            />
+                        <Card
+                          key={photo.id}
+                          sx={{
+                            position: "relative",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                              transform: "translateY(-4px)",
+                              boxShadow: 4,
+                              "& .photo-actions": {
+                                opacity: 1,
+                              },
+                            },
+                          }}
+                        >
+                          {canManageGallery && (
+                            <Box
+                              className="photo-actions"
+                              sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                zIndex: 10,
+                                display: "flex",
+                                gap: 0.5,
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                borderRadius: 1,
+                                p: 0.5,
+                                opacity: 0,
+                                transition: "opacity 0.2s",
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenPhotoDialog(photo);
+                                }}
+                                sx={{ color: "primary.main" }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePhoto(photo.id);
+                                }}
+                                sx={{ color: "error.main" }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
                           )}
-                        </ImageListItem>
+                          <CardActionArea onClick={() => handlePhotoClick(photo)}>
+                            <CardMedia
+                              component="img"
+                              image={photo.image_url}
+                              alt={photo.caption || event.title}
+                              sx={{
+                                height: 280,
+                                objectFit: "cover",
+                              }}
+                            />
+                            {photo.caption && (
+                              <CardContent sx={{ p: 1.5 }}>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={500}
+                                  noWrap
+                                  title={photo.caption}
+                                >
+                                  {photo.caption}
+                                </Typography>
+                              </CardContent>
+                            )}
+                          </CardActionArea>
+                        </Card>
                       ))}
-                    </ImageList>
+                    </Box>
                   </Box>
                 );
               })}
@@ -303,41 +514,97 @@ export const GalleryPage = () => {
                   <Typography variant="h5" gutterBottom>
                     {t("otherPhotos")}
                   </Typography>
-                  <ImageList
-                    variant="masonry"
-                    cols={imageListCols}
-                    gap={isXs ? 16 : isSm ? 24 : 32}
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      },
+                      gap: 3,
+                    }}
                   >
                     {photosWithoutEvent.map((photo) => (
-                      <ImageListItem key={photo.id}>
-                        <img
-                          src={photo.image_url}
-                          alt={photo.caption || "Gallery photo"}
-                          loading="lazy"
-                          style={{
-                            cursor: "pointer",
-                            width: "100%",
-                            height: "auto",
-                          }}
-                          onClick={() => handlePhotoClick(photo)}
-                        />
-                        {photo.caption && (
-                          <ImageListItemBar
-                            title={photo.caption}
-                            actionIcon={
-                              <IconButton
-                                sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-                                onClick={() => handlePhotoClick(photo)}
-                                size="small"
-                              >
-                                <ZoomInIcon />
-                              </IconButton>
-                            }
-                          />
+                      <Card
+                        key={photo.id}
+                        sx={{
+                          position: "relative",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 4,
+                            "& .photo-actions": {
+                              opacity: 1,
+                            },
+                          },
+                        }}
+                      >
+                        {canManageGallery && (
+                          <Box
+                            className="photo-actions"
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              zIndex: 10,
+                              display: "flex",
+                              gap: 0.5,
+                              backgroundColor: "rgba(255, 255, 255, 0.9)",
+                              borderRadius: 1,
+                              p: 0.5,
+                              opacity: 0,
+                              transition: "opacity 0.2s",
+                            }}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenPhotoDialog(photo);
+                              }}
+                              sx={{ color: "primary.main" }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePhoto(photo.id);
+                              }}
+                              sx={{ color: "error.main" }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
                         )}
-                      </ImageListItem>
+                        <CardActionArea onClick={() => handlePhotoClick(photo)}>
+                          <CardMedia
+                            component="img"
+                            image={photo.image_url}
+                            alt={photo.caption || "Gallery photo"}
+                            sx={{
+                              height: 280,
+                              objectFit: "cover",
+                            }}
+                          />
+                          {photo.caption && (
+                            <CardContent sx={{ p: 1.5 }}>
+                              <Typography
+                                variant="body2"
+                                fontWeight={500}
+                                noWrap
+                                title={photo.caption}
+                              >
+                                {photo.caption}
+                              </Typography>
+                            </CardContent>
+                          )}
+                        </CardActionArea>
+                      </Card>
                     ))}
-                  </ImageList>
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -367,46 +634,106 @@ export const GalleryPage = () => {
                     <Typography variant="h5" gutterBottom>
                       {monthName}
                     </Typography>
-                    <ImageList
-                      variant="masonry"
-                      cols={imageListCols}
-                      gap={isXs ? 16 : isSm ? 24 : 32}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "1fr",
+                          sm: "repeat(2, 1fr)",
+                          md: "repeat(3, 1fr)",
+                        },
+                        gap: 3,
+                      }}
                     >
                       {monthPhotos.map((photo) => (
-                        <ImageListItem key={photo.id}>
-                          <img
-                            src={photo.image_url}
-                            alt={photo.caption || "Gallery photo"}
-                            loading="lazy"
-                            style={{
-                              cursor: "pointer",
-                              width: "100%",
-                              height: "auto",
-                            }}
-                            onClick={() => handlePhotoClick(photo)}
-                          />
-                          {(photo.caption || photo.event_name) && (
-                            <ImageListItemBar
-                              title={photo.caption || photo.event_name}
-                              subtitle={
-                                photo.event_name && photo.caption
-                                  ? photo.event_name
-                                  : undefined
-                              }
-                              actionIcon={
-                                <IconButton
-                                  sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-                                  onClick={() => handlePhotoClick(photo)}
-                                  size="small"
-                                >
-                                  <ZoomInIcon />
-                                </IconButton>
-                              }
-                            />
+                        <Card
+                          key={photo.id}
+                          sx={{
+                            position: "relative",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                              transform: "translateY(-4px)",
+                              boxShadow: 4,
+                              "& .photo-actions": {
+                                opacity: 1,
+                              },
+                            },
+                          }}
+                        >
+                          {canManageGallery && (
+                            <Box
+                              className="photo-actions"
+                              sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                zIndex: 10,
+                                display: "flex",
+                                gap: 0.5,
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                borderRadius: 1,
+                                p: 0.5,
+                                opacity: 0,
+                                transition: "opacity 0.2s",
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenPhotoDialog(photo);
+                                }}
+                                sx={{ color: "primary.main" }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePhoto(photo.id);
+                                }}
+                                sx={{ color: "error.main" }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
                           )}
-                        </ImageListItem>
+                          <CardActionArea onClick={() => handlePhotoClick(photo)}>
+                            <CardMedia
+                              component="img"
+                              image={photo.image_url}
+                              alt={photo.caption || "Gallery photo"}
+                              sx={{
+                                height: 280,
+                                objectFit: "cover",
+                              }}
+                            />
+                            {(photo.caption || photo.event_name) && (
+                              <CardContent sx={{ p: 1.5 }}>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={500}
+                                  noWrap
+                                  title={photo.caption || photo.event_name}
+                                >
+                                  {photo.caption || photo.event_name}
+                                </Typography>
+                                {photo.event_name && photo.caption && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    noWrap
+                                  >
+                                    {photo.event_name}
+                                  </Typography>
+                                )}
+                              </CardContent>
+                            )}
+                          </CardActionArea>
+                        </Card>
                       ))}
-                    </ImageList>
+                    </Box>
                   </Box>
                 );
               })}
@@ -433,39 +760,66 @@ export const GalleryPage = () => {
               p: 0,
               position: "relative",
               maxHeight: { xs: "100vh", sm: "90vh" },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <IconButton
               onClick={handleCloseDialog}
               sx={{
                 position: "absolute",
-                right: { xs: 8, sm: 8 },
-                top: { xs: 8, sm: 8 },
+                right: { xs: 8, sm: 16 },
+                top: { xs: 8, sm: 16 },
                 color: "white",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                backgroundColor: alpha("#000", 0.6),
                 width: { xs: 40, sm: 48 },
                 height: { xs: 40, sm: 48 },
+                backdropFilter: "blur(10px)",
                 "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  backgroundColor: alpha("#000", 0.8),
                 },
                 zIndex: 1,
+                transition: "all 0.2s",
               }}
             >
               <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
             </IconButton>
             {selectedPhoto && (
-              <Box>
-                <img
-                  src={selectedPhoto.image_url}
-                  alt={selectedPhoto.caption || "Gallery photo"}
-                  style={{
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  maxHeight: { xs: "100vh", sm: "90vh" },
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Box
+                  sx={{
                     width: "100%",
-                    height: "auto",
-                    display: "block",
-                    maxHeight: "90vh",
-                    objectFit: "contain",
+                    maxHeight: { xs: "calc(100vh - 120px)", sm: "calc(90vh - 120px)" },
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: alpha("#000", 0.3),
+                    backdropFilter: "blur(10px)",
+                    borderRadius: { xs: 0, sm: 2 },
+                    overflow: "hidden",
                   }}
-                />
+                >
+                  <img
+                    src={selectedPhoto.image_url}
+                    alt={selectedPhoto.caption || "Gallery photo"}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      maxHeight: isMobile ? "calc(100vh - 120px)" : "calc(90vh - 120px)",
+                      objectFit: "contain",
+                      display: "block",
+                    }}
+                  />
+                </Box>
                 {(selectedPhoto.caption || selectedPhoto.event_name) && (
                   <Box
                     sx={{
@@ -473,18 +827,31 @@ export const GalleryPage = () => {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      backgroundColor: "rgba(0, 0, 0, 0.7)",
+                      background: `linear-gradient(to top, ${alpha("#000", 0.9)} 0%, ${alpha("#000", 0.7)} 50%, transparent 100%)`,
                       color: "white",
-                      p: 2,
+                      p: 3,
+                      pt: 4,
                     }}
                   >
                     {selectedPhoto.event_name && (
-                      <Typography variant="subtitle1" gutterBottom>
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{
+                          fontWeight: 600,
+                          mb: 0.5,
+                        }}
+                      >
                         {selectedPhoto.event_name}
                       </Typography>
                     )}
                     {selectedPhoto.caption && (
-                      <Typography variant="body2">
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          lineHeight: 1.6,
+                        }}
+                      >
                         {selectedPhoto.caption}
                       </Typography>
                     )}
@@ -505,14 +872,94 @@ export const GalleryPage = () => {
               bottom: 24,
               right: 24,
             }}
-            onClick={() => {
-              // Navigate to admin gallery page for now
-              window.location.href = "/admin/gallery";
-            }}
+            onClick={() => handleOpenPhotoDialog()}
           >
             <AddIcon />
           </Fab>
         )}
+
+        {/* Photo Upload/Edit Dialog */}
+        <Dialog
+          open={photoDialogOpen}
+          onClose={handleClosePhotoDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {editingPhoto ? "Edit Photo" : "Upload Photo"}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2 }}>
+              <ImageUpload
+                mode="single"
+                bucket="event-photos"
+                value={photoFormData.image_url}
+                onChange={(url) =>
+                  setPhotoFormData({ ...photoFormData, image_url: url as string })
+                }
+                label="Photo"
+              />
+              <TextField
+                fullWidth
+                label="Caption"
+                value={photoFormData.caption}
+                onChange={(e) =>
+                  setPhotoFormData({ ...photoFormData, caption: e.target.value })
+                }
+                margin="normal"
+                multiline
+                rows={2}
+              />
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Event (Optional)</InputLabel>
+                <Select
+                  value={photoFormData.event_id || ""}
+                  onChange={(e) =>
+                    setPhotoFormData({
+                      ...photoFormData,
+                      event_id: e.target.value || undefined,
+                    })
+                  }
+                  label="Event (Optional)"
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {events.map((event) => (
+                    <MenuItem key={event.id} value={event.id}>
+                      {event.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="Taken Date"
+                type="date"
+                value={photoFormData.taken_at}
+                onChange={(e) =>
+                  setPhotoFormData({ ...photoFormData, taken_at: e.target.value })
+                }
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClosePhotoDialog} disabled={uploading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSavePhoto}
+              variant="contained"
+              disabled={uploading || !photoFormData.image_url}
+            >
+              {uploading ? "Saving..." : editingPhoto ? "Update" : "Upload"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );

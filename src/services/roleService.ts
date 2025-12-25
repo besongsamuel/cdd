@@ -239,6 +239,55 @@ export const roleService = {
   },
 
   /**
+   * Get all member roles for multiple members in a single query
+   * Returns a map of member_id -> Role[]
+   */
+  async getAllMemberRoles(memberIds: string[]): Promise<Record<string, Role[]>> {
+    if (memberIds.length === 0) {
+      return {};
+    }
+
+    const { data, error } = await supabase
+      .from('member_roles')
+      .select(`
+        member_id,
+        role:roles (
+          id,
+          name,
+          description,
+          is_superuser,
+          created_at
+        )
+      `)
+      .in('member_id', memberIds);
+
+    if (error) {
+      console.error('Error getting all member roles:', error);
+      return {};
+    }
+
+    // Group roles by member_id
+    const rolesMap: Record<string, Role[]> = {};
+    
+    // Initialize all member IDs with empty arrays
+    memberIds.forEach(id => {
+      rolesMap[id] = [];
+    });
+
+    // Populate with actual roles
+    (data || []).forEach((item: any) => {
+      if (item.role && item.member_id) {
+        if (!rolesMap[item.member_id]) {
+          rolesMap[item.member_id] = [];
+        }
+        rolesMap[item.member_id].push(item.role);
+      }
+    });
+
+    return rolesMap;
+  },
+
+  /**
    * Assign a role to a member
    */
   async assignRole(memberId: string, roleId: string): Promise<void> {

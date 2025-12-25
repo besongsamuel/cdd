@@ -24,14 +24,19 @@ import {
   Tab,
   List,
   ListItem,
+  Tooltip,
+  Autocomplete,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { roleService } from '../../services/roleService';
 import { permissionsService } from '../../services/permissionsService';
+import { membersService } from '../../services/membersService';
 import { LoadingSpinner } from '../common/LoadingSpinner';
-import type { Role, Permission } from '../../types';
+import type { Role, Permission, Member } from '../../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,6 +75,11 @@ export const RolesManager = () => {
   });
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [assignRoleDialogOpen, setAssignRoleDialogOpen] = useState(false);
+  const [selectedRoleForAssignment, setSelectedRoleForAssignment] = useState<Role | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
   useEffect(() => {
     loadAllData();
@@ -78,12 +88,21 @@ export const RolesManager = () => {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      await Promise.all([loadRoles(), loadPermissions()]);
+      await Promise.all([loadRoles(), loadPermissions(), loadMembers()]);
     } catch (err) {
       console.error('Error loading data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMembers = async () => {
+    try {
+      const data = await membersService.getAll();
+      setMembers(data);
+    } catch (err) {
+      console.error('Error loading members:', err);
     }
   };
 
@@ -218,6 +237,44 @@ export const RolesManager = () => {
     }
   };
 
+  const handleOpenAssignRoleDialog = (role: Role) => {
+    setSelectedRoleForAssignment(role);
+    setSelectedMember(null);
+    setMemberSearchQuery('');
+    setAssignRoleDialogOpen(true);
+  };
+
+  const handleCloseAssignRoleDialog = () => {
+    setAssignRoleDialogOpen(false);
+    setSelectedRoleForAssignment(null);
+    setSelectedMember(null);
+    setMemberSearchQuery('');
+  };
+
+  const handleAssignRoleToMember = async () => {
+    if (!selectedRoleForAssignment || !selectedMember) {
+      setError('Please select a member');
+      return;
+    }
+
+    try {
+      // Check if member already has this role
+      const memberRoles = await roleService.getMemberRoles(selectedMember.id);
+      const hasRole = memberRoles.some(r => r.id === selectedRoleForAssignment.id);
+
+      if (hasRole) {
+        setError('Member already has this role');
+        return;
+      }
+
+      await roleService.assignRole(selectedMember.id, selectedRoleForAssignment.id);
+      handleCloseAssignRoleDialog();
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to assign role');
+    }
+  };
+
 
   if (loading) {
     return <LoadingSpinner />;
@@ -288,28 +345,42 @@ export const RolesManager = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenPermissionsDialog(role)}
-                        color="primary"
-                        title="Manage Permissions"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(role)}
-                        color="primary"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(role.id)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      <Tooltip title="Assign Role to Member">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenAssignRoleDialog(role)}
+                          color="primary"
+                        >
+                          <PersonAddIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Manage Permissions">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenPermissionsDialog(role)}
+                          color="primary"
+                        >
+                          <SettingsIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Edit Role">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDialog(role)}
+                          color="primary"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Role">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(role.id)}
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))
@@ -420,6 +491,74 @@ export const RolesManager = () => {
           <Button onClick={() => setPermissionsDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleSavePermissions} variant="contained">
             Save Permissions
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Assign Role to Member Dialog */}
+      <Dialog open={assignRoleDialogOpen} onClose={handleCloseAssignRoleDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Assign Role: {selectedRoleForAssignment?.name}
+        </DialogTitle>
+        <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+          <Box sx={{ mt: 2 }}>
+            <Autocomplete
+              options={members}
+              getOptionLabel={(option) => option.name}
+              value={selectedMember}
+              onChange={(_, newValue) => {
+                setSelectedMember(newValue);
+                setError(null);
+              }}
+              inputValue={memberSearchQuery}
+              onInputChange={(_, newInputValue) => {
+                setMemberSearchQuery(newInputValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select Member"
+                  placeholder="Search for a member..."
+                  margin="normal"
+                  fullWidth
+                />
+              )}
+              filterOptions={(options, { inputValue }) => {
+                return options.filter((option) =>
+                  option.name.toLowerCase().includes(inputValue.toLowerCase())
+                );
+              }}
+            />
+            {selectedMember && (
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Selected Member:
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  {selectedMember.name}
+                </Typography>
+                {selectedMember.email && (
+                  <Typography variant="body2" color="text.secondary">
+                    {selectedMember.email}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAssignRoleDialog}>Cancel</Button>
+          <Button
+            onClick={handleAssignRoleToMember}
+            variant="contained"
+            disabled={!selectedMember}
+          >
+            Assign Role
           </Button>
         </DialogActions>
       </Dialog>

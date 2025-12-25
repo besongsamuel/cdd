@@ -3,17 +3,27 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import {
+  alpha,
   Box,
+  Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Fab,
+  IconButton,
   List,
   ListItem,
   ListItemText,
   Paper,
+  TextField,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EventDetailDialog } from "../components/common/EventDetailDialog";
@@ -32,6 +42,26 @@ export const EventsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [eventFormData, setEventFormData] = useState({
+    title: "",
+    description: "",
+    event_date: "",
+    event_time: "",
+    location: "",
+  });
+  const [programDialogOpen, setProgramDialogOpen] = useState(false);
+  const [editingProgram, setEditingProgram] = useState<RegularProgram | null>(null);
+  const [programFormData, setProgramFormData] = useState({
+    day: "",
+    time: "",
+    location: "",
+    description: "",
+    order: 0,
+    start_date: "",
+    end_date: "",
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -55,6 +85,131 @@ export const EventsPage = () => {
   if (loading) {
     return <LoadingSpinner />;
   }
+
+  const handleOpenEventDialog = (event?: Event) => {
+    if (event) {
+      setEditingEvent(event);
+      setEventFormData({
+        title: event.title,
+        description: event.description || "",
+        event_date: event.event_date,
+        event_time: event.event_time || "",
+        location: event.location || "",
+      });
+    } else {
+      setEditingEvent(null);
+      setEventFormData({
+        title: "",
+        description: "",
+        event_date: "",
+        event_time: "",
+        location: "",
+      });
+    }
+    setEventDialogOpen(true);
+  };
+
+  const handleCloseEventDialog = () => {
+    setEventDialogOpen(false);
+    setEditingEvent(null);
+  };
+
+  const handleSaveEvent = async () => {
+    try {
+      if (editingEvent) {
+        await eventsService.update(editingEvent.id, eventFormData);
+      } else {
+        await eventsService.create(eventFormData);
+      }
+      handleCloseEventDialog();
+      // Reload events
+      const eventsData = await eventsService.getAll();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Error saving event:", error);
+      alert("Failed to save event");
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) {
+      return;
+    }
+    try {
+      await eventsService.delete(eventId);
+      // Reload events
+      const eventsData = await eventsService.getAll();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event");
+    }
+  };
+
+  const handleOpenProgramDialog = (program?: RegularProgram) => {
+    if (program) {
+      setEditingProgram(program);
+      setProgramFormData({
+        day: program.day,
+        time: program.time,
+        location: program.location,
+        description: program.description,
+        order: program.order,
+        start_date: program.start_date || "",
+        end_date: program.end_date || "",
+      });
+    } else {
+      setEditingProgram(null);
+      setProgramFormData({
+        day: "",
+        time: "",
+        location: "",
+        description: "",
+        order: regularPrograms.length,
+        start_date: "",
+        end_date: "",
+      });
+    }
+    setProgramDialogOpen(true);
+  };
+
+  const handleCloseProgramDialog = () => {
+    setProgramDialogOpen(false);
+    setEditingProgram(null);
+  };
+
+  const handleSaveProgram = async () => {
+    try {
+      if (editingProgram) {
+        await regularProgramsService.update(editingProgram.id, programFormData);
+      } else {
+        await regularProgramsService.create(programFormData);
+      }
+      handleCloseProgramDialog();
+      // Reload programs
+      const programsData = await regularProgramsService.getAll();
+      setRegularPrograms(programsData);
+    } catch (error) {
+      console.error("Error saving program:", error);
+      alert("Failed to save program");
+    }
+  };
+
+  const handleDeleteProgram = async (programId: string) => {
+    if (!window.confirm("Are you sure you want to delete this program?")) {
+      return;
+    }
+    try {
+      await regularProgramsService.delete(programId);
+      // Reload programs
+      const programsData = await regularProgramsService.getAll();
+      setRegularPrograms(programsData);
+    } catch (error) {
+      console.error("Error deleting program:", error);
+      alert("Failed to delete program");
+    }
+  };
+
 
   // Convert events to calendar format
   const calendarEvents = events.map((event) => {
@@ -295,15 +450,38 @@ export const EventsPage = () => {
 
           {/* Regular Programs Section */}
           <Box sx={{ mt: { xs: 3, md: 4 } }}>
-            <Typography
-              variant="h4"
-              component="h2"
-              gutterBottom
-              sx={{ fontSize: { xs: "24px", md: "32px" } }}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
             >
-              {t("regularPrograms")}
-            </Typography>
-            <Paper sx={{ mt: 2 }}>
+              <Typography
+                variant="h4"
+                component="h2"
+                sx={{ fontSize: { xs: "24px", md: "32px" } }}
+              >
+                {t("regularPrograms")}
+              </Typography>
+              {canManageEvents && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  onClick={() => handleOpenProgramDialog()}
+                >
+                  Add Program
+                </Button>
+              )}
+            </Box>
+            <Paper
+              sx={{
+                mt: 2,
+                overflow: "hidden",
+              }}
+            >
               <List>
                 {regularPrograms.length === 0 ? (
                   <ListItem>
@@ -317,7 +495,35 @@ export const EventsPage = () => {
                 ) : (
                   regularPrograms.map((program, index) => (
                     <div key={program.id}>
-                      <ListItem sx={{ py: { xs: 1.5, sm: 2 } }}>
+                      <ListItem
+                        sx={{
+                          py: { xs: 1.5, sm: 2 },
+                          transition: "background-color 0.2s",
+                          "&:hover": {
+                            backgroundColor: alpha("#000", 0.02),
+                          },
+                        }}
+                        secondaryAction={
+                          canManageEvents ? (
+                            <Box sx={{ display: "flex", gap: 0.5 }}>
+                              <IconButton
+                                edge="end"
+                                onClick={() => handleOpenProgramDialog(program)}
+                                sx={{ color: "primary.main" }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                edge="end"
+                                onClick={() => handleDeleteProgram(program.id)}
+                                sx={{ color: "error.main" }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Box>
+                          ) : undefined
+                        }
+                      >
                         <ListItemText
                           primary={`${program.day} - ${program.time}`}
                           secondary={`${program.description} - ${program.location}`}
@@ -389,8 +595,13 @@ export const EventsPage = () => {
                 eventClick={(info) => {
                   const eventData = events.find((e) => e.id === info.event.id);
                   if (eventData) {
-                    setSelectedEvent(eventData);
-                    setDialogOpen(true);
+                    if (canManageEvents && (info.jsEvent.ctrlKey || info.jsEvent.metaKey)) {
+                      // Ctrl/Cmd+Click opens edit dialog
+                      handleOpenEventDialog(eventData);
+                    } else {
+                      setSelectedEvent(eventData);
+                      setDialogOpen(true);
+                    }
                   }
                 }}
                 height="auto"
@@ -412,14 +623,215 @@ export const EventsPage = () => {
               bottom: 24,
               right: 24,
             }}
-            onClick={() => {
-              // Navigate to admin events page for now, or could open a dialog
-              window.location.href = "/admin/events";
-            }}
+            onClick={() => handleOpenEventDialog()}
           >
             <AddIcon />
           </Fab>
         )}
+
+        {/* Event Create/Edit Dialog */}
+        <Dialog
+          open={eventDialogOpen}
+          onClose={handleCloseEventDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {editingEvent ? "Edit Event" : "Create Event"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Title"
+              value={eventFormData.title}
+              onChange={(e) =>
+                setEventFormData({ ...eventFormData, title: e.target.value })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={eventFormData.description}
+              onChange={(e) =>
+                setEventFormData({
+                  ...eventFormData,
+                  description: e.target.value,
+                })
+              }
+              margin="normal"
+              multiline
+              rows={4}
+            />
+            <TextField
+              fullWidth
+              label="Date"
+              type="date"
+              value={eventFormData.event_date}
+              onChange={(e) =>
+                setEventFormData({
+                  ...eventFormData,
+                  event_date: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Time"
+              type="time"
+              value={eventFormData.event_time}
+              onChange={(e) =>
+                setEventFormData({
+                  ...eventFormData,
+                  event_time: e.target.value,
+                })
+              }
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              value={eventFormData.location}
+              onChange={(e) =>
+                setEventFormData({
+                  ...eventFormData,
+                  location: e.target.value,
+                })
+              }
+              margin="normal"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseEventDialog}>Cancel</Button>
+            <Button onClick={handleSaveEvent} variant="contained">
+              {editingEvent ? "Update" : "Create"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Program Create/Edit Dialog */}
+        <Dialog
+          open={programDialogOpen}
+          onClose={handleCloseProgramDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {editingProgram ? "Edit Program" : "Create Program"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Day"
+              value={programFormData.day}
+              onChange={(e) =>
+                setProgramFormData({ ...programFormData, day: e.target.value })
+              }
+              margin="normal"
+              required
+              placeholder="e.g., Sunday, Monday"
+            />
+            <TextField
+              fullWidth
+              label="Time"
+              value={programFormData.time}
+              onChange={(e) =>
+                setProgramFormData({ ...programFormData, time: e.target.value })
+              }
+              margin="normal"
+              required
+              placeholder="e.g., 9:00 AM"
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              value={programFormData.location}
+              onChange={(e) =>
+                setProgramFormData({
+                  ...programFormData,
+                  location: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={programFormData.description}
+              onChange={(e) =>
+                setProgramFormData({
+                  ...programFormData,
+                  description: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+              multiline
+              rows={3}
+            />
+            <TextField
+              fullWidth
+              label="Order"
+              type="number"
+              value={programFormData.order}
+              onChange={(e) =>
+                setProgramFormData({
+                  ...programFormData,
+                  order: parseInt(e.target.value) || 0,
+                })
+              }
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Start Date (Optional)"
+              type="date"
+              value={programFormData.start_date}
+              onChange={(e) =>
+                setProgramFormData({
+                  ...programFormData,
+                  start_date: e.target.value,
+                })
+              }
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="End Date (Optional)"
+              type="date"
+              value={programFormData.end_date}
+              onChange={(e) =>
+                setProgramFormData({
+                  ...programFormData,
+                  end_date: e.target.value,
+                })
+              }
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseProgramDialog}>Cancel</Button>
+            <Button onClick={handleSaveProgram} variant="contained">
+              {editingProgram ? "Update" : "Create"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       <EventDetailDialog
@@ -429,6 +841,9 @@ export const EventsPage = () => {
           setDialogOpen(false);
           setSelectedEvent(null);
         }}
+        onEdit={canManageEvents ? handleOpenEventDialog : undefined}
+        onDelete={canManageEvents ? handleDeleteEvent : undefined}
+        canManage={canManageEvents}
       />
     </>
   );
