@@ -10,54 +10,48 @@ BEGIN
   FOR v_member_unseen IN
     WITH unseen_replies AS (
       -- Find all reply messages (messages with reply_to_id) that are unseen
+      -- Join with parent message to get the author who should be notified
       SELECT DISTINCT
         m.id AS message_id,
         m.thread_id,
         m.author_id AS reply_author_id,
         m.reply_to_id,
+        parent_msg.author_id AS parent_author_id,
         mt.board_id,
         m.created_at AS reply_created_at
       FROM messages m
       INNER JOIN message_threads mt ON mt.id = m.thread_id
+      INNER JOIN messages parent_msg ON parent_msg.id = m.reply_to_id
       WHERE m.is_deleted = false
+      AND parent_msg.is_deleted = false
       -- This is a reply (has a reply_to_id)
       AND m.reply_to_id IS NOT NULL
-    ),
-    thread_participants AS (
-      -- For each unseen reply, find members who posted in thread before this reply
-      SELECT DISTINCT
-        ur.message_id,
-        ur.thread_id,
-        ur.board_id,
-        m2.author_id AS member_id
-      FROM unseen_replies ur
-      INNER JOIN messages m2 ON m2.thread_id = ur.thread_id
-      WHERE m2.is_deleted = false
-      AND m2.author_id IS NOT NULL
-      AND m2.author_id != ur.reply_author_id  -- Don't notify the reply author
-      AND m2.created_at < ur.reply_created_at  -- Posted before this reply
-      -- Check if this reply has NOT been seen by this member
+      -- Parent message must have an author
+      AND parent_msg.author_id IS NOT NULL
+      -- Don't notify if replying to yourself
+      AND m.author_id != parent_msg.author_id
+      -- Check if this reply has NOT been seen by the parent message author
       AND NOT EXISTS (
         SELECT 1
         FROM message_views mv
-        WHERE mv.message_id = ur.message_id
-        AND mv.member_id = m2.author_id
+        WHERE mv.message_id = m.id
+        AND mv.member_id = parent_msg.author_id
       )
     )
     -- Aggregate by member and board to create batched notifications
     SELECT 
-      tp.member_id,
-      tp.board_id,
-      COUNT(DISTINCT tp.message_id) AS unseen_count,
-      (array_agg(tp.thread_id ORDER BY tp.thread_id))[1] AS first_thread_id
-    FROM thread_participants tp
+      ur.parent_author_id AS member_id,
+      ur.board_id,
+      COUNT(DISTINCT ur.message_id) AS unseen_count,
+      (array_agg(ur.thread_id ORDER BY ur.thread_id))[1] AS first_thread_id
+    FROM unseen_replies ur
     -- Only for members with in-app notifications enabled
     INNER JOIN board_notification_preferences bnp 
-      ON bnp.member_id = tp.member_id 
-      AND bnp.board_id = tp.board_id
+      ON bnp.member_id = ur.parent_author_id 
+      AND bnp.board_id = ur.board_id
       AND bnp.in_app_notifications = true
-    GROUP BY tp.member_id, tp.board_id
-    HAVING COUNT(DISTINCT tp.message_id) > 0
+    GROUP BY ur.parent_author_id, ur.board_id
+    HAVING COUNT(DISTINCT ur.message_id) > 0
   LOOP
     -- Only create notification if we don't already have one for this member/board in the last hour
     -- (to avoid duplicate notifications)
