@@ -15,6 +15,22 @@ export interface Title {
   created_at: string;
 }
 
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  is_superuser: boolean;
+  created_at: string;
+  permissions?: Permission[]; // Joined field
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -30,6 +46,8 @@ export interface Member {
   is_verified?: boolean;
   title_id?: string;
   title_name?: string; // Joined field for display
+  permissions?: Permission[]; // Joined field
+  roles?: Role[]; // Joined field
   created_at: string;
   updated_at: string;
 }

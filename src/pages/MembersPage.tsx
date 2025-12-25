@@ -25,19 +25,20 @@ import { DraggableProfileImage } from "../components/common/DraggableProfileImag
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+import { useHasPermission } from "../hooks/usePermissions";
 import { membersService } from "../services/membersService";
 import type { Member } from "../types";
 
 // Component for Leader Card with image error handling
 const LeaderCard = ({
   leader,
-  isAdmin,
+  canManageMembers,
   onPositionUpdate,
   isCurrentMemberVerified,
   currentMemberId,
 }: {
   leader: Member;
-  isAdmin: boolean;
+  canManageMembers: boolean;
   onPositionUpdate: (
     memberId: string,
     position: { x: number; y: number }
@@ -164,7 +165,7 @@ const LeaderCard = ({
           imageUrl={leader.picture_url}
           alt={getDisplayName(leader)}
           position={position}
-          isEditable={isAdmin}
+          isEditable={canManageMembers}
           onPositionChange={handlePositionChange}
           height={250}
         />
@@ -299,7 +300,8 @@ const LeaderCard = ({
 
 export const MembersPage = () => {
   const { t } = useTranslation("members");
-  const { isAdmin, currentMember } = useAuth();
+  const { currentMember } = useAuth();
+  const canManageMembers = useHasPermission("manage:members");
   const isCurrentMemberVerified = currentMember?.is_verified ?? false;
   const [leaders, setLeaders] = useState<Member[]>([]);
   const [regularMembers, setRegularMembers] = useState<Member[]>([]);
@@ -818,7 +820,7 @@ export const MembersPage = () => {
                         <LeaderCard
                           key={leader.id}
                           leader={leader}
-                          isAdmin={isAdmin}
+                          canManageMembers={canManageMembers}
                           onPositionUpdate={handlePositionUpdate}
                           isCurrentMemberVerified={isCurrentMemberVerified}
                           currentMemberId={currentMember?.id}

@@ -10,9 +10,11 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Divider,
 } from "@mui/material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useHasPermission } from "../../hooks/usePermissions";
 
 const drawerWidth = 240;
 
@@ -20,6 +22,7 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const canManageRoles = useHasPermission("manage:roles");
 
   const menuItems = [
     { label: "Dashboard", path: "/admin/dashboard" },
@@ -36,6 +39,11 @@ export const AdminLayout = () => {
     { label: "Titles", path: "/admin/titles" },
     { label: "Contact Submissions", path: "/admin/contact" },
     { label: "Test Emails", path: "/admin/email-test" },
+  ];
+
+  const systemMenuItems = [
+    { label: "Roles", path: "/admin/roles" },
+    { label: "Permissions", path: "/admin/permissions" },
   ];
 
   const handleLogout = async () => {
@@ -91,6 +99,33 @@ export const AdminLayout = () => {
               </ListItem>
             ))}
           </List>
+          {canManageRoles && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <List>
+                <ListItem disablePadding>
+                  <ListItemText
+                    primary="System"
+                    primaryTypographyProps={{
+                      variant: "overline",
+                      color: "text.secondary",
+                    }}
+                    sx={{ px: 2, py: 1 }}
+                  />
+                </ListItem>
+                {systemMenuItems.map((item) => (
+                  <ListItem key={item.path} disablePadding>
+                    <ListItemButton
+                      selected={location.pathname === item.path}
+                      onClick={() => navigate(item.path)}
+                    >
+                      <ListItemText primary={item.label} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          )}
         </Box>
       </Drawer>
       <Box

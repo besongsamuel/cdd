@@ -11,7 +11,9 @@ import { EventsManager } from "./components/Admin/EventsManager";
 import { GalleryManager } from "./components/Admin/GalleryManager";
 import { MembersManager } from "./components/Admin/MembersManager";
 import { MinistriesManager } from "./components/Admin/MinistriesManager";
+import { PermissionsManager } from "./components/Admin/PermissionsManager";
 import { RequestsManager } from "./components/Admin/RequestsManager";
+import { RolesManager } from "./components/Admin/RolesManager";
 import { SuggestionsManager } from "./components/Admin/SuggestionsManager";
 import { TestimoniesManager } from "./components/Admin/TestimoniesManager";
 import { TitlesManager } from "./components/Admin/TitlesManager";
@@ -459,6 +461,8 @@ function App() {
                         element={<ContactSubmissionsManager />}
                       />
                       <Route path="email-test" element={<EmailTestManager />} />
+                      <Route path="roles" element={<RolesManager />} />
+                      <Route path="permissions" element={<PermissionsManager />} />
                       <Route
                         path=""
                         element={<Navigate to="/admin/dashboard" replace />}

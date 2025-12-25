@@ -24,6 +24,7 @@ import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+import { useHasPermission } from "../hooks/usePermissions";
 import { membersService } from "../services/membersService";
 import { ministriesService } from "../services/ministriesService";
 import { ministryJoinRequestsService } from "../services/ministryJoinRequestsService";
@@ -35,7 +36,8 @@ export const MinistryDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("ministries");
   const navigate = useNavigate();
-  const { user, currentMember, isAdmin } = useAuth();
+  const { user, currentMember } = useAuth();
+  const canManageMinistries = useHasPermission("manage:ministries");
   const [ministry, setMinistry] = useState<Ministry | null>(null);
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export const MinistryDetailPage = () => {
     checkLeadStatus();
   }, [currentMember, id]);
 
-  const canAddMembers = isAdmin || isMinistryLead;
+  const canAddMembers = canManageMinistries || isMinistryLead;
 
   const handleJoinConfirm = async () => {
     if (!id || !ministry || !user || !currentMember) return;

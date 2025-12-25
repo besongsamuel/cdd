@@ -21,6 +21,7 @@ import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+import { useHasPermission } from "../hooks/usePermissions";
 import { departmentJoinRequestsService } from "../services/departmentJoinRequestsService";
 import { departmentMembersService } from "../services/departmentMembersService";
 import { departmentsService } from "../services/departmentsService";
@@ -32,7 +33,8 @@ export const DepartmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation("departments");
   const navigate = useNavigate();
-  const { user, currentMember, isAdmin } = useAuth();
+  const { user, currentMember } = useAuth();
+  const canManageDepartments = useHasPermission("manage:departments");
   const [department, setDepartment] = useState<Department | null>(null);
   const [members, setMembers] = useState<DepartmentMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export const DepartmentDetailPage = () => {
     checkLeadStatus();
   }, [currentMember, id]);
 
-  const canAddMembers = isAdmin || isDepartmentLead;
+  const canAddMembers = canManageDepartments || isDepartmentLead;
 
   const handleJoinConfirm = async () => {
     if (!id || !department || !user || !currentMember) return;
