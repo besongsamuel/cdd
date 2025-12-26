@@ -38,6 +38,16 @@ export const galleryService = {
     return data;
   },
 
+  async createMultiple(photos: Omit<GalleryPhoto, 'id' | 'created_at'>[]): Promise<GalleryPhoto[]> {
+    const { data, error } = await supabase
+      .from('gallery_photos')
+      .insert(photos)
+      .select();
+
+    if (error) throw error;
+    return data || [];
+  },
+
   async update(id: string, photo: Partial<GalleryPhoto>): Promise<GalleryPhoto> {
     const { data, error } = await supabase
       .from('gallery_photos')

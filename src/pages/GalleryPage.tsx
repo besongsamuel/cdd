@@ -1,7 +1,11 @@
 import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   alpha,
   Box,
@@ -10,6 +14,7 @@ import {
   CardActionArea,
   CardContent,
   CardMedia,
+  Chip,
   Container,
   Dialog,
   DialogActions,
@@ -18,6 +23,7 @@ import {
   Fab,
   FormControl,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -69,11 +75,16 @@ export const GalleryPage = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedDateGroup, setSelectedDateGroup] = useState<string | null>(null);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [viewingMode, setViewingMode] = useState<'list' | 'photos'>('list');
+  const [searchQuery, setSearchQuery] = useState('');
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
   const [uploading, setUploading] = useState(false);
   const [photoFormData, setPhotoFormData] = useState({
-    image_url: "",
+    image_url: "" as string | string[],
     caption: "",
     event_id: "" as string | undefined,
     taken_at: "",
@@ -107,11 +118,86 @@ export const GalleryPage = () => {
     loadData();
   }, []);
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Get current photos based on context - compute from state to avoid stale closures
+      let currentPhotos: GalleryPhoto[] = [];
+      if (dialogOpen && selectedPhoto) {
+        if (selectedEventId) {
+          if (selectedEventId === 'other') {
+            currentPhotos = photos.filter((p) => !p.event_id);
+          } else {
+            currentPhotos = photos.filter((p) => p.event_id === selectedEventId);
+          }
+        } else if (selectedDateGroup) {
+          const [year, month] = selectedDateGroup.split("-");
+          currentPhotos = photos.filter((photo) => {
+            const date = photo.taken_at ? new Date(photo.taken_at) : new Date(photo.created_at);
+            return date.getFullYear() === parseInt(year) && 
+                   date.getMonth() + 1 === parseInt(month);
+          });
+        }
+      }
+
+      if (e.key === 'ArrowLeft') {
+        if (dialogOpen && currentPhotos.length > 0) {
+          e.preventDefault();
+          const newIndex = currentPhotoIndex > 0 ? currentPhotoIndex - 1 : currentPhotos.length - 1;
+          setCurrentPhotoIndex(newIndex);
+          setSelectedPhoto(currentPhotos[newIndex]);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (dialogOpen && currentPhotos.length > 0) {
+          e.preventDefault();
+          const newIndex = currentPhotoIndex < currentPhotos.length - 1 ? currentPhotoIndex + 1 : 0;
+          setCurrentPhotoIndex(newIndex);
+          setSelectedPhoto(currentPhotos[newIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        if (dialogOpen) {
+          handleCloseDialog();
+        } else if (viewingMode === 'photos') {
+          setViewingMode('list');
+          setSelectedEventId(null);
+          setSelectedDateGroup(null);
+          setCurrentPhotoIndex(0);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [dialogOpen, viewingMode, selectedEventId, selectedDateGroup, currentPhotoIndex, selectedPhoto, photos]);
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
+    // Reset viewing mode when switching tabs
+    setViewingMode('list');
+    setSelectedEventId(null);
+    setSelectedDateGroup(null);
+    setCurrentPhotoIndex(0);
+    setSearchQuery('');
   };
 
   const handlePhotoClick = (photo: GalleryPhoto) => {
+    // Find the index of the photo in the current context
+    let photoList: GalleryPhoto[] = [];
+    if (selectedEventId) {
+      photoList = selectedEventId === 'other' 
+        ? photosWithoutEvent 
+        : (photosByEvent[selectedEventId] || []);
+    } else if (selectedDateGroup) {
+      photoList = photosByDate[selectedDateGroup] || [];
+    }
+    
+    const index = photoList.findIndex(p => p.id === photo.id);
+    if (index !== -1) {
+      setCurrentPhotoIndex(index);
+    } else {
+      setCurrentPhotoIndex(0);
+    }
+    
     setSelectedPhoto(photo);
     setDialogOpen(true);
   };
@@ -133,7 +219,7 @@ export const GalleryPage = () => {
     } else {
       setEditingPhoto(null);
       setPhotoFormData({
-        image_url: "",
+        image_url: [],
         caption: "",
         event_id: undefined,
         taken_at: "",
@@ -146,7 +232,7 @@ export const GalleryPage = () => {
     setPhotoDialogOpen(false);
     setEditingPhoto(null);
     setPhotoFormData({
-      image_url: "",
+      image_url: [],
       caption: "",
       event_id: undefined,
       taken_at: "",
@@ -154,30 +240,45 @@ export const GalleryPage = () => {
   };
 
   const handleSavePhoto = async () => {
-    if (!photoFormData.image_url) {
-      alert("Please upload an image");
+    const imageUrls = Array.isArray(photoFormData.image_url)
+      ? photoFormData.image_url
+      : photoFormData.image_url
+      ? [photoFormData.image_url]
+      : [];
+
+    if (imageUrls.length === 0) {
+      alert("Please upload at least one image");
       return;
     }
+
     setUploading(true);
     try {
-      const photoData = {
-        image_url: photoFormData.image_url,
-        caption: photoFormData.caption || undefined,
-        event_id: photoFormData.event_id || undefined,
-        taken_at: photoFormData.taken_at || undefined,
-      };
       if (editingPhoto) {
+        // Editing single photo - use first image URL
+        const photoData = {
+          image_url: imageUrls[0],
+          caption: photoFormData.caption || undefined,
+          event_id: photoFormData.event_id || undefined,
+          taken_at: photoFormData.taken_at || undefined,
+        };
         await galleryService.update(editingPhoto.id, photoData);
       } else {
-        await galleryService.create(photoData);
+        // Creating multiple photos - create one for each uploaded image
+        const photosToCreate = imageUrls.map((imageUrl) => ({
+          image_url: imageUrl,
+          caption: photoFormData.caption || undefined,
+          event_id: photoFormData.event_id || undefined,
+          taken_at: photoFormData.taken_at || undefined,
+        }));
+        await galleryService.createMultiple(photosToCreate);
       }
       handleClosePhotoDialog();
       // Reload photos
       const photosData = await galleryService.getAll();
       setPhotos(photosData);
     } catch (error) {
-      console.error("Error saving photo:", error);
-      alert("Failed to save photo");
+      console.error("Error saving photo(s):", error);
+      alert("Failed to save photo(s)");
     } finally {
       setUploading(false);
     }
@@ -229,6 +330,53 @@ export const GalleryPage = () => {
 
   const dateGroups = Object.keys(photosByDate).sort().reverse();
 
+  // Filter events based on search query
+  const filteredEvents = events.filter((event) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    const eventPhotos = photosByEvent[event.id] || [];
+    if (eventPhotos.length === 0) return false;
+    
+    return (
+      event.title.toLowerCase().includes(query) ||
+      (event.description && event.description.toLowerCase().includes(query)) ||
+      event.location?.toLowerCase().includes(query) ||
+      new Date(event.event_date).toLocaleDateString().toLowerCase().includes(query) ||
+      event.event_time?.toLowerCase().includes(query)
+    );
+  });
+
+  // Filter date groups based on search query
+  const filteredDateGroups = dateGroups.filter((yearMonth) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    const [year, month] = yearMonth.split("-");
+    const monthName = new Date(
+      parseInt(year),
+      parseInt(month) - 1
+    ).toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
+    
+    return (
+      monthName.toLowerCase().includes(query) ||
+      yearMonth.includes(query) ||
+      year.includes(query) ||
+      month.includes(query)
+    );
+  });
+
+  // Filter photos without event based on search query
+  const filteredPhotosWithoutEvent = photosWithoutEvent.filter((photo) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      photo.caption?.toLowerCase().includes(query) ||
+      photo.event_name?.toLowerCase().includes(query)
+    );
+  });
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -276,244 +424,178 @@ export const GalleryPage = () => {
               },
             }}
           >
-            <Tab label={t("allPhotos")} />
             <Tab label={t("byEvent")} />
             <Tab label={t("byDate")} />
           </Tabs>
         </Box>
 
         <TabPanel value={selectedTab} index={0}>
-          {photos.length === 0 ? (
-            <Typography color="text.secondary" textAlign="center">
-              {t("noPhotos")}
-            </Typography>
-          ) : (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, 1fr)",
-                  md: "repeat(3, 1fr)",
-                },
-                gap: 3,
-              }}
-            >
-              {photos.map((photo) => (
-                <Card
-                  key={photo.id}
-                  sx={{
-                    position: "relative",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: 4,
-                      "& .photo-actions": {
-                        opacity: 1,
-                      },
-                    },
-                  }}
-                >
-                  {canManageGallery && (
-                    <Box
-                      className="photo-actions"
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        zIndex: 10,
-                        display: "flex",
-                        gap: 0.5,
-                        backgroundColor: "rgba(255, 255, 255, 0.9)",
-                        borderRadius: 1,
-                        p: 0.5,
-                        opacity: 0,
-                        transition: "opacity 0.2s",
-                      }}
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenPhotoDialog(photo);
-                        }}
-                        sx={{ color: "primary.main" }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePhoto(photo.id);
-                        }}
-                        sx={{ color: "error.main" }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  )}
-                  <CardActionArea onClick={() => handlePhotoClick(photo)}>
-                    <CardMedia
-                      component="img"
-                      image={photo.image_url}
-                      alt={photo.caption || "Gallery photo"}
-                      sx={{
-                        height: 280,
-                        objectFit: "cover",
-                      }}
-                    />
-                    {(photo.caption || photo.event_name) && (
-                      <CardContent sx={{ p: 1.5 }}>
-                        <Typography
-                          variant="body2"
-                          fontWeight={500}
-                          noWrap
-                          title={photo.caption || photo.event_name}
-                        >
-                          {photo.caption || photo.event_name}
-                        </Typography>
-                        {photo.event_name && photo.caption && (
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            noWrap
-                          >
-                            {photo.event_name}
-                          </Typography>
-                        )}
-                      </CardContent>
-                    )}
-                  </CardActionArea>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </TabPanel>
-
-        <TabPanel value={selectedTab} index={1}>
-          {events.length === 0 && photosWithoutEvent.length === 0 ? (
-            <Typography color="text.secondary" textAlign="center">
-              {t("noEventPhotos")}
-            </Typography>
-          ) : (
-            <Box>
-              {events.map((event) => {
+          {viewingMode === 'list' ? (
+            <>
+              <TextField
+                fullWidth
+                placeholder="Search events by title, description, date, location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "text.secondary" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ mb: 3 }}
+              />
+              {filteredEvents.length === 0 && filteredPhotosWithoutEvent.length === 0 ? (
+                <Typography color="text.secondary" textAlign="center">
+                  {searchQuery ? "No events found matching your search" : t("noEventPhotos")}
+                </Typography>
+              ) : (
+                <Box>
+                  {filteredEvents.map((event) => {
                 const eventPhotos = photosByEvent[event.id] || [];
                 if (eventPhotos.length === 0) return null;
 
+                    const previewPhoto = eventPhotos[0];
+
                 return (
-                  <Box key={event.id} sx={{ mb: 6 }}>
+                      <Card
+                        key={event.id}
+                        sx={{
+                          mb: 2,
+                          cursor: "pointer",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 4,
+                          },
+                          display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
+                        }}
+                        onClick={() => {
+                          setSelectedEventId(event.id);
+                          setViewingMode('photos');
+                          setCurrentPhotoIndex(0);
+                        }}
+                      >
+                        <CardMedia
+                          component="img"
+                          image={previewPhoto.image_url}
+                          alt={event.title}
+                          sx={{
+                            width: { xs: "100%", sm: 200 },
+                            height: { xs: 200, sm: "auto" },
+                            objectFit: "cover",
+                          }}
+                        />
+                        <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                          <Box>
                     <Typography variant="h5" gutterBottom>
                       {event.title}
                     </Typography>
+                            {event.description && (
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      gutterBottom
-                      sx={{ mb: 2 }}
-                    >
-                      {new Date(event.event_date).toLocaleDateString()}
-                    </Typography>
-                    <Box
+                                sx={{
+                                  mb: 1,
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {event.description}
+                              </Typography>
+                            )}
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(event.event_date).toLocaleDateString()}
+                              {event.event_time && ` • ${event.event_time}`}
+                              {event.location && ` • ${event.location}`}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                            <Chip
+                              label={`${eventPhotos.length} photo${eventPhotos.length !== 1 ? 's' : ''}`}
+                              color="primary"
+                            />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                  {filteredPhotosWithoutEvent.length > 0 && (
+                    <Card
                       sx={{
-                        display: "grid",
-                        gridTemplateColumns: {
-                          xs: "1fr",
-                          sm: "repeat(2, 1fr)",
-                          md: "repeat(3, 1fr)",
+                        mb: 2,
+                        cursor: "pointer",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: 4,
                         },
-                        gap: 3,
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                      }}
+                      onClick={() => {
+                        setSelectedEventId('other');
+                        setViewingMode('photos');
+                        setCurrentPhotoIndex(0);
                       }}
                     >
-                      {eventPhotos.map((photo) => (
-                        <Card
-                          key={photo.id}
-                          sx={{
-                            position: "relative",
-                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                            "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow: 4,
-                              "& .photo-actions": {
-                                opacity: 1,
-                              },
-                            },
-                          }}
-                        >
-                          {canManageGallery && (
-                            <Box
-                              className="photo-actions"
-                              sx={{
-                                position: "absolute",
-                                top: 8,
-                                right: 8,
-                                zIndex: 10,
-                                display: "flex",
-                                gap: 0.5,
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                borderRadius: 1,
-                                p: 0.5,
-                                opacity: 0,
-                                transition: "opacity 0.2s",
-                              }}
-                            >
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenPhotoDialog(photo);
-                                }}
-                                sx={{ color: "primary.main" }}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeletePhoto(photo.id);
-                                }}
-                                sx={{ color: "error.main" }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          )}
-                          <CardActionArea onClick={() => handlePhotoClick(photo)}>
-                            <CardMedia
-                              component="img"
-                              image={photo.image_url}
-                              alt={photo.caption || event.title}
-                              sx={{
-                                height: 280,
-                                objectFit: "cover",
-                              }}
-                            />
-                            {photo.caption && (
-                              <CardContent sx={{ p: 1.5 }}>
-                                <Typography
-                                  variant="body2"
-                                  fontWeight={500}
-                                  noWrap
-                                  title={photo.caption}
-                                >
-                                  {photo.caption}
-                                </Typography>
-                              </CardContent>
-                            )}
-                          </CardActionArea>
-                        </Card>
-                      ))}
-                    </Box>
-                  </Box>
-                );
-              })}
-              {photosWithoutEvent.length > 0 && (
-                <Box>
-                  <Typography variant="h5" gutterBottom>
-                    {t("otherPhotos")}
-                  </Typography>
+                      <CardMedia
+                        component="img"
+                        image={filteredPhotosWithoutEvent[0].image_url}
+                        alt={t("otherPhotos")}
+                        sx={{
+                          width: { xs: "100%", sm: 200 },
+                          height: { xs: 200, sm: "auto" },
+                          objectFit: "cover",
+                        }}
+                      />
+                      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                        <Typography variant="h5">
+                          {t("otherPhotos")}
+                        </Typography>
+                        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                          <Chip
+                            label={`${filteredPhotosWithoutEvent.length} photo${filteredPhotosWithoutEvent.length !== 1 ? 's' : ''}`}
+                            color="primary"
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  )}
+                </Box>
+              )}
+            </>
+          ) : (
+            <Box>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => {
+                  setViewingMode('list');
+                  setSelectedEventId(null);
+                  setCurrentPhotoIndex(0);
+                }}
+                sx={{ mb: 3 }}
+              >
+                Back to Events
+              </Button>
+              {(() => {
+                const currentPhotos = selectedEventId === 'other' 
+                  ? photosWithoutEvent 
+                  : (selectedEventId ? photosByEvent[selectedEventId] || [] : []);
+                
+                if (currentPhotos.length === 0) {
+                  return (
+                    <Typography color="text.secondary" textAlign="center">
+                      No photos found
+                    </Typography>
+                  );
+                }
+
+                return (
                   <Box
                     sx={{
                       display: "grid",
@@ -525,7 +607,7 @@ export const GalleryPage = () => {
                       gap: 3,
                     }}
                   >
-                    {photosWithoutEvent.map((photo) => (
+                    {currentPhotos.map((photo) => (
                       <Card
                         key={photo.id}
                         sx={{
@@ -595,7 +677,7 @@ export const GalleryPage = () => {
                                 variant="body2"
                                 fontWeight={500}
                                 noWrap
-                                title={photo.caption}
+                              title={photo.caption}
                               >
                                 {photo.caption}
                               </Typography>
@@ -605,20 +687,36 @@ export const GalleryPage = () => {
                       </Card>
                     ))}
                   </Box>
-                </Box>
-              )}
+                );
+              })()}
             </Box>
           )}
         </TabPanel>
 
-        <TabPanel value={selectedTab} index={2}>
-          {dateGroups.length === 0 ? (
-            <Typography color="text.secondary" textAlign="center">
-              {t("noPhotos")}
-            </Typography>
-          ) : (
-            <Box>
-              {dateGroups.map((yearMonth) => {
+        <TabPanel value={selectedTab} index={1}>
+          {viewingMode === 'list' ? (
+            <>
+              <TextField
+                fullWidth
+                placeholder="Search by year or month (e.g., 2024, December, 12/2024)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "text.secondary" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ mb: 3 }}
+              />
+              {filteredDateGroups.length === 0 ? (
+                <Typography color="text.secondary" textAlign="center">
+                  {searchQuery ? "No dates found matching your search" : t("noPhotos")}
+                </Typography>
+              ) : (
+                <Box>
+                  {filteredDateGroups.map((yearMonth) => {
                 const [year, month] = yearMonth.split("-");
                 const monthName = new Date(
                   parseInt(year),
@@ -630,116 +728,171 @@ export const GalleryPage = () => {
                 const monthPhotos = photosByDate[yearMonth];
 
                 return (
-                  <Box key={yearMonth} sx={{ mb: 6 }}>
-                    <Typography variant="h5" gutterBottom>
+                      <Card
+                        key={yearMonth}
+                        sx={{
+                          mb: 2,
+                          cursor: "pointer",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 4,
+                          },
+                        }}
+                        onClick={() => {
+                          setSelectedDateGroup(yearMonth);
+                          setViewingMode('photos');
+                          setCurrentPhotoIndex(0);
+                        }}
+                      >
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Typography variant="h5">
                       {monthName}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: {
-                          xs: "1fr",
-                          sm: "repeat(2, 1fr)",
-                          md: "repeat(3, 1fr)",
-                        },
-                        gap: 3,
-                      }}
-                    >
-                      {monthPhotos.map((photo) => (
-                        <Card
-                          key={photo.id}
-                          sx={{
-                            position: "relative",
-                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                            "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow: 4,
-                              "& .photo-actions": {
-                                opacity: 1,
-                              },
-                            },
-                          }}
-                        >
-                          {canManageGallery && (
-                            <Box
-                              className="photo-actions"
-                              sx={{
-                                position: "absolute",
-                                top: 8,
-                                right: 8,
-                                zIndex: 10,
-                                display: "flex",
-                                gap: 0.5,
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                borderRadius: 1,
-                                p: 0.5,
-                                opacity: 0,
-                                transition: "opacity 0.2s",
-                              }}
-                            >
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenPhotoDialog(photo);
-                                }}
-                                sx={{ color: "primary.main" }}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeletePhoto(photo.id);
-                                }}
-                                sx={{ color: "error.main" }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          )}
-                          <CardActionArea onClick={() => handlePhotoClick(photo)}>
-                            <CardMedia
-                              component="img"
-                              image={photo.image_url}
-                              alt={photo.caption || "Gallery photo"}
-                              sx={{
-                                height: 280,
-                                objectFit: "cover",
-                              }}
+                            </Typography>
+                            <Chip
+                              label={`${monthPhotos.length} photo${monthPhotos.length !== 1 ? 's' : ''}`}
+                              color="primary"
                             />
-                            {(photo.caption || photo.event_name) && (
-                              <CardContent sx={{ p: 1.5 }}>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </Box>
+              )}
+            </>
+          ) : (
+            <Box>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => {
+                  setViewingMode('list');
+                  setSelectedDateGroup(null);
+                  setCurrentPhotoIndex(0);
+                }}
+                sx={{ mb: 3 }}
+              >
+                Back to Dates
+              </Button>
+              {(() => {
+                const currentPhotos = selectedDateGroup ? photosByDate[selectedDateGroup] || [] : [];
+                
+                if (currentPhotos.length === 0) {
+                  return (
+                    <Typography color="text.secondary" textAlign="center">
+                      No photos found
+                    </Typography>
+                  );
+                }
+
+                return (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      },
+                      gap: 3,
+                    }}
+                  >
+                    {currentPhotos.map((photo) => (
+                      <Card
+                        key={photo.id}
+                        sx={{
+                          position: "relative",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 4,
+                            "& .photo-actions": {
+                              opacity: 1,
+                            },
+                          },
+                        }}
+                      >
+                        {canManageGallery && (
+                          <Box
+                            className="photo-actions"
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              zIndex: 10,
+                              display: "flex",
+                              gap: 0.5,
+                              backgroundColor: "rgba(255, 255, 255, 0.9)",
+                              borderRadius: 1,
+                              p: 0.5,
+                              opacity: 0,
+                              transition: "opacity 0.2s",
+                            }}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenPhotoDialog(photo);
+                              }}
+                              sx={{ color: "primary.main" }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePhoto(photo.id);
+                              }}
+                              sx={{ color: "error.main" }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
+                        <CardActionArea onClick={() => handlePhotoClick(photo)}>
+                          <CardMedia
+                            component="img"
+                            image={photo.image_url}
+                            alt={photo.caption || "Gallery photo"}
+                            sx={{
+                              height: 280,
+                              objectFit: "cover",
+                            }}
+                          />
+                          {(photo.caption || photo.event_name) && (
+                            <CardContent sx={{ p: 1.5 }}>
+                              <Typography
+                                variant="body2"
+                                fontWeight={500}
+                                noWrap
+                              title={photo.caption || photo.event_name}
+                              >
+                                {photo.caption || photo.event_name}
+                              </Typography>
+                              {photo.event_name && photo.caption && (
                                 <Typography
-                                  variant="body2"
-                                  fontWeight={500}
+                                  variant="caption"
+                                  color="text.secondary"
                                   noWrap
-                                  title={photo.caption || photo.event_name}
                                 >
-                                  {photo.caption || photo.event_name}
+                                  {photo.event_name}
                                 </Typography>
-                                {photo.event_name && photo.caption && (
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    noWrap
-                                  >
-                                    {photo.event_name}
-                                  </Typography>
-                                )}
-                              </CardContent>
-                            )}
-                          </CardActionArea>
-                        </Card>
-                      ))}
-                    </Box>
+                              )}
+                            </CardContent>
+                          )}
+                        </CardActionArea>
+                      </Card>
+                    ))}
                   </Box>
                 );
-              })}
+              })()}
             </Box>
           )}
         </TabPanel>
+
 
         <Dialog
           open={dialogOpen}
@@ -765,61 +918,165 @@ export const GalleryPage = () => {
               justifyContent: "center",
             }}
           >
+            {selectedPhoto && (() => {
+              // Get current photos based on context
+              let currentPhotos: GalleryPhoto[] = [];
+              if (selectedEventId) {
+                currentPhotos = selectedEventId === 'other' 
+                  ? photosWithoutEvent 
+                  : (photosByEvent[selectedEventId] || []);
+              } else if (selectedDateGroup) {
+                currentPhotos = photosByDate[selectedDateGroup] || [];
+              }
+              const totalPhotos = currentPhotos.length;
+              const canNavigate = totalPhotos > 1;
+
+              const handlePrevious = () => {
+                if (canNavigate) {
+                  const newIndex = currentPhotoIndex > 0 ? currentPhotoIndex - 1 : totalPhotos - 1;
+                  setCurrentPhotoIndex(newIndex);
+                  setSelectedPhoto(currentPhotos[newIndex]);
+                }
+              };
+
+              const handleNext = () => {
+                if (canNavigate) {
+                  const newIndex = currentPhotoIndex < totalPhotos - 1 ? currentPhotoIndex + 1 : 0;
+                  setCurrentPhotoIndex(newIndex);
+                  setSelectedPhoto(currentPhotos[newIndex]);
+                }
+              };
+
+              return (
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    maxHeight: { xs: "100vh", sm: "90vh" },
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  {/* Close Button */}
             <IconButton
               onClick={handleCloseDialog}
               sx={{
                 position: "absolute",
-                right: { xs: 8, sm: 16 },
-                top: { xs: 8, sm: 16 },
+                      right: { xs: 8, sm: 16 },
+                      top: { xs: 8, sm: 16 },
                 color: "white",
-                backgroundColor: alpha("#000", 0.6),
+                      backgroundColor: alpha("#000", 0.6),
                 width: { xs: 40, sm: 48 },
                 height: { xs: 40, sm: 48 },
-                backdropFilter: "blur(10px)",
+                      backdropFilter: "blur(10px)",
                 "&:hover": {
-                  backgroundColor: alpha("#000", 0.8),
+                        backgroundColor: alpha("#000", 0.8),
                 },
-                zIndex: 1,
-                transition: "all 0.2s",
+                      zIndex: 2,
+                      transition: "all 0.2s",
               }}
             >
               <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
             </IconButton>
-            {selectedPhoto && (
-              <Box
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  maxHeight: { xs: "100vh", sm: "90vh" },
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: "100%",
-                    maxHeight: { xs: "calc(100vh - 120px)", sm: "calc(90vh - 120px)" },
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: alpha("#000", 0.3),
-                    backdropFilter: "blur(10px)",
-                    borderRadius: { xs: 0, sm: 2 },
-                    overflow: "hidden",
-                  }}
-                >
-                  <img
-                    src={selectedPhoto.image_url}
-                    alt={selectedPhoto.caption || "Gallery photo"}
-                    style={{
+
+                  {/* Navigation Arrows */}
+                  {canNavigate && (
+                    <>
+                      <IconButton
+                        onClick={handlePrevious}
+                        sx={{
+                          position: "absolute",
+                          left: { xs: 8, sm: 16 },
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "white",
+                          backgroundColor: alpha("#000", 0.6),
+                          width: { xs: 40, sm: 48 },
+                          height: { xs: 40, sm: 48 },
+                          backdropFilter: "blur(10px)",
+                          "&:hover": {
+                            backgroundColor: alpha("#000", 0.8),
+                          },
+                          zIndex: 2,
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <ArrowLeftIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleNext}
+                        sx={{
+                          position: "absolute",
+                          right: { xs: 8, sm: 16 },
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "white",
+                          backgroundColor: alpha("#000", 0.6),
+                          width: { xs: 40, sm: 48 },
+                          height: { xs: 40, sm: 48 },
+                          backdropFilter: "blur(10px)",
+                          "&:hover": {
+                            backgroundColor: alpha("#000", 0.8),
+                          },
+                          zIndex: 2,
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <ArrowRightIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                      </IconButton>
+                    </>
+                  )}
+
+                  {/* Photo Counter */}
+                  {canNavigate && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: { xs: 8, sm: 16 },
+                        left: { xs: 8, sm: 16 },
+                        color: "white",
+                        backgroundColor: alpha("#000", 0.6),
+                        backdropFilter: "blur(10px)",
+                        px: 2,
+                        py: 1,
+                        borderRadius: 1,
+                        zIndex: 2,
+                      }}
+                    >
+                      <Typography variant="body2">
+                        {currentPhotoIndex + 1} / {totalPhotos}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Image */}
+                  <Box
+                    sx={{
                       width: "100%",
-                      height: "auto",
-                      maxHeight: isMobile ? "calc(100vh - 120px)" : "calc(90vh - 120px)",
-                      objectFit: "contain",
-                      display: "block",
+                      maxHeight: { xs: "calc(100vh - 120px)", sm: "calc(90vh - 120px)" },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: alpha("#000", 0.3),
+                      backdropFilter: "blur(10px)",
+                      borderRadius: { xs: 0, sm: 2 },
+                      overflow: "hidden",
                     }}
-                  />
-                </Box>
+                  >
+                <img
+                  src={selectedPhoto.image_url}
+                  alt={selectedPhoto.caption || "Gallery photo"}
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                        maxHeight: isMobile ? "calc(100vh - 120px)" : "calc(90vh - 120px)",
+                        objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+                  </Box>
+
+                  {/* Caption */}
                 {(selectedPhoto.caption || selectedPhoto.event_name) && (
                   <Box
                     sx={{
@@ -827,38 +1084,39 @@ export const GalleryPage = () => {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      background: `linear-gradient(to top, ${alpha("#000", 0.9)} 0%, ${alpha("#000", 0.7)} 50%, transparent 100%)`,
+                        background: `linear-gradient(to top, ${alpha("#000", 0.9)} 0%, ${alpha("#000", 0.7)} 50%, transparent 100%)`,
                       color: "white",
-                      p: 3,
-                      pt: 4,
+                        p: 3,
+                        pt: 4,
                     }}
                   >
                     {selectedPhoto.event_name && (
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{
-                          fontWeight: 600,
-                          mb: 0.5,
-                        }}
-                      >
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{
+                            fontWeight: 600,
+                            mb: 0.5,
+                          }}
+                        >
                         {selectedPhoto.event_name}
                       </Typography>
                     )}
                     {selectedPhoto.caption && (
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          lineHeight: 1.6,
-                        }}
-                      >
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            lineHeight: 1.6,
+                          }}
+                        >
                         {selectedPhoto.caption}
                       </Typography>
                     )}
                   </Box>
                 )}
               </Box>
-            )}
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
@@ -886,18 +1144,19 @@ export const GalleryPage = () => {
           fullWidth
         >
           <DialogTitle>
-            {editingPhoto ? "Edit Photo" : "Upload Photo"}
+            {editingPhoto ? "Edit Photo" : "Upload Photos"}
           </DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <ImageUpload
-                mode="single"
+                mode={editingPhoto ? "single" : "multiple"}
                 bucket="event-photos"
                 value={photoFormData.image_url}
                 onChange={(url) =>
-                  setPhotoFormData({ ...photoFormData, image_url: url as string })
+                  setPhotoFormData({ ...photoFormData, image_url: url })
                 }
-                label="Photo"
+                label={editingPhoto ? "Photo" : "Photos (you can upload multiple)"}
+                maxFiles={20}
               />
               <TextField
                 fullWidth
@@ -954,9 +1213,18 @@ export const GalleryPage = () => {
             <Button
               onClick={handleSavePhoto}
               variant="contained"
-              disabled={uploading || !photoFormData.image_url}
+              disabled={
+                uploading ||
+                (Array.isArray(photoFormData.image_url)
+                  ? photoFormData.image_url.length === 0
+                  : !photoFormData.image_url)
+              }
             >
-              {uploading ? "Saving..." : editingPhoto ? "Update" : "Upload"}
+              {uploading
+                ? "Saving..."
+                : editingPhoto
+                ? "Update"
+                : `Upload ${Array.isArray(photoFormData.image_url) ? `(${photoFormData.image_url.length})` : ""}`}
             </Button>
           </DialogActions>
         </Dialog>
