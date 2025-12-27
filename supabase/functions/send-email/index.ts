@@ -276,6 +276,7 @@ interface DepartmentMemberData {
   members?: {
     email?: string;
     name?: string;
+    user_id?: string | null;
   };
 }
 
@@ -304,7 +305,8 @@ async function resolveRecipients(
           member_id,
           members!department_members_member_id_fkey (
             email,
-            name
+            name,
+            user_id
           )
         `
         )
@@ -314,7 +316,11 @@ async function resolveRecipients(
       if (!error && data) {
         recipients = (data as DepartmentMemberData[])
           .filter(
-            (dm) => dm.members?.email && typeof dm.members.email === "string"
+            (dm) =>
+              dm.members?.email &&
+              typeof dm.members.email === "string" &&
+              dm.members.user_id !== null &&
+              dm.members.user_id !== undefined
           )
           .map((dm) => ({
             email: dm.members!.email!,
@@ -332,7 +338,8 @@ async function resolveRecipients(
           member_id,
           members!ministry_members_member_id_fkey (
             email,
-            name
+            name,
+            user_id
           )
         `
         )
@@ -342,7 +349,11 @@ async function resolveRecipients(
       if (!error && data) {
         recipients = (data as DepartmentMemberData[])
           .filter(
-            (mm) => mm.members?.email && typeof mm.members.email === "string"
+            (mm) =>
+              mm.members?.email &&
+              typeof mm.members.email === "string" &&
+              mm.members.user_id !== null &&
+              mm.members.user_id !== undefined
           )
           .map((mm) => ({
             email: mm.members!.email!,
@@ -366,7 +377,8 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .eq("title_id", titlesData.id)
-          .not("email", "is", null);
+          .not("email", "is", null)
+          .not("user_id", "is", null);
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -396,7 +408,8 @@ async function resolveRecipients(
             member_id,
             members!department_members_member_id_fkey (
               email,
-              name
+              name,
+              user_id
             )
           `
           )
@@ -406,7 +419,11 @@ async function resolveRecipients(
         if (!error && data) {
           recipients = (data as DepartmentMemberData[])
             .filter(
-              (dm) => dm.members?.email && typeof dm.members.email === "string"
+              (dm) =>
+                dm.members?.email &&
+                typeof dm.members.email === "string" &&
+                dm.members.user_id !== null &&
+                dm.members.user_id !== undefined
             )
             .map((dm) => ({
               email: dm.members!.email!,
@@ -433,7 +450,8 @@ async function resolveRecipients(
             member_id,
             members!department_members_member_id_fkey (
               email,
-              name
+              name,
+              user_id
             )
           `
           )
@@ -443,7 +461,11 @@ async function resolveRecipients(
         if (!error && data) {
           recipients = (data as DepartmentMemberData[])
             .filter(
-              (dm) => dm.members?.email && typeof dm.members.email === "string"
+              (dm) =>
+                dm.members?.email &&
+                typeof dm.members.email === "string" &&
+                dm.members.user_id !== null &&
+                dm.members.user_id !== undefined
             )
             .map((dm) => ({
               email: dm.members!.email!,
@@ -467,7 +489,8 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .eq("title_id", titlesData.id)
-          .not("email", "is", null);
+          .not("email", "is", null)
+          .not("user_id", "is", null);
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -493,7 +516,8 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .eq("title_id", titlesData.id)
-          .not("email", "is", null);
+          .not("email", "is", null)
+          .not("user_id", "is", null);
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -522,7 +546,8 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .in("title_id", titleIds)
-          .not("email", "is", null);
+          .not("email", "is", null)
+          .not("user_id", "is", null);
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -544,6 +569,7 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .eq("id", memberId)
+          .not("user_id", "is", null)
           .single();
 
         if (!error && data && data.email) {
@@ -580,7 +606,8 @@ async function getCCRecipients(
     .from("members")
     .select("email, name")
     .in("title_id", titleIds)
-    .not("email", "is", null);
+    .not("email", "is", null)
+    .not("user_id", "is", null);
 
   if (error || !data) {
     return [];
@@ -612,7 +639,8 @@ async function getApostleRecipients(
     .from("members")
     .select("email, name")
     .eq("title_id", (titlesData as TitleData).id)
-    .not("email", "is", null);
+    .not("email", "is", null)
+    .not("user_id", "is", null);
 
   if (error || !data) {
     return [];
