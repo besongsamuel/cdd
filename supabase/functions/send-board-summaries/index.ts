@@ -308,18 +308,18 @@ async function processUser(
           ? lastNotificationTime
           : twentyFourHoursAgo;
 
-      // Get thread IDs for this board
-      const { data: threadIds, error: threadsError } = await supabase
+      // Get thread IDs and created_at for this board
+      const { data: threadsData, error: threadsError } = await supabase
         .from("message_threads")
-        .select("id")
+        .select("id, created_at")
         .eq("board_id", board.id)
         .is("archived_at", null);
 
-      if (threadsError || !threadIds || threadIds.length === 0) {
+      if (threadsError || !threadsData || threadsData.length === 0) {
         continue;
       }
 
-      const threadIdList = threadIds.map((t) => t.id);
+      const threadIdList = threadsData.map((t: { id: string }) => t.id);
 
       // Count new messages in last 24h
       const { count: messageCount, error: messagesError } = await supabase
@@ -356,7 +356,8 @@ async function processUser(
 
       // Count new threads
       const threadCount = threadsData.filter(
-        (t) => new Date(t.created_at || 0) > activityStartTime
+        (t: { id: string; created_at: string | null }) =>
+          new Date(t.created_at || 0) > activityStartTime
       ).length;
 
       // Only include board if there's activity
@@ -390,10 +391,9 @@ async function processUser(
   };
 }
 
-// Deno-specific: Using any for Supabase client - type is complex and not easily imported in Deno edge functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendSummaryEmail(
-  supabase: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  _supabase: any, // NOSONAR
   summary: UserSummary
 ): Promise<void> {
   // Build boards summary HTML
@@ -463,7 +463,7 @@ async function sendSummaryEmail(
 // Deno-specific: Using any for Supabase client - type is complex and not easily imported in Deno edge functions
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function updateNotificationTimestamps(
-  supabase: any,
+  supabase: any, // NOSONAR
   memberId: string,
   boards: BoardActivity[]
 ): Promise<void> {
