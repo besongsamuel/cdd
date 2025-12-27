@@ -31,6 +31,7 @@ const EVENT_TEMPLATE_MAP: Record<string, string> = {
   donation: "donation",
   "contact-submission": "contact-submission",
   "weekly-digest": "weekly-digest",
+  "board-summary": "board-summary",
 };
 
 const corsHeaders = {
@@ -534,6 +535,28 @@ async function resolveRecipients(
       }
       break;
     }
+
+    case "board-summary": {
+      // Get member email from member_id
+      const memberId = eventData.member_id;
+      if (memberId && typeof memberId === "string") {
+        const { data, error } = await supabase
+          .from("members")
+          .select("email, name")
+          .eq("id", memberId)
+          .single();
+
+        if (!error && data && data.email) {
+          recipients = [
+            {
+              email: data.email,
+              name: data.name,
+            },
+          ];
+        }
+      }
+      break;
+    }
   }
 
   return { to: recipients };
@@ -716,6 +739,7 @@ function getEventTypeLabel(eventType: string): string {
     donation: "Donation",
     "contact-submission": "Contact Submission",
     "weekly-digest": "Weekly Digest",
+    "board-summary": "Board Activity Summary",
   };
   return labels[eventType] || eventType;
 }

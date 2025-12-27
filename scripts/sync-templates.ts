@@ -193,7 +193,7 @@ async function updateTemplate(
   variables: TemplateVariable[]
 ): Promise<void> {
   try {
-    const { data, error } = await resend.templates.update(templateId, {
+    const { error } = await resend.templates.update(templateId, {
       name,
       html,
       variables: variables.length > 0 ? variables : undefined,
