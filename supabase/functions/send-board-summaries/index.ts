@@ -415,11 +415,25 @@ async function sendSummaryEmail(
   
   for (const board of summary.boards) {
     const boardHtml = generateBoardHtml(board);
-    if (accumulatedLength + boardHtml.length > MAX_HTML_LENGTH) {
+    // Check if adding this board would exceed limit (account for joining)
+    const newLength = accumulatedLength + (accumulatedLength > 0 ? 0 : 0) + boardHtml.length;
+    if (newLength > MAX_HTML_LENGTH && accumulatedLength > 0) {
+      // Don't add this board if we already have some boards
       break;
     }
-    includedBoards.push(board);
-    accumulatedLength += boardHtml.length;
+    // Always include at least one board, even if it slightly exceeds limit
+    if (includedBoards.length === 0 || newLength <= MAX_HTML_LENGTH) {
+      includedBoards.push(board);
+      accumulatedLength = newLength;
+    } else {
+      break;
+    }
+  }
+  
+  // Ensure we always have at least one board if there are any boards
+  if (includedBoards.length === 0 && summary.boards.length > 0) {
+    includedBoards.push(summary.boards[0]);
+    console.warn(`First board HTML too long (${generateBoardHtml(summary.boards[0]).length} chars), including anyway`);
   }
   
   const boardsSummaryHtml = includedBoards.map(generateBoardHtml).join("");
