@@ -708,6 +708,16 @@ async function sendEmailViaResend(
 
   // Prepare template variables from event data
   const templateVariables = prepareTemplateVariables(eventData);
+  
+  // Debug logging for board-summary emails
+  if (eventType === "board-summary") {
+    console.log("Board summary template variables:", Object.keys(templateVariables));
+    if (templateVariables.BOARDS_SUMMARY_HTML) {
+      console.log(`BOARDS_SUMMARY_HTML length: ${String(templateVariables.BOARDS_SUMMARY_HTML).length}`);
+    } else {
+      console.warn("BOARDS_SUMMARY_HTML variable not found in template variables!");
+    }
+  }
 
   // Map EMAIL to appropriate variable name to avoid Resend reserved variable
   if ("EMAIL" in templateVariables) {
