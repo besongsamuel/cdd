@@ -207,11 +207,11 @@ serve(async (req: Request) => {
 
     // Get CC recipients (elders and apostles)
     // Special case: for donations, only apostles are CC'd (elders are TO)
-    // For weekly-digest, no CC (all recipients are in TO)
+    // For weekly-digest and board-summary, no CC (all recipients are in TO)
     let ccRecipients: EmailRecipient[] = [];
     if (payload.eventType === "donation") {
       ccRecipients = await getApostleRecipients(supabase);
-    } else if (payload.eventType !== "weekly-digest") {
+    } else if (payload.eventType !== "weekly-digest" && payload.eventType !== "board-summary") {
       ccRecipients = await getCCRecipients(supabase);
     }
 
