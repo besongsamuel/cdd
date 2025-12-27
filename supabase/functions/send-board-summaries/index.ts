@@ -406,14 +406,35 @@ async function sendSummaryEmail(
   const boardsSummaryHtml = summary.boards
     .map(
       (board) => `
-    <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
-      <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px;">${board.board_name}</h3>
-      <div style="display: flex; gap: 20px; color: #555555; font-size: 14px;">
-        <div><strong>${board.message_count}</strong> messages</div>
-        <div><strong>${board.reply_count}</strong> replies</div>
-        <div><strong>${board.thread_count}</strong> new threads</div>
-      </div>
-    </div>
+    <table role="presentation" style="width: 100%; margin-bottom: 24px; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+      <tr>
+        <td style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 600;">${board.board_name}</h3>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px;">
+          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 12px 16px; text-align: center; background-color: #f0f7ff; border-radius: 6px; margin-right: 8px;">
+                <div style="color: #1e40af; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.message_count}</div>
+                <div style="color: #3b82f6; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Messages</div>
+              </td>
+              <td style="width: 12px;"></td>
+              <td style="padding: 12px 16px; text-align: center; background-color: #fef3f2; border-radius: 6px; margin-right: 8px;">
+                <div style="color: #dc2626; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.reply_count}</div>
+                <div style="color: #ef4444; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Replies</div>
+              </td>
+              <td style="width: 12px;"></td>
+              <td style="padding: 12px 16px; text-align: center; background-color: #f0fdf4; border-radius: 6px;">
+                <div style="color: #16a34a; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.thread_count}</div>
+                <div style="color: #22c55e; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">New Threads</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `
     )
     .join("");
