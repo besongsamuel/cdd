@@ -429,6 +429,11 @@ async function sendSummaryEmail(
       `HTML too long, including only ${includedBoards.length} of ${summary.boards.length} boards (${accumulatedLength} chars)`
     );
   }
+  
+  // Ensure we have HTML content - if empty, add a fallback message
+  const finalBoardsSummaryHtml = boardsSummaryHtml || '<p style="color:#666;font-size:14px;padding:20px;text-align:center">No board activity to display.</p>';
+  
+  console.log(`Generated boards summary HTML length: ${finalBoardsSummaryHtml.length}, boards included: ${includedBoards.length}`);
 
   // Get frontend URL from environment or use default
   const frontendUrl =
@@ -450,7 +455,7 @@ async function sendSummaryEmail(
     eventData: {
       member_id: summary.member_id,
       member_name: summary.member_name,
-      boards_summary_html: boardsSummaryHtml,
+      boards_summary_html: finalBoardsSummaryHtml,
       view_url: viewUrl,
       boards: includedBoards.map((b) => ({
         board_name: b.board_name,
