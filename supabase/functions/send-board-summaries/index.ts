@@ -423,32 +423,32 @@ async function sendSummaryEmail(
                 <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 10px; border: 2px solid #bfdbfe;">
                   <tr>
                     <td style="padding: 18px 16px; text-align: center;">
-                      <div style="color: #1e40af; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.message_count}</div>
-                      <div style="color: #3b82f6; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">💬 Messages</div>
+                      <div style="color: #1e40af; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1.2;">${board.message_count}</div>
+                      <div style="color: #3b82f6; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px;">💬 Messages</div>
                     </td>
                   </tr>
                 </table>
               </td>
-              <td style="width: 12px; padding: 0;"></td>
+              <td style="width: 16px; padding: 0;"></td>
               <!-- Replies Card -->
               <td style="padding: 0; width: 33.33%;">
                 <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 10px; border: 2px solid #fecaca;">
                   <tr>
                     <td style="padding: 18px 16px; text-align: center;">
-                      <div style="color: #dc2626; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.reply_count}</div>
-                      <div style="color: #ef4444; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">↩️ Replies</div>
+                      <div style="color: #dc2626; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1.2;">${board.reply_count}</div>
+                      <div style="color: #ef4444; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px;">↩️ Replies</div>
                     </td>
                   </tr>
                 </table>
               </td>
-              <td style="width: 12px; padding: 0;"></td>
+              <td style="width: 16px; padding: 0;"></td>
               <!-- Threads Card -->
               <td style="padding: 0; width: 33.33%;">
                 <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 10px; border: 2px solid #bbf7d0;">
                   <tr>
                     <td style="padding: 18px 16px; text-align: center;">
-                      <div style="color: #16a34a; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.thread_count}</div>
-                      <div style="color: #22c55e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">✨ New Threads</div>
+                      <div style="color: #16a34a; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1.2;">${board.thread_count}</div>
+                      <div style="color: #22c55e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px;">✨ New Threads</div>
                     </td>
                   </tr>
                 </table>
