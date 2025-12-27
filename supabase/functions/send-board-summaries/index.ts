@@ -406,29 +406,52 @@ async function sendSummaryEmail(
   const boardsSummaryHtml = summary.boards
     .map(
       (board) => `
-    <table role="presentation" style="width: 100%; margin-bottom: 24px; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+    <table role="presentation" style="width: 100%; margin-bottom: 28px; border-collapse: separate; border-spacing: 0; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+      <!-- Header with gradient -->
       <tr>
-        <td style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-          <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 600;">${board.board_name}</h3>
+        <td style="padding: 24px 24px 20px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <h3 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">📋 ${board.board_name}</h3>
         </td>
       </tr>
+      <!-- Stats section -->
       <tr>
-        <td style="padding: 20px;">
+        <td style="padding: 24px;">
           <table role="presentation" style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="padding: 12px 16px; text-align: center; background-color: #f0f7ff; border-radius: 6px; margin-right: 8px;">
-                <div style="color: #1e40af; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.message_count}</div>
-                <div style="color: #3b82f6; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Messages</div>
+              <!-- Messages Card -->
+              <td style="padding: 0; width: 33.33%;">
+                <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 10px; border: 2px solid #bfdbfe;">
+                  <tr>
+                    <td style="padding: 18px 16px; text-align: center;">
+                      <div style="color: #1e40af; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.message_count}</div>
+                      <div style="color: #3b82f6; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">💬 Messages</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
-              <td style="width: 12px;"></td>
-              <td style="padding: 12px 16px; text-align: center; background-color: #fef3f2; border-radius: 6px; margin-right: 8px;">
-                <div style="color: #dc2626; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.reply_count}</div>
-                <div style="color: #ef4444; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Replies</div>
+              <td style="width: 12px; padding: 0;"></td>
+              <!-- Replies Card -->
+              <td style="padding: 0; width: 33.33%;">
+                <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 10px; border: 2px solid #fecaca;">
+                  <tr>
+                    <td style="padding: 18px 16px; text-align: center;">
+                      <div style="color: #dc2626; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.reply_count}</div>
+                      <div style="color: #ef4444; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">↩️ Replies</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
-              <td style="width: 12px;"></td>
-              <td style="padding: 12px 16px; text-align: center; background-color: #f0fdf4; border-radius: 6px;">
-                <div style="color: #16a34a; font-size: 24px; font-weight: 700; margin-bottom: 4px;">${board.thread_count}</div>
-                <div style="color: #22c55e; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">New Threads</div>
+              <td style="width: 12px; padding: 0;"></td>
+              <!-- Threads Card -->
+              <td style="padding: 0; width: 33.33%;">
+                <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 10px; border: 2px solid #bbf7d0;">
+                  <tr>
+                    <td style="padding: 18px 16px; text-align: center;">
+                      <div style="color: #16a34a; font-size: 32px; font-weight: 800; margin-bottom: 6px; line-height: 1;">${board.thread_count}</div>
+                      <div style="color: #22c55e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">✨ New Threads</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>
