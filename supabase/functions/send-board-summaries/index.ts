@@ -146,13 +146,19 @@ serve(async (req: Request) => {
     // Process each user
     for (const user of users) {
       try {
+        // Skip users without user_id (shouldn't happen due to query filter, but safety check)
+        if (!user.user_id || !user.email) {
+          console.log(`Skipping user ${user.id}: missing user_id or email`);
+          continue;
+        }
+
         const memberId = user.id;
         const userSummary = await processUser(
           supabase,
           memberId,
-          user.user_id!,
+          user.user_id,
           user.name || "Member",
-          user.email!
+          user.email
         );
 
         // If user has activity, send email
