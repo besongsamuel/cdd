@@ -403,11 +403,32 @@ async function sendSummaryEmail(
   summary: UserSummary
 ): Promise<void> {
   // Build boards summary HTML - optimized to minimize character count
-  const boardsSummaryHtml = summary.boards
-    .map(
-      (board) => `<table role="presentation" style="width:100%;margin-bottom:28px;border-collapse:separate;border-spacing:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08)"><tr><td style="padding:24px 24px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"><h3 style="margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:-.3px">📋 ${board.board_name}</h3></td></tr><tr><td style="padding:24px"><table role="presentation" style="width:100%;border-collapse:collapse"><tr><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border-radius:10px;border:2px solid #bfdbfe"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#1e40af;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.message_count}</div><div style="color:#3b82f6;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">💬 Messages</div></td></tr></table></td><td style="width:16px;padding:0"></td><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);border-radius:10px;border:2px solid #fecaca"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#dc2626;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.reply_count}</div><div style="color:#ef4444;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">↩️ Replies</div></td></tr></table></td><td style="width:16px;padding:0"></td><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:10px;border:2px solid #bbf7d0"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#16a34a;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.thread_count}</div><div style="color:#22c55e;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">✨ New Threads</div></td></tr></table></td></tr></table></td></tr></table>`
-    )
-    .join("");
+  // Resend has a 2000 character limit per template variable
+  const MAX_HTML_LENGTH = 1900; // Leave buffer for safety
+  
+  // Helper function to generate board HTML
+  const generateBoardHtml = (board: BoardActivity) => `<table role="presentation" style="width:100%;margin-bottom:28px;border-collapse:separate;border-spacing:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08)"><tr><td style="padding:24px 24px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"><h3 style="margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:-.3px">📋 ${board.board_name}</h3></td></tr><tr><td style="padding:24px"><table role="presentation" style="width:100%;border-collapse:collapse"><tr><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border-radius:10px;border:2px solid #bfdbfe"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#1e40af;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.message_count}</div><div style="color:#3b82f6;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">💬 Messages</div></td></tr></table></td><td style="width:16px;padding:0"></td><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);border-radius:10px;border:2px solid #fecaca"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#dc2626;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.reply_count}</div><div style="color:#ef4444;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">↩️ Replies</div></td></tr></table></td><td style="width:16px;padding:0"></td><td style="padding:0;width:33.33%"><table role="presentation" style="width:100%;border-collapse:collapse;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:10px;border:2px solid #bbf7d0"><tr><td style="padding:18px 16px;text-align:center"><div style="color:#16a34a;font-size:32px;font-weight:800;margin-bottom:6px;line-height:1.2">${board.thread_count}</div><div style="color:#22c55e;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px">✨ New Threads</div></td></tr></table></td></tr></table></td></tr></table>`;
+  
+  // Build HTML only for boards that fit within the limit
+  let accumulatedLength = 0;
+  const includedBoards: BoardActivity[] = [];
+  
+  for (const board of summary.boards) {
+    const boardHtml = generateBoardHtml(board);
+    if (accumulatedLength + boardHtml.length > MAX_HTML_LENGTH) {
+      break;
+    }
+    includedBoards.push(board);
+    accumulatedLength += boardHtml.length;
+  }
+  
+  const boardsSummaryHtml = includedBoards.map(generateBoardHtml).join("");
+  
+  if (summary.boards.length > includedBoards.length) {
+    console.warn(
+      `HTML too long, including only ${includedBoards.length} of ${summary.boards.length} boards (${accumulatedLength} chars)`
+    );
+  }
 
   // Get frontend URL from environment or use default
   const frontendUrl =
@@ -431,7 +452,7 @@ async function sendSummaryEmail(
       member_name: summary.member_name,
       boards_summary_html: boardsSummaryHtml,
       view_url: viewUrl,
-      boards: summary.boards.map((b) => ({
+      boards: includedBoards.map((b) => ({
         board_name: b.board_name,
         message_count: b.message_count,
         reply_count: b.reply_count,
