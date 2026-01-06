@@ -31,3 +31,4 @@ SELECT cron.schedule(
 -- Comments
 COMMENT ON EXTENSION pg_cron IS 'Enables scheduled jobs. Board summaries run daily at 6pm EST.';
 
+

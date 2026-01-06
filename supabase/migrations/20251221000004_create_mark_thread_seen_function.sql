@@ -65,3 +65,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 COMMENT ON FUNCTION mark_thread_as_seen(UUID, UUID) IS 'Marks all messages in a thread as seen for a member, returns count of messages marked';
 COMMENT ON FUNCTION get_unseen_message_count(UUID, UUID) IS 'Returns count of unseen messages for a member, optionally filtered by thread';
 
+

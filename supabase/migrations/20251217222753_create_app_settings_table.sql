@@ -70,8 +70,8 @@ DECLARE
   auth_key TEXT;
   headers_json JSONB;
 BEGIN
-  -- Get the edge function URL
-  edge_function_url := get_edge_function_url();
+  -- Get the edge function URL (base URL + specific function path)
+  edge_function_url := get_edge_function_url() || '/send-email';
   
   -- Build the payload
   payload := jsonb_build_object(

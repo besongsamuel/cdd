@@ -71,3 +71,4 @@ CREATE POLICY "Authenticated users can delete suggestions" ON suggestions
 
 
 
+

@@ -298,3 +298,4 @@ COMMENT ON FUNCTION toggle_thread_pin(UUID, BOOLEAN, UUID) IS 'Pins or unpins a 
 COMMENT ON FUNCTION create_notification(UUID, TEXT, UUID, UUID, UUID) IS 'Creates an in-app notification';
 
 
+

@@ -212,3 +212,4 @@ COMMENT ON TABLE moderation_logs IS 'Log of all moderation actions';
 COMMENT ON TABLE notifications IS 'In-app notifications for users';
 
 
+

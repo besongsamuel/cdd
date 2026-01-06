@@ -7,3 +7,4 @@ SELECT cron.unschedule('check-unseen-replies');
 -- Comments
 COMMENT ON EXTENSION pg_cron IS 'Board summaries have replaced the hourly unseen replies check.';
 
+

@@ -112,3 +112,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 COMMENT ON FUNCTION check_unseen_replies() IS 'Checks for unseen replies and creates batched notifications per user';
 
 
+

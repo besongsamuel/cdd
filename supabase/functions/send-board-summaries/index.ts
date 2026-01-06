@@ -402,63 +402,51 @@ async function sendSummaryEmail(
   _supabase: any, // NOSONAR
   summary: UserSummary
 ): Promise<void> {
-  // Build boards summary HTML - optimized to minimize character count
-  // Resend has a 2000 character limit per template variable
-  // After heavy optimization, single board is ~750 chars, so we can fit 2 boards safely
-  const MAX_HTML_LENGTH = 1800; // Leave buffer for safety
-  
-  // Helper function to generate board HTML - heavily optimized for character count
+  // Helper function to generate board HTML - beautiful design with optimized character count
+  // Must be under 2000 chars to meet Resend's limit
   const generateBoardHtml = (board: BoardActivity) => {
-    // Truncate board name if too long
-    const boardName = board.board_name.length > 40 ? board.board_name.substring(0, 37) + '...' : board.board_name;
-    // Use minimal HTML with inline styles - each board ~750 chars
-    return `<table style="width:100%;margin-bottom:16px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.08)"><tr><td style="padding:16px;background:linear-gradient(135deg,#667eea,#764ba2)"><h3 style="margin:0;color:#fff;font-size:16px;font-weight:700">${boardName}</h3></td></tr><tr><td style="padding:16px"><table style="width:100%"><tr><td style="padding:0;width:33%"><table style="width:100%;background:#eff6ff;border-radius:6px;border:1px solid #bfdbfe"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#1e40af;font-size:24px;font-weight:800;margin-bottom:2px">${board.message_count}</div><div style="color:#3b82f6;font-size:10px;font-weight:600;text-transform:uppercase">Msgs</div></td></tr></table></td><td style="width:10px"></td><td style="padding:0;width:33%"><table style="width:100%;background:#fef2f2;border-radius:6px;border:1px solid #fecaca"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#dc2626;font-size:24px;font-weight:800;margin-bottom:2px">${board.reply_count}</div><div style="color:#ef4444;font-size:10px;font-weight:600;text-transform:uppercase">Replies</div></td></tr></table></td><td style="width:10px"></td><td style="padding:0;width:33%"><table style="width:100%;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#16a34a;font-size:24px;font-weight:800;margin-bottom:2px">${board.thread_count}</div><div style="color:#22c55e;font-size:10px;font-weight:600;text-transform:uppercase">Threads</div></td></tr></table></td></tr></table></td></tr></table>`;
+    // Truncate board name if too long (max 30 chars to save space)
+    const boardName = board.board_name.length > 30 ? board.board_name.substring(0, 27) + '...' : board.board_name;
+    // Ultra-compact but beautiful design - removed role="presentation", shortened styles, reduced padding
+    return `<table style="width:100%;margin-bottom:16px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.1)"><tr><td style="padding:16px;background:linear-gradient(135deg,#667eea,#764ba2)"><h3 style="margin:0;color:#fff;font-size:16px;font-weight:700">📋 ${boardName}</h3></td></tr><tr><td style="padding:16px"><table style="width:100%"><tr><td style="padding:0;width:33%"><table style="width:100%;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:6px;border:2px solid #bfdbfe"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#1e40af;font-size:24px;font-weight:800;margin-bottom:2px">${board.message_count}</div><div style="color:#3b82f6;font-size:10px;font-weight:600;text-transform:uppercase">💬 Msgs</div></td></tr></table></td><td style="width:10px"></td><td style="padding:0;width:33%"><table style="width:100%;background:linear-gradient(135deg,#fef2f2,#fee2e2);border-radius:6px;border:2px solid #fecaca"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#dc2626;font-size:24px;font-weight:800;margin-bottom:2px">${board.reply_count}</div><div style="color:#ef4444;font-size:10px;font-weight:600;text-transform:uppercase">↩️ Replies</div></td></tr></table></td><td style="width:10px"></td><td style="padding:0;width:33%"><table style="width:100%;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:6px;border:2px solid #bbf7d0"><tr><td style="padding:12px 10px;text-align:center"><div style="color:#16a34a;font-size:24px;font-weight:800;margin-bottom:2px">${board.thread_count}</div><div style="color:#22c55e;font-size:10px;font-weight:600;text-transform:uppercase">✨ Threads</div></td></tr></table></td></tr></table></td></tr></table>`;
   };
   
-  // Build HTML only for boards that fit within the limit
-  let accumulatedLength = 0;
-  const includedBoards: BoardActivity[] = [];
+  // Generate HTML for each board and split into separate variables
+  // Support up to 10 boards (each ~750 chars, well under 2000 limit)
+  const MAX_BOARDS = 10;
+  const includedBoards = summary.boards.slice(0, MAX_BOARDS);
   
-  for (const board of summary.boards) {
-    const boardHtml = generateBoardHtml(board);
-    // Check if adding this board would exceed limit (account for joining)
-    const newLength = accumulatedLength + (accumulatedLength > 0 ? 0 : 0) + boardHtml.length;
-    if (newLength > MAX_HTML_LENGTH && accumulatedLength > 0) {
-      // Don't add this board if we already have some boards
-      break;
-    }
-    // Always include at least one board, even if it slightly exceeds limit
-    if (includedBoards.length === 0 || newLength <= MAX_HTML_LENGTH) {
-      includedBoards.push(board);
-      accumulatedLength = newLength;
+  // Build event data with separate variables for each board
+  const eventData: Record<string, string> = {
+    member_id: summary.member_id,
+    member_name: summary.member_name,
+    view_url: `${Deno.env.get("FRONTEND_URL") || "https://eglisecitededavid.com"}/message-boards`,
+    // Include deprecated BOARDS_SUMMARY_HTML as empty string to satisfy Resend's requirement
+    // This variable exists in the template but is no longer used (we use BOARD_SUMMARY_1-10 instead)
+    boards_summary_html: '',
+  };
+  
+  // Generate HTML for each board and assign to separate variables
+  // Always provide all 10 variables (empty string if no board) to satisfy Resend's requirement
+  for (let i = 0; i < MAX_BOARDS; i++) {
+    if (i < includedBoards.length) {
+      const board = includedBoards[i];
+      const boardHtml = generateBoardHtml(board);
+      eventData[`board_summary_${i + 1}`] = boardHtml;
+      console.log(`Generated board_summary_${i + 1} HTML length: ${boardHtml.length} chars`);
     } else {
-      break;
+      // Provide empty string for unused board slots
+      eventData[`board_summary_${i + 1}`] = '';
     }
   }
   
-  // Ensure we always have at least one board if there are any boards
-  if (includedBoards.length === 0 && summary.boards.length > 0) {
-    includedBoards.push(summary.boards[0]);
-    console.warn(`First board HTML too long (${generateBoardHtml(summary.boards[0]).length} chars), including anyway`);
-  }
-  
-  const boardsSummaryHtml = includedBoards.map(generateBoardHtml).join("");
-  
-  if (summary.boards.length > includedBoards.length) {
+  if (summary.boards.length > MAX_BOARDS) {
     console.warn(
-      `HTML too long, including only ${includedBoards.length} of ${summary.boards.length} boards (${accumulatedLength} chars)`
+      `Too many boards (${summary.boards.length}), including only first ${MAX_BOARDS} boards`
     );
   }
   
-  // Ensure we have HTML content - if empty, add a fallback message
-  const finalBoardsSummaryHtml = boardsSummaryHtml || '<p style="color:#666;font-size:14px;padding:20px;text-align:center">No board activity to display.</p>';
-  
-  console.log(`Generated boards summary HTML length: ${finalBoardsSummaryHtml.length}, boards included: ${includedBoards.length}`);
-
-  // Get frontend URL from environment or use default
-  const frontendUrl =
-    Deno.env.get("FRONTEND_URL") || "https://eglisecitededavid.com";
-  const viewUrl = `${frontendUrl}/message-boards`;
+  console.log(`Generated ${includedBoards.length} board summaries for email`);
 
   // Call send-email edge function
   const supabaseUrl =
@@ -472,18 +460,7 @@ async function sendSummaryEmail(
 
   const emailPayload = {
     eventType: "board-summary",
-    eventData: {
-      member_id: summary.member_id,
-      member_name: summary.member_name,
-      boards_summary_html: finalBoardsSummaryHtml,
-      view_url: viewUrl,
-      boards: includedBoards.map((b) => ({
-        board_name: b.board_name,
-        message_count: b.message_count,
-        reply_count: b.reply_count,
-        thread_count: b.thread_count,
-      })),
-    },
+    eventData,
   };
 
   const response = await fetch(emailFunctionUrl, {

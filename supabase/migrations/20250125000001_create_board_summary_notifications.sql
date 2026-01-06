@@ -43,3 +43,4 @@ CREATE POLICY "Service role can manage board summary notifications" ON board_sum
 COMMENT ON TABLE board_summary_notifications IS 'Tracks when each user was last notified about activity in each board';
 COMMENT ON COLUMN board_summary_notifications.last_notified_at IS 'Timestamp of the last summary email sent to this user for this board';
 
+

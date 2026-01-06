@@ -10,3 +10,4 @@ COMMENT ON COLUMN members.phone IS 'Optional phone number for member contact';
 
 
 
+

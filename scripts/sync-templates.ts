@@ -246,7 +246,24 @@ async function processTemplate(filename: string): Promise<void> {
     const html = await readFile(filePath, "utf-8");
 
     // Extract variables from HTML
-    const variables = extractVariables(html);
+    let variables = extractVariables(html);
+
+    // Handle deprecated variables for board-summary template
+    // Resend requires all variables from the old template to be in the variables list
+    if (templateName === "board-summary") {
+      // Check if BOARDS_SUMMARY_HTML was in the old template but not in new HTML
+      const hasOldVariable = variables.some((v) => v.key === "BOARDS_SUMMARY_HTML");
+      if (!hasOldVariable) {
+        // Add deprecated variable to avoid Resend validation error
+        variables.push({
+          key: "BOARDS_SUMMARY_HTML",
+          type: "string",
+        });
+        console.log(
+          `⚠️  Added deprecated variable "BOARDS_SUMMARY_HTML" to maintain compatibility with existing template`
+        );
+      }
+    }
 
     if (variables.length > 0) {
       console.log(

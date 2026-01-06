@@ -37,3 +37,4 @@ COMMENT ON TABLE contact_submission_throttle IS 'Tracks contact form submissions
 COMMENT ON FUNCTION cleanup_old_throttle_records() IS 'Removes throttle records older than 1 hour';
 
 
+

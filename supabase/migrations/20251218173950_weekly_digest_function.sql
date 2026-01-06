@@ -422,3 +422,4 @@ COMMENT ON FUNCTION build_digest_html_sections(JSONB) IS 'Builds HTML sections f
 COMMENT ON FUNCTION send_weekly_digest() IS 'Sends weekly digest email to Elders and Apostles every Saturday at 8am';
 
 
+

@@ -7,3 +7,4 @@ ALTER TABLE members
 
 COMMENT ON COLUMN members.is_verified IS 'Indicates whether the member has been verified by an admin. Unverified members have restricted access to other members contact information.';
 
+
