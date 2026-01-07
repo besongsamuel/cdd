@@ -25,10 +25,8 @@ import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
 import { budgetService } from "../services/budgetService";
 import { donationCategoryService } from "../services/donationCategoryService";
-import { donationsService } from "../services/donationsService";
 import { stripeService } from "../services/stripeService";
 import type { DonationCategory, PaymentType, YearlyBudget } from "../types";
-import { DONATION_EMAIL } from "../utils/constants";
 
 export const DonationsPage = () => {
   const { t } = useTranslation("donations");
@@ -40,7 +38,6 @@ export const DonationsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"etransfer" | "stripe">("stripe");
   const [paymentType, setPaymentType] = useState<PaymentType>("one_time");
 
   const [formData, setFormData] = useState({
@@ -112,42 +109,19 @@ export const DonationsPage = () => {
     }
 
     try {
-      if (paymentMethod === "stripe") {
-        // Create Stripe Checkout session
-        const { url } = await stripeService.createCheckoutSession({
-          amount: parseFloat(formData.amount),
-          categoryId: formData.category_id || undefined,
-          paymentType,
-          memberId: currentMember?.id,
-          email: formData.donor_email,
-          donorName: formData.donor_name || undefined,
-          notes: formData.notes || undefined,
-        });
+      // Create Stripe Checkout session
+      const { url } = await stripeService.createCheckoutSession({
+        amount: parseFloat(formData.amount),
+        categoryId: formData.category_id || undefined,
+        paymentType,
+        memberId: currentMember?.id,
+        email: formData.donor_email,
+        donorName: formData.donor_name || undefined,
+        notes: formData.notes || undefined,
+      });
 
-        // Redirect to Stripe Checkout
-        window.location.href = url;
-      } else {
-        // E-transfer flow (existing)
-        await donationsService.create({
-          amount: parseFloat(formData.amount),
-          donor_name: formData.donor_name || undefined,
-          donor_email: formData.donor_email || undefined,
-          category_id: formData.category_id || undefined,
-          notes: formData.notes || undefined,
-          member_id: currentMember?.id || undefined,
-          etransfer_email: DONATION_EMAIL,
-          status: "pending",
-        });
-
-        setSuccess(true);
-        setFormData({
-          amount: "",
-          donor_name: currentMember?.name || "",
-          donor_email: currentMember?.email || "",
-          category_id: "",
-          notes: "",
-        });
-      }
+      // Redirect to Stripe Checkout
+      window.location.href = url;
     } catch (err) {
       setError(err instanceof Error ? err.message : t("form.error") || "An error occurred");
     } finally {
@@ -232,33 +206,17 @@ export const DonationsPage = () => {
             <form onSubmit={handleSubmit}>
               <FormControl component="fieldset" fullWidth margin="normal">
                 <Typography variant="subtitle2" gutterBottom>
-                  Payment Method
+                  Payment Type
                 </Typography>
                 <RadioGroup
                   row
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as "etransfer" | "stripe")}
+                  value={paymentType}
+                  onChange={(e) => setPaymentType(e.target.value as PaymentType)}
                 >
-                  <FormControlLabel value="stripe" control={<Radio />} label="Credit/Debit Card (Stripe)" />
-                  <FormControlLabel value="etransfer" control={<Radio />} label="E-transfer" />
+                  <FormControlLabel value="one_time" control={<Radio />} label="One-time" />
+                  <FormControlLabel value="subscription" control={<Radio />} label="Monthly Subscription" />
                 </RadioGroup>
               </FormControl>
-
-              {paymentMethod === "stripe" && (
-                <FormControl component="fieldset" fullWidth margin="normal">
-                  <Typography variant="subtitle2" gutterBottom>
-                    Payment Type
-                  </Typography>
-                  <RadioGroup
-                    row
-                    value={paymentType}
-                    onChange={(e) => setPaymentType(e.target.value as PaymentType)}
-                  >
-                    <FormControlLabel value="one_time" control={<Radio />} label="One-time" />
-                    <FormControlLabel value="subscription" control={<Radio />} label="Monthly Subscription" />
-                  </RadioGroup>
-                </FormControl>
-              )}
 
               <TextField
                 fullWidth
@@ -357,14 +315,10 @@ export const DonationsPage = () => {
                 disabled={submitting}
               >
                 {submitting
-                  ? paymentMethod === "stripe"
-                    ? "Redirecting to payment..."
-                    : t("form.submitting")
-                  : paymentMethod === "stripe"
-                  ? paymentType === "subscription"
-                    ? "Subscribe with Stripe"
-                    : "Pay with Stripe"
-                  : t("form.submit")}
+                  ? "Redirecting to payment..."
+                  : paymentType === "subscription"
+                  ? "Subscribe with Stripe"
+                  : "Pay with Stripe"}
               </Button>
             </form>
           </Paper>
