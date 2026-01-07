@@ -416,8 +416,6 @@ export const MinistryDetailPage = () => {
     try {
       const isViewing = selectedEventForViewer === eventId;
       const currentIndex = isViewing ? currentPhotoIndex : 0;
-      const photos = outreachGalleryPhotos[eventId] || [];
-      const isLastPhoto = photos.length === 1;
       
       await outreachGalleryService.delete(photoId);
       
@@ -562,6 +560,7 @@ export const MinistryDetailPage = () => {
           <Box
             sx={{
               width: "100%",
+              height: { xs: 250, sm: 350, md: 450 },
               mb: 5,
               borderRadius: 3,
               overflow: "hidden",
@@ -587,7 +586,7 @@ export const MinistryDetailPage = () => {
               position={imagePosition}
               isEditable={canManageMinistries}
               onPositionChange={handleImagePositionUpdate}
-              height={{ xs: 250, sm: 350, md: 450 }}
+              height="100%"
             />
             {isSavingPosition && (
               <Box

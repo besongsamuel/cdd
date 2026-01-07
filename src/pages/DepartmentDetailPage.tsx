@@ -259,6 +259,7 @@ export const DepartmentDetailPage = () => {
           <Box
             sx={{
               width: "100%",
+              height: { xs: 250, sm: 350, md: 450 },
               mb: 5,
               borderRadius: 3,
               overflow: "hidden",
@@ -284,7 +285,7 @@ export const DepartmentDetailPage = () => {
               position={imagePosition}
               isEditable={canManageDepartments}
               onPositionChange={handleImagePositionUpdate}
-              height={{ xs: 250, sm: 350, md: 450 }}
+              height="100%"
             />
             {isSavingPosition && (
               <Box
