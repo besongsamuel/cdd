@@ -157,6 +157,7 @@ export interface Department {
   name: string;
   description?: string; // markdown
   image_url?: string;
+  image_position?: { x: number; y: number };
   display_order: number;
   is_active: boolean;
   created_at: string;
@@ -209,6 +210,7 @@ export interface Ministry {
   name: string;
   description?: string; // markdown
   image_url?: string;
+  image_position?: { x: number; y: number };
   display_order: number;
   is_active: boolean;
   details?: MinistryDetails;

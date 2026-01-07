@@ -30,6 +30,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { DraggableProfileImage } from "../components/common/DraggableProfileImage";
 import { ImageUpload } from "../components/common/ImageUpload";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
@@ -144,6 +145,37 @@ export const MinistryDetailPage = () => {
 
   const canAddMembers = canManageMinistries || isMinistryLead;
   const canManageOutreach = canManageMinistries || isMinistryLead;
+  const [imagePosition, setImagePosition] = useState(
+    ministry?.image_position || { x: 50, y: 50 }
+  );
+  const [isSavingPosition, setIsSavingPosition] = useState(false);
+
+  // Update position when ministry changes
+  useEffect(() => {
+    if (ministry) {
+      setImagePosition(ministry.image_position || { x: 50, y: 50 });
+    }
+  }, [ministry]);
+
+  const handleImagePositionUpdate = async (position: { x: number; y: number }) => {
+    if (!ministry || !canManageMinistries) return;
+    setIsSavingPosition(true);
+    try {
+      await ministriesService.update(ministry.id, {
+        image_position: position,
+      });
+      // Reload ministry to get updated data
+      const updatedMinistry = await ministriesService.getById(ministry.id);
+      setMinistry(updatedMinistry);
+      setImagePosition(position);
+    } catch (error) {
+      console.error("Failed to save image position:", error);
+      // Revert to original position on error
+      setImagePosition(ministry.image_position || { x: 50, y: 50 });
+    } finally {
+      setIsSavingPosition(false);
+    }
+  };
 
   const handleJoinConfirm = async () => {
     if (!id || !ministry || !user || !currentMember) return;
@@ -530,7 +562,6 @@ export const MinistryDetailPage = () => {
           <Box
             sx={{
               width: "100%",
-              height: { xs: 250, sm: 350, md: 450 },
               mb: 5,
               borderRadius: 3,
               overflow: "hidden",
@@ -550,20 +581,35 @@ export const MinistryDetailPage = () => {
               },
             }}
           >
-            <Box
-              component="img"
-              src={ministry.image_url}
+            <DraggableProfileImage
+              imageUrl={ministry.image_url}
               alt={ministry.name}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  transform: "scale(1.05)",
-                },
-              }}
+              position={imagePosition}
+              isEditable={canManageMinistries}
+              onPositionChange={handleImagePositionUpdate}
+              height={{ xs: 250, sm: 350, md: 450 }}
             />
+            {isSavingPosition && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  left: 8,
+                  zIndex: 3,
+                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                  color: "white",
+                  borderRadius: 1,
+                  px: 1,
+                  py: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  fontSize: "12px",
+                }}
+              >
+                Saving...
+              </Box>
+            )}
             <Box
               sx={{
                 position: "absolute",
@@ -574,6 +620,7 @@ export const MinistryDetailPage = () => {
                 background:
                   "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
                 pointerEvents: "none",
+                zIndex: 1,
               }}
             />
           </Box>

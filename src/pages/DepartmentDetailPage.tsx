@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { DraggableProfileImage } from "../components/common/DraggableProfileImage";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
@@ -89,6 +90,37 @@ export const DepartmentDetailPage = () => {
   }, [currentMember, id]);
 
   const canAddMembers = canManageDepartments || isDepartmentLead;
+  const [imagePosition, setImagePosition] = useState(
+    department?.image_position || { x: 50, y: 50 }
+  );
+  const [isSavingPosition, setIsSavingPosition] = useState(false);
+
+  // Update position when department changes
+  useEffect(() => {
+    if (department) {
+      setImagePosition(department.image_position || { x: 50, y: 50 });
+    }
+  }, [department]);
+
+  const handleImagePositionUpdate = async (position: { x: number; y: number }) => {
+    if (!department || !canManageDepartments) return;
+    setIsSavingPosition(true);
+    try {
+      await departmentsService.update(department.id, {
+        image_position: position,
+      });
+      // Reload department to get updated data
+      const updatedDepartment = await departmentsService.getById(department.id);
+      setDepartment(updatedDepartment);
+      setImagePosition(position);
+    } catch (error) {
+      console.error("Failed to save image position:", error);
+      // Revert to original position on error
+      setImagePosition(department.image_position || { x: 50, y: 50 });
+    } finally {
+      setIsSavingPosition(false);
+    }
+  };
 
   const handleJoinConfirm = async () => {
     if (!id || !department || !user || !currentMember) return;
@@ -227,7 +259,6 @@ export const DepartmentDetailPage = () => {
           <Box
             sx={{
               width: "100%",
-              height: { xs: 250, sm: 350, md: 450 },
               mb: 5,
               borderRadius: 3,
               overflow: "hidden",
@@ -247,20 +278,35 @@ export const DepartmentDetailPage = () => {
               },
             }}
           >
-            <Box
-              component="img"
-              src={department.image_url}
+            <DraggableProfileImage
+              imageUrl={department.image_url}
               alt={department.name}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  transform: "scale(1.05)",
-                },
-              }}
+              position={imagePosition}
+              isEditable={canManageDepartments}
+              onPositionChange={handleImagePositionUpdate}
+              height={{ xs: 250, sm: 350, md: 450 }}
             />
+            {isSavingPosition && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  left: 8,
+                  zIndex: 3,
+                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                  color: "white",
+                  borderRadius: 1,
+                  px: 1,
+                  py: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  fontSize: "12px",
+                }}
+              >
+                Saving...
+              </Box>
+            )}
             <Box
               sx={{
                 position: "absolute",
@@ -271,6 +317,7 @@ export const DepartmentDetailPage = () => {
                 background:
                   "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
                 pointerEvents: "none",
+                zIndex: 1,
               }}
             />
           </Box>
