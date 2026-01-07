@@ -83,7 +83,7 @@ serve(async (req: Request) => {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        await handleInvoicePaymentFailed(invoice, supabase);
+        await handleInvoicePaymentFailed(invoice);
         break;
       }
 
@@ -142,7 +142,7 @@ async function handleCheckoutSessionCompleted(
   let stripePaymentIntentId = null;
   let stripeSubscriptionId = null;
   let stripeCustomerId = session.customer as string | null;
-  let stripeInvoiceId = null;
+  const stripeInvoiceId = null;
 
   if (session.mode === "payment") {
     // One-time payment
@@ -261,8 +261,9 @@ async function handleInvoicePaymentSucceeded(
 }
 
 async function handleInvoicePaymentFailed(
-  invoice: Stripe.Invoice,
-  supabase: any
+  invoice: Stripe.Invoice
+   
+  // supabase: any - reserved for future use
 ) {
   // Log failed payment - could send notification to admin
   console.log("Invoice payment failed:", invoice.id);

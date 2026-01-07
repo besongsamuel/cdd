@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import type { AuthContextType } from "../context/AuthContext";
-// eslint-disable-next-line no-restricted-imports
+ 
 import { AuthContextInternal } from "../context/AuthContext";
 
 export const useAuth = (): AuthContextType => {

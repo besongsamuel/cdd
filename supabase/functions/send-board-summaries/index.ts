@@ -249,7 +249,7 @@ serve(async (req: Request) => {
 });
 
 // Deno-specific: Using any for Supabase client - type is complex and not easily imported in Deno edge functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 async function processUser(
   supabase: any,
   memberId: string,
@@ -398,7 +398,7 @@ async function processUser(
 }
 
 async function sendSummaryEmail(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _supabase: any, // NOSONAR
   summary: UserSummary
 ): Promise<void> {
@@ -481,7 +481,7 @@ async function sendSummaryEmail(
 }
 
 // Deno-specific: Using any for Supabase client - type is complex and not easily imported in Deno edge functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 async function updateNotificationTimestamps(
   supabase: any, // NOSONAR
   memberId: string,

@@ -246,7 +246,7 @@ async function processTemplate(filename: string): Promise<void> {
     const html = await readFile(filePath, "utf-8");
 
     // Extract variables from HTML
-    let variables = extractVariables(html);
+    const variables = extractVariables(html);
 
     // Handle deprecated variables for board-summary template
     // Resend requires all variables from the old template to be in the variables list
