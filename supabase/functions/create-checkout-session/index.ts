@@ -123,7 +123,7 @@ serve(async (req: Request) => {
       apiVersion: "2024-11-20.acacia",
     });
 
-    // Get member info if member_id is provided or if user is authenticated
+    // Get member info if member_id is provided, if user is authenticated, or by email
     let memberId = body.member_id;
     let memberName = body.donor_name;
     
@@ -140,6 +140,29 @@ serve(async (req: Request) => {
         if (!memberName) {
           memberName = member.name;
         }
+      }
+    }
+
+    // If still no member found and we have an email, try to find member by email
+    if (!memberId && body.email) {
+      try {
+        const { data: members } = await supabase
+          .from("members")
+          .select("id, name, email")
+          .ilike("email", body.email)
+          .limit(1);
+
+        if (members && members.length > 0) {
+          const member = members[0];
+          memberId = member.id;
+          if (!memberName) {
+            memberName = member.name;
+          }
+          console.log(`Found member ${memberId} by email ${body.email}`);
+        }
+      } catch (emailSearchError) {
+        console.log("Error searching for member by email (non-fatal):", emailSearchError);
+        // Continue without member - donation can be anonymous
       }
     }
 

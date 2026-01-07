@@ -131,11 +131,30 @@ async function handleCheckoutSessionCompleted(
   stripe: Stripe
 ) {
   const metadata = session.metadata || {};
-  const memberId = metadata.member_id || null;
+  let memberId = metadata.member_id || null;
   const categoryId = metadata.donation_category_id || null;
   const paymentType = metadata.payment_type || "one_time";
   const donorName = metadata.donor_name || session.customer_details?.name || null;
   const email = session.customer_email || metadata.email || null;
+
+  // If no member_id in metadata but we have an email, try to find member by email
+  if (!memberId && email) {
+    try {
+      const { data: members } = await supabase
+        .from("members")
+        .select("id, name, email")
+        .ilike("email", email)
+        .limit(1);
+
+      if (members && members.length > 0) {
+        memberId = members[0].id;
+        console.log(`Found member ${memberId} by email ${email} during webhook processing`);
+      }
+    } catch (emailSearchError) {
+      console.log("Error searching for member by email in webhook (non-fatal):", emailSearchError);
+      // Continue without member - donation can be anonymous
+    }
+  }
 
   // Get payment intent or subscription details
   let amount = 0;
