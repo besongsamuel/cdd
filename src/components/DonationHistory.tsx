@@ -1,18 +1,18 @@
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
+    Box,
+    Card,
+    CardContent,
+    Chip,
+    CircularProgress,
+    Container,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,8 +20,8 @@ import { useAuth } from "../hooks/useAuth";
 import { donationsService } from "../services/donationsService";
 import type { Donation } from "../types";
 import {
-  calculateTaxCredit,
-  getTaxCreditByCategory,
+    calculateTaxCredit,
+    getTaxCreditByCategory,
 } from "../utils/taxCreditCalculator";
 
 export const DonationHistory = () => {
