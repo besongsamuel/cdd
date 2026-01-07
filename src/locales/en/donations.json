@@ -1,11 +1,19 @@
 {
   "title": "Donations",
   "subtitle": "Your generous contributions help us serve our community and spread the gospel. We appreciate your support!",
+  "donationHistory": "Donation History",
+  "subscriptionManagement": "Subscription Management",
   "etransferInstructions": "Please send your donation via eTransfer to:",
   "makeDonation": "Make a Donation",
   "partnersProjects": "Our Partners & Projects",
   "budgetProgress": "Progress",
   "complete": "complete",
+  "thankYou": {
+    "title": "Thank You!",
+    "description": "Thank you for your generous donation",
+    "message": "Your generous donation helps us serve our community and spread the gospel. We are truly grateful for your support!",
+    "backToHome": "Return to Home"
+  },
   "form": {
     "amount": "Amount (CAD)",
     "amountRequired": "Please enter a valid donation amount",
@@ -16,7 +24,7 @@
     "notes": "Message (Optional)",
     "submit": "Submit Donation",
     "submitting": "Submitting...",
-    "success": "Thank you for your donation! Please send your eTransfer to info@eglisecitededavid.com",
+    "success": "Thank you for your donation!",
     "error": "Failed to submit donation. Please try again.",
     "submitAfterTransfer": "Important: Please submit this form after you have successfully sent your e-transfer.",
     "submitAfterTransferDescription": "This helps us track and process your donation. Fill out the form below and submit it once your e-transfer has been sent."

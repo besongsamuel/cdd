@@ -1,11 +1,19 @@
 {
   "title": "Dons",
   "subtitle": "Vos contributions généreuses nous aident à servir notre communauté et à propager l'évangile. Nous apprécions votre soutien!",
+  "donationHistory": "Historique des Dons",
+  "subscriptionManagement": "Gestion des Abonnements",
   "etransferInstructions": "Veuillez envoyer votre don par virement électronique à:",
   "makeDonation": "Faire un Don",
   "partnersProjects": "Nos Partenaires et Projets",
   "budgetProgress": "Progression",
   "complete": "complété",
+  "thankYou": {
+    "title": "Merci!",
+    "description": "Merci pour votre don généreux",
+    "message": "Votre don généreux nous aide à servir notre communauté et à propager l'évangile. Nous sommes vraiment reconnaissants de votre soutien!",
+    "backToHome": "Retour à l'accueil"
+  },
   "form": {
     "amount": "Montant (CAD)",
     "amountRequired": "Veuillez entrer un montant de don valide",
@@ -16,10 +24,11 @@
     "notes": "Message (Optionnel)",
     "submit": "Soumettre le Don",
     "submitting": "Soumission en cours...",
-    "success": "Merci pour votre don! Veuillez envoyer votre virement électronique à info@eglisecitededavid.com",
+    "success": "Merci pour votre don!",
     "error": "Échec de la soumission du don. Veuillez réessayer."
   }
 }
+
 
 
 

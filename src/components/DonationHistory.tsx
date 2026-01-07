@@ -1,4 +1,5 @@
 import {
+    Alert,
     Box,
     Card,
     CardContent,
@@ -21,6 +22,7 @@ import { donationsService } from "../services/donationsService";
 import type { Donation } from "../types";
 import {
     calculateTaxCredit,
+    effectiveDonationPercent,
     getTaxCreditByCategory,
 } from "../utils/taxCreditCalculator";
 
@@ -34,7 +36,7 @@ export const DonationHistory = () => {
   >({});
 
   const currentYear = new Date().getFullYear();
-  const taxCreditRate = 0.5; // 50% default, can be made configurable
+  const highIncome = false; // Set to true for top bracket rates
 
   useEffect(() => {
     if (currentMember?.id) {
@@ -86,19 +88,33 @@ export const DonationHistory = () => {
   const estimatedTaxCredit = calculateTaxCredit(
     donations,
     currentYear,
-    taxCreditRate
+    highIncome
   );
   const taxCreditByCategory = getTaxCreditByCategory(
     donations,
     currentYear,
-    taxCreditRate
+    highIncome
   );
+  
+  // Calculate effective percentage for display
+  const effectivePercent = yearTotal > 0 
+    ? effectiveDonationPercent(yearTotal, highIncome) 
+    : 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
       <Typography variant="h5" gutterBottom>
         {t("donationHistory") || "Donation History"}
       </Typography>
+
+      {/* Quebec Residents Note */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2">
+          <strong>Note:</strong> Tax credit calculations are estimates and only applicable for Canadians residing in Quebec. 
+          The calculation uses a two-tier system: first $200 at 35% (15% federal + 20% Quebec), 
+          and amounts above $200 at 53% (29% federal + 24% Quebec) or higher rates for top income brackets.
+        </Typography>
+      </Alert>
 
       {/* Summary Cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2, mb: 4 }}>
@@ -142,7 +158,10 @@ export const DonationHistory = () => {
               })}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              ~{(taxCreditRate * 100).toFixed(0)}% of {currentYear} donations
+              ~{(effectivePercent * 100).toFixed(1)}% of {currentYear} donations
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+              {highIncome ? "Using top bracket rates" : "Using standard rates"}
             </Typography>
           </CardContent>
         </Card>

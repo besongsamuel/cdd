@@ -175,7 +175,7 @@ serve(async (req: Request) => {
 
     // Get success and cancel URLs from environment or use production defaults
     const successUrl = Deno.env.get("STRIPE_SUCCESS_URL") || 
-      "https://eglisecitededavid.com/donations?success=true";
+      "https://eglisecitededavid.com/donation-thank-you";
     const cancelUrl = Deno.env.get("STRIPE_CANCEL_URL") || 
       "https://eglisecitededavid.com/donations?canceled=true";
 

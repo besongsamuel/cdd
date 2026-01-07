@@ -29,6 +29,7 @@ import { CompleteProfilePage } from "./pages/CompleteProfilePage";
 import { ContactPage } from "./pages/ContactPage";
 import { DepartmentDetailPage } from "./pages/DepartmentDetailPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
+import { DonationThankYouPage } from "./pages/DonationThankYouPage";
 import { DonationsPage } from "./pages/DonationsPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { EventsPage } from "./pages/EventsPage";
@@ -271,6 +272,18 @@ function App() {
                           <Header />
                           <Box component="main" sx={{ flexGrow: 1 }}>
                             <DonationsPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/donation-thank-you"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <DonationThankYouPage />
                           </Box>
                           <Footer />
                         </>
