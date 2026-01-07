@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { ImageUpload } from "../components/common/ImageUpload";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useHasPermission } from "../hooks/usePermissions";
@@ -577,18 +578,17 @@ export const DepartmentsPage = () => {
               multiline
               rows={4}
             />
-            <TextField
-              fullWidth
-              label="Image URL"
+            <ImageUpload
+              mode="single"
+              bucket="department-images"
               value={departmentFormData.image_url}
-              onChange={(e) =>
+              onChange={(url) =>
                 setDepartmentFormData({
                   ...departmentFormData,
-                  image_url: e.target.value,
+                  image_url: url as string,
                 })
               }
-              margin="normal"
-              helperText="URL to department image"
+              label="Department Image"
             />
             <TextField
               fullWidth

@@ -3,6 +3,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import {
   Box,
   Button,
@@ -36,6 +37,8 @@ import { membersService } from "../../services/membersService";
 import { ministriesService } from "../../services/ministriesService";
 import { ministryJoinRequestsService } from "../../services/ministryJoinRequestsService";
 import { ministryMembersService } from "../../services/ministryMembersService";
+import { outreachEventsService } from "../../services/outreachEventsService";
+import { outreachGalleryService } from "../../services/outreachGalleryService";
 import { roleService } from "../../services/roleService";
 import type {
   DepartmentRequestStatus,
@@ -43,6 +46,8 @@ import type {
   Ministry,
   MinistryJoinRequest,
   MinistryMember,
+  OutreachEvent,
+  OutreachGalleryPhoto,
 } from "../../types";
 import { ImageUpload } from "../common/ImageUpload";
 import { LoadingSpinner } from "../common/LoadingSpinner";
@@ -81,11 +86,14 @@ export const MinistriesManager = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<
-    "ministry" | "member" | "request"
+    "ministry" | "member" | "request" | "outreach-event" | "outreach-gallery"
   >("ministry");
   const [editingItem, setEditingItem] = useState<
-    Ministry | MinistryJoinRequest | null
+    Ministry | MinistryJoinRequest | OutreachEvent | null
   >(null);
+  const [outreachEvents, setOutreachEvents] = useState<OutreachEvent[]>([]);
+  const [outreachGalleryPhotos, setOutreachGalleryPhotos] = useState<OutreachGalleryPhoto[]>([]);
+  const [selectedOutreachEventId, setSelectedOutreachEventId] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<
     DepartmentRequestStatus | "all"
   >("all");
@@ -103,6 +111,19 @@ export const MinistriesManager = () => {
     "approve"
   );
   const [isMinistryLead, setIsMinistryLead] = useState(false);
+  const [outreachEventForm, setOutreachEventForm] = useState({
+    title: "",
+    description: "",
+    event_date: "",
+    event_time: "",
+    location: "",
+  });
+  const [outreachGalleryForm, setOutreachGalleryForm] = useState({
+    image_url: "" as string | string[],
+    caption: "",
+    taken_at: "",
+  });
+  const [editingGalleryPhoto, setEditingGalleryPhoto] = useState<OutreachGalleryPhoto | null>(null);
 
   useEffect(() => {
     loadAllData();
@@ -121,8 +142,16 @@ export const MinistriesManager = () => {
       checkMinistryLeadStatus();
     } else if (tabValue === 2) {
       loadJoinRequests();
+    } else if (tabValue === 3) {
+      loadOutreachEvents();
     }
   }, [tabValue, selectedMinistryId, currentMember]);
+
+  useEffect(() => {
+    if (selectedOutreachEventId && tabValue === 3) {
+      loadOutreachGallery();
+    }
+  }, [selectedOutreachEventId, tabValue]);
 
   const checkMinistryLeadStatus = async () => {
     if (!currentMember || !selectedMinistryId) {
@@ -219,6 +248,32 @@ export const MinistriesManager = () => {
     }
   };
 
+  const loadOutreachEvents = async () => {
+    if (!selectedMinistryId) {
+      setOutreachEvents([]);
+      return;
+    }
+    try {
+      const data = await outreachEventsService.getByMinistry(selectedMinistryId);
+      setOutreachEvents(data);
+    } catch (error) {
+      console.error("Error loading outreach events:", error);
+    }
+  };
+
+  const loadOutreachGallery = async () => {
+    if (!selectedOutreachEventId) {
+      setOutreachGalleryPhotos([]);
+      return;
+    }
+    try {
+      const data = await outreachGalleryService.getByEvent(selectedOutreachEventId);
+      setOutreachGalleryPhotos(data);
+    } catch (error) {
+      console.error("Error loading outreach gallery:", error);
+    }
+  };
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -254,6 +309,7 @@ export const MinistriesManager = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingItem(null);
+    setEditingGalleryPhoto(null);
     setRequestNotes("");
   };
 
@@ -380,6 +436,150 @@ export const MinistriesManager = () => {
     }
   };
 
+  const handleOpenOutreachEventDialog = (event?: OutreachEvent) => {
+    if (!isAdmin) return;
+    setDialogType("outreach-event");
+    setEditingItem(event || null);
+    if (event) {
+      setOutreachEventForm({
+        title: event.title,
+        description: event.description || "",
+        event_date: event.event_date,
+        event_time: event.event_time || "",
+        location: event.location || "",
+      });
+    } else {
+      setOutreachEventForm({
+        title: "",
+        description: "",
+        event_date: "",
+        event_time: "",
+        location: "",
+      });
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSaveOutreachEvent = async () => {
+    if (!selectedMinistryId) {
+      alert("Please select a ministry first");
+      return;
+    }
+    try {
+      const eventData = {
+        ministry_id: selectedMinistryId,
+        title: outreachEventForm.title,
+        description: outreachEventForm.description || undefined,
+        event_date: outreachEventForm.event_date,
+        event_time: outreachEventForm.event_time || undefined,
+        location: outreachEventForm.location || undefined,
+      };
+      if (editingItem) {
+        await outreachEventsService.update(editingItem.id, eventData);
+      } else {
+        await outreachEventsService.create(eventData);
+      }
+      handleCloseDialog();
+      loadOutreachEvents();
+    } catch (error) {
+      console.error("Error saving outreach event:", error);
+      alert(error instanceof Error ? error.message : "Error saving outreach event");
+    }
+  };
+
+  const handleDeleteOutreachEvent = async (id: string) => {
+    if (!isAdmin) return;
+    if (!confirm("Are you sure you want to delete this outreach event? All associated photos will also be deleted.")) return;
+    try {
+      await outreachEventsService.delete(id);
+      loadOutreachEvents();
+      if (selectedOutreachEventId === id) {
+        setSelectedOutreachEventId("");
+      }
+    } catch (error) {
+      console.error("Error deleting outreach event:", error);
+      alert(error instanceof Error ? error.message : "Error deleting outreach event");
+    }
+  };
+
+  const handleOpenGalleryDialog = (photo?: OutreachGalleryPhoto) => {
+    if (!isAdmin) return;
+    setDialogType("outreach-gallery");
+    setEditingGalleryPhoto(photo || null);
+    if (photo) {
+      setOutreachGalleryForm({
+        image_url: photo.image_url,
+        caption: photo.caption || "",
+        taken_at: photo.taken_at ? new Date(photo.taken_at).toISOString().split("T")[0] : "",
+      });
+    } else {
+      setOutreachGalleryForm({
+        image_url: [],
+        caption: "",
+        taken_at: "",
+      });
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSaveGalleryPhoto = async () => {
+    if (!selectedOutreachEventId) {
+      alert("Please select an outreach event first");
+      return;
+    }
+    try {
+      const photoData = {
+        outreach_event_id: selectedOutreachEventId,
+        image_url: typeof outreachGalleryForm.image_url === "string" ? outreachGalleryForm.image_url : "",
+        caption: outreachGalleryForm.caption || undefined,
+        taken_at: outreachGalleryForm.taken_at || undefined,
+      };
+      if (editingGalleryPhoto) {
+        await outreachGalleryService.update(editingGalleryPhoto.id, photoData);
+      } else {
+        await outreachGalleryService.create(photoData);
+      }
+      handleCloseDialog();
+      loadOutreachGallery();
+    } catch (error) {
+      console.error("Error saving gallery photo:", error);
+      alert(error instanceof Error ? error.message : "Error saving gallery photo");
+    }
+  };
+
+  const handleBulkUploadGallery = async (urls: string[]) => {
+    if (!selectedOutreachEventId) {
+      alert("Please select an outreach event first");
+      return;
+    }
+    try {
+      const photos = urls.map((url) => ({
+        outreach_event_id: selectedOutreachEventId,
+        image_url: url,
+        caption: outreachGalleryForm.caption || undefined,
+        taken_at: outreachGalleryForm.taken_at || undefined,
+      }));
+      await outreachGalleryService.createMultiple(photos);
+      loadOutreachGallery();
+      alert(`Successfully uploaded ${urls.length} photos`);
+    } catch (error) {
+      console.error("Error bulk uploading photos:", error);
+      alert("Failed to upload some photos");
+    }
+  };
+
+  const handleDeleteGalleryPhoto = async (id: string) => {
+    if (!isAdmin) return;
+    if (!confirm("Are you sure you want to delete this photo?")) return;
+    try {
+      await outreachGalleryService.delete(id);
+      loadOutreachGallery();
+    } catch (error) {
+      console.error("Error deleting gallery photo:", error);
+      alert(error instanceof Error ? error.message : "Error deleting gallery photo");
+    }
+  };
+
   const filteredRequests =
     filterStatus === "all"
       ? joinRequests
@@ -406,6 +606,7 @@ export const MinistriesManager = () => {
         <Tab label="Ministries" />
         <Tab label="Members" />
         <Tab label="Join Requests" />
+        <Tab label="Outreach Events" />
       </Tabs>
 
       {/* Ministries Tab */}
@@ -837,6 +1038,363 @@ export const MinistriesManager = () => {
                 )}
               </>
             )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Outreach Events Tab */}
+      <TabPanel value={tabValue} index={3}>
+        {!isAdmin ? (
+          <Typography color="text.secondary">
+            Only admins can manage outreach events.
+          </Typography>
+        ) : (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth sx={{ maxWidth: 400 }}>
+                <InputLabel>Select Ministry</InputLabel>
+                <Select
+                  value={selectedMinistryId}
+                  onChange={(e) => {
+                    setSelectedMinistryId(e.target.value);
+                    setSelectedOutreachEventId("");
+                  }}
+                  label="Select Ministry"
+                >
+                  {filteredMinistries.map((ministry) => (
+                    <MenuItem key={ministry.id} value={ministry.id}>
+                      {ministry.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {selectedMinistryId && (
+              <>
+                <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="h6">Outreach Events</Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpenOutreachEventDialog()}
+                  >
+                    Add Event
+                  </Button>
+                </Box>
+
+                <TableContainer component={Paper} sx={{ mb: 3 }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Title</TableCell>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Location</TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {outreachEvents.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} align="center">
+                            No outreach events yet. Create your first event!
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        outreachEvents.map((event) => (
+                          <TableRow key={event.id}>
+                            <TableCell>{event.title}</TableCell>
+                            <TableCell>
+                              {new Date(event.event_date).toLocaleDateString()}
+                              {event.event_time && ` ${event.event_time}`}
+                            </TableCell>
+                            <TableCell>{event.location || "-"}</TableCell>
+                            <TableCell>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpenOutreachEventDialog(event)}
+                                title="Edit Event"
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setSelectedOutreachEventId(event.id);
+                                }}
+                                title="View Gallery"
+                              >
+                                <PhotoLibraryIcon />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteOutreachEvent(event.id)}
+                                title="Delete Event"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+
+                {selectedOutreachEventId && (
+                  <>
+                    <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography variant="h6">
+                        Gallery: {outreachEvents.find(e => e.id === selectedOutreachEventId)?.title}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenGalleryDialog()}
+                      >
+                        Add Photos
+                      </Button>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "repeat(1, minmax(0, 1fr))",
+                          sm: "repeat(2, minmax(0, 1fr))",
+                          md: "repeat(3, minmax(0, 1fr))",
+                          lg: "repeat(4, minmax(0, 1fr))",
+                        },
+                        gap: 2,
+                      }}
+                    >
+                      {outreachGalleryPhotos.map((photo) => (
+                        <Paper
+                          key={photo.id}
+                          sx={{
+                            p: 1,
+                            position: "relative",
+                            "&:hover .photo-actions": {
+                              opacity: 1,
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              position: "relative",
+                              width: "100%",
+                              paddingTop: "75%",
+                              bgcolor: "grey.100",
+                              borderRadius: 1,
+                              overflow: "hidden",
+                              mb: 1,
+                            }}
+                          >
+                            <img
+                              src={photo.image_url}
+                              alt={photo.caption || "Gallery photo"}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                            <Box
+                              className="photo-actions"
+                              sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                opacity: 0,
+                                transition: "opacity 0.2s",
+                                display: "flex",
+                                gap: 0.5,
+                                bgcolor: "rgba(0,0,0,0.5)",
+                                borderRadius: 1,
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpenGalleryDialog(photo)}
+                                sx={{ color: "white" }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteGalleryPhoto(photo.id)}
+                                sx={{ color: "white" }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                          {photo.caption && (
+                            <Typography variant="caption" noWrap>
+                              {photo.caption}
+                            </Typography>
+                          )}
+                        </Paper>
+                      ))}
+                    </Box>
+
+                    {outreachGalleryPhotos.length === 0 && (
+                      <Box sx={{ textAlign: "center", py: 4 }}>
+                        <Typography color="text.secondary">
+                          No photos yet. Add your first photo!
+                        </Typography>
+                      </Box>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </TabPanel>
+
+      {/* Outreach Event Dialog */}
+      <Dialog
+        open={dialogOpen && dialogType === "outreach-event"}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingItem ? "Edit Outreach Event" : "Add Outreach Event"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Title"
+            value={outreachEventForm.title}
+            onChange={(e) =>
+              setOutreachEventForm({ ...outreachEventForm, title: e.target.value })
+            }
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Description"
+            value={outreachEventForm.description}
+            onChange={(e) =>
+              setOutreachEventForm({ ...outreachEventForm, description: e.target.value })
+            }
+            margin="normal"
+            multiline
+            rows={3}
+          />
+          <TextField
+            fullWidth
+            label="Event Date"
+            type="date"
+            value={outreachEventForm.event_date}
+            onChange={(e) =>
+              setOutreachEventForm({ ...outreachEventForm, event_date: e.target.value })
+            }
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+          <TextField
+            fullWidth
+            label="Event Time"
+            type="time"
+            value={outreachEventForm.event_time}
+            onChange={(e) =>
+              setOutreachEventForm({ ...outreachEventForm, event_time: e.target.value })
+            }
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            fullWidth
+            label="Location"
+            value={outreachEventForm.location}
+            onChange={(e) =>
+              setOutreachEventForm({ ...outreachEventForm, location: e.target.value })
+            }
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleSaveOutreachEvent} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Outreach Gallery Dialog */}
+      <Dialog
+        open={dialogOpen && dialogType === "outreach-gallery"}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingGalleryPhoto ? "Edit Photo" : "Add Photo"}
+        </DialogTitle>
+        <DialogContent>
+          <ImageUpload
+            mode="single"
+            bucket="ministry-images"
+            value={typeof outreachGalleryForm.image_url === "string" ? outreachGalleryForm.image_url : ""}
+            onChange={(url) =>
+              setOutreachGalleryForm({ ...outreachGalleryForm, image_url: url as string })
+            }
+            label="Photo"
+          />
+          <TextField
+            fullWidth
+            label="Caption"
+            value={outreachGalleryForm.caption}
+            onChange={(e) =>
+              setOutreachGalleryForm({ ...outreachGalleryForm, caption: e.target.value })
+            }
+            margin="normal"
+            multiline
+            rows={2}
+          />
+          <TextField
+            fullWidth
+            label="Date Taken"
+            type="date"
+            value={outreachGalleryForm.taken_at}
+            onChange={(e) =>
+              setOutreachGalleryForm({ ...outreachGalleryForm, taken_at: e.target.value })
+            }
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          {!editingGalleryPhoto && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" gutterBottom>
+                Or upload multiple photos at once:
+              </Typography>
+              <ImageUpload
+                mode="multiple"
+                bucket="ministry-images"
+                value={[]}
+                onChange={(urls) => {
+                  if (Array.isArray(urls) && urls.length > 0) {
+                    handleBulkUploadGallery(urls);
+                  }
+                }}
+                label="Upload Multiple Photos"
+                maxFiles={20}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleSaveGalleryPhoto} variant="contained">
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

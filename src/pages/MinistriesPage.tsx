@@ -23,6 +23,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { ImageUpload } from "../components/common/ImageUpload";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useHasPermission } from "../hooks/usePermissions";
@@ -802,18 +803,17 @@ export const MinistriesPage = () => {
               multiline
               rows={4}
             />
-            <TextField
-              fullWidth
-              label="Image URL"
+            <ImageUpload
+              mode="single"
+              bucket="ministry-images"
               value={ministryFormData.image_url}
-              onChange={(e) =>
+              onChange={(url) =>
                 setMinistryFormData({
                   ...ministryFormData,
-                  image_url: e.target.value,
+                  image_url: url as string,
                 })
               }
-              margin="normal"
-              helperText="URL to ministry image"
+              label="Ministry Image"
             />
             <TextField
               fullWidth

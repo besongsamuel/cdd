@@ -461,3 +461,29 @@ export interface Testimony {
   created_at: string;
   updated_at: string;
 }
+
+export interface OutreachEvent {
+  id: string;
+  ministry_id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  event_time?: string;
+  location?: string;
+  created_at: string;
+  updated_at: string;
+  ministry_name?: string; // joined from ministries
+}
+
+export interface OutreachGalleryPhoto {
+  id: string;
+  outreach_event_id: string;
+  image_url: string;
+  caption?: string;
+  taken_at?: string;
+  is_cover?: boolean;
+  created_at: string;
+  outreach_event_title?: string; // joined from outreach_events
+  ministry_id?: string; // joined from outreach_events
+  ministry_name?: string; // joined from outreach_events -> ministries
+}
