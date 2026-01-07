@@ -12,10 +12,14 @@ const corsHeaders = {
 interface CheckoutSessionRequest {
   amount: number;
   category_id?: string;
-  payment_type: "one_time" | "subscription";
+  categoryId?: string; // Support camelCase
+  payment_type?: "one_time" | "subscription";
+  paymentType?: "one_time" | "subscription"; // Support camelCase
   member_id?: string;
+  memberId?: string; // Support camelCase
   email: string;
   donor_name?: string;
+  donorName?: string; // Support camelCase
   notes?: string;
 }
 
@@ -65,7 +69,18 @@ serve(async (req: Request) => {
     }
 
     // Parse request body
-    const body: CheckoutSessionRequest = await req.json();
+    const rawBody: CheckoutSessionRequest = await req.json();
+
+    // Normalize camelCase to snake_case for consistent handling
+    const body = {
+      amount: rawBody.amount,
+      category_id: rawBody.category_id || rawBody.categoryId,
+      payment_type: rawBody.payment_type || rawBody.paymentType,
+      member_id: rawBody.member_id || rawBody.memberId,
+      email: rawBody.email,
+      donor_name: rawBody.donor_name || rawBody.donorName,
+      notes: rawBody.notes,
+    };
 
     // Validate required fields
     if (!body.amount || body.amount <= 0) {
@@ -158,12 +173,11 @@ serve(async (req: Request) => {
       metadata.donor_name = memberName;
     }
 
-    // Get success and cancel URLs from environment or use defaults
-    const baseUrl = Deno.env.get("SUPABASE_URL")?.replace("/rest/v1", "") || "";
+    // Get success and cancel URLs from environment or use production defaults
     const successUrl = Deno.env.get("STRIPE_SUCCESS_URL") || 
-      `${baseUrl.replace("/functions/v1", "")}/donations?success=true`;
+      "https://eglisecitededavid.com/donations?success=true";
     const cancelUrl = Deno.env.get("STRIPE_CANCEL_URL") || 
-      `${baseUrl.replace("/functions/v1", "")}/donations?canceled=true`;
+      "https://eglisecitededavid.com/donations?canceled=true";
 
     // Create Stripe Checkout session
     const sessionParams: Stripe.Checkout.SessionCreateParams = {

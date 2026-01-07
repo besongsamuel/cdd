@@ -56,6 +56,8 @@ export const stripeService = {
       throw new Error("Not authenticated");
     }
 
+    // Use invoke - it should automatically include Authorization header from session
+    // If this doesn't work, the issue is likely in the edge function not receiving the header
     const { data, error } = await supabase.functions.invoke(
       "create-portal-session",
       {
