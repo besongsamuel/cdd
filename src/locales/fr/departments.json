@@ -6,6 +6,7 @@
   "departmentLeads": "Responsables de Département",
   "otherMembers": "Membres",
   "joinDepartment": "Rejoindre le Département",
+  "loginRequired": "Veuillez vous connecter pour rejoindre ce département",
   "memberCount": "{{count}} membre",
   "memberCount_plural": "{{count}} membres",
   "noMembers": "Aucun membre pour le moment",
@@ -24,6 +25,7 @@
     "error": "Une erreur s'est produite. Veuillez réessayer."
   }
 }
+
 
 
 

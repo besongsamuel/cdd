@@ -11,6 +11,7 @@
   "ministryLeads": "Ministry Leads",
   "otherMembers": "Members",
   "joinMinistry": "Join Ministry",
+  "loginRequired": "Please log in to join this ministry",
   "memberCount": "{{count}} member",
   "memberCount_plural": "{{count}} members",
   "noMembers": "No members yet",

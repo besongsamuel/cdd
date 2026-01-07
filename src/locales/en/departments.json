@@ -6,6 +6,7 @@
   "departmentLeads": "Department Leads",
   "otherMembers": "Members",
   "joinDepartment": "Join Department",
+  "loginRequired": "Please log in to join this department",
   "memberCount": "{{count}} member",
   "memberCount_plural": "{{count}} members",
   "noMembers": "No members yet",
@@ -24,6 +25,7 @@
     "error": "An error occurred. Please try again."
   }
 }
+
 
 
 

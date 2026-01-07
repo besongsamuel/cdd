@@ -11,6 +11,7 @@
   "ministryLeads": "Responsables de Ministère",
   "otherMembers": "Membres",
   "joinMinistry": "Rejoindre le Ministère",
+  "loginRequired": "Veuillez vous connecter pour rejoindre ce ministère",
   "memberCount": "{{count}} membre",
   "memberCount_plural": "{{count}} membres",
   "noMembers": "Aucun membre pour le moment",
