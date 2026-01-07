@@ -19,29 +19,33 @@ export const stripeService = {
   async createCheckoutSession(
     params: CreateCheckoutSessionParams
   ): Promise<CheckoutSessionResponse> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error("Not authenticated");
-    }
+    // Transform camelCase to snake_case to match edge function interface
+    const requestBody = {
+      amount: params.amount,
+      category_id: params.categoryId,
+      payment_type: params.paymentType,
+      member_id: params.memberId,
+      email: params.email,
+      donor_name: params.donorName,
+      notes: params.notes,
+    };
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`,
+    const { data, error } = await supabase.functions.invoke(
+      "create-checkout-session",
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(params),
+        body: requestBody,
       }
     );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to create checkout session");
+    if (error) {
+      throw new Error(error.message || "Failed to create checkout session");
     }
 
-    return response.json();
+    if (!data) {
+      throw new Error("No data returned from checkout session creation");
+    }
+
+    return data as CheckoutSessionResponse;
   },
 
   async createCustomerPortalSession(
@@ -52,24 +56,22 @@ export const stripeService = {
       throw new Error("Not authenticated");
     }
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-portal-session`,
+    const { data, error } = await supabase.functions.invoke(
+      "create-portal-session",
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ customer_id: customerId }),
+        body: { customer_id: customerId },
       }
     );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to create portal session");
+    if (error) {
+      throw new Error(error.message || "Failed to create portal session");
     }
 
-    return response.json();
+    if (!data) {
+      throw new Error("No data returned from portal session creation");
+    }
+
+    return data as { url: string };
   },
 };
 

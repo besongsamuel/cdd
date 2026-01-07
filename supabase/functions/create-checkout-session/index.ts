@@ -25,17 +25,8 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Get authorization header
+    // Get authorization header (optional - donations can be anonymous)
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "Missing authorization header" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
 
     // Get Supabase configuration
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -45,22 +36,31 @@ serve(async (req: Request) => {
       throw new Error("Missing Supabase configuration");
     }
 
-    // Create authenticated Supabase client
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    // Create Supabase client (with auth header if provided)
+    const supabase = authHeader
+      ? createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } },
+        })
+      : createClient(supabaseUrl, supabaseAnonKey);
 
-    // Verify user authentication
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    // Try to get user if authenticated (optional)
+    let user = null;
+    if (authHeader) {
+      try {
+        const {
+          data: { user: authUser },
+          error: userError,
+        } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        if (userError) {
+          console.log("Auth error (non-fatal, continuing as anonymous):", userError.message);
+        } else if (authUser) {
+          user = authUser;
+        }
+      } catch (authErr) {
+        console.log("Auth exception (non-fatal, continuing as anonymous):", authErr);
+        // Continue without user - donation can be anonymous
+      }
     }
 
     // Parse request body
@@ -107,11 +107,11 @@ serve(async (req: Request) => {
       apiVersion: "2024-11-20.acacia",
     });
 
-    // Get member info if member_id is provided
+    // Get member info if member_id is provided or if user is authenticated
     let memberId = body.member_id;
     let memberName = body.donor_name;
     
-    if (!memberId) {
+    if (!memberId && user) {
       // Try to find member by user_id
       const { data: member } = await supabase
         .from("members")
@@ -207,9 +207,14 @@ serve(async (req: Request) => {
     );
   } catch (error) {
     console.error("Error creating checkout session:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error details:", {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
       }),
       {
         status: 500,
