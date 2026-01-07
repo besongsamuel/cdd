@@ -4,7 +4,9 @@ export type RequestType = "prayer" | "support" | "testimony";
 
 export type RequestStatus = "pending" | "approved" | "completed";
 
-export type DonationStatus = "pending" | "received" | "verified";
+export type DonationStatus = "pending" | "received" | "verified" | "paid";
+export type PaymentType = "one_time" | "subscription";
+export type PaymentMethod = "etransfer" | "stripe";
 
 export type DepartmentRequestStatus = "pending" | "approved" | "rejected";
 
@@ -149,6 +151,36 @@ export interface Donation {
   notes?: string;
   received_at?: string;
   created_at: string;
+  category_name?: string; // Joined field
+  // Stripe fields
+  stripe_payment_intent_id?: string;
+  stripe_subscription_id?: string;
+  stripe_customer_id?: string;
+  stripe_invoice_id?: string;
+  payment_method?: PaymentMethod;
+  payment_type?: PaymentType;
+  is_recurring?: boolean;
+  currency?: string;
+  stripe_metadata?: Record<string, unknown>;
+}
+
+export interface StripeSubscription {
+  id: string;
+  stripe_subscription_id: string;
+  stripe_customer_id: string;
+  member_id?: string;
+  donor_email?: string;
+  donation_category_id?: string;
+  amount: number;
+  currency: string;
+  status: string;
+  current_period_start?: string;
+  current_period_end?: string;
+  cancel_at_period_end: boolean;
+  canceled_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
   category_name?: string; // Joined field
 }
 

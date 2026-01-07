@@ -14,6 +14,8 @@ import {
   MenuItem,
   Paper,
   Select,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,6 +24,8 @@ import { useTranslation } from "react-i18next";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useNavigate } from "react-router-dom";
+import { DonationHistory } from "../components/DonationHistory";
+import { SubscriptionManagement } from "../components/SubscriptionManagement";
 import { PassionsAutocomplete } from "../components/common/PassionsAutocomplete";
 import { ProfilePictureUpload } from "../components/common/ProfilePictureUpload";
 import { useAuth } from "../hooks/useAuth";
@@ -35,6 +39,7 @@ export const CompleteProfilePage = () => {
   const { user, currentMember, getCurrentMember } = useAuth();
   const navigate = useNavigate();
 
+  const [tabValue, setTabValue] = useState(0);
   const [bio, setBio] = useState("");
   const [titleId, setTitleId] = useState<string>("");
   const [passions, setPassions] = useState<string[]>([]);
@@ -289,29 +294,41 @@ export const CompleteProfilePage = () => {
           </CardContent>
         </Card>
 
-        <Paper sx={{ p: 4 }}>
-          {success ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
-              <Alert severity="success" sx={{ mb: 3 }}>
-                {t("profileSavedSuccessfully")}
-              </Alert>
-              <Typography variant="h6" gutterBottom>
-                {t("profileComplete")}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {t("profileCompleteMessage")}
-              </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate("/")}
-                sx={{ minWidth: 150 }}
-              >
-                {t("goToHome")}
-              </Button>
-            </Box>
-          ) : (
-            <form onSubmit={handleSubmit}>
+        <Paper>
+          <Tabs
+            value={tabValue}
+            onChange={(_, newValue) => setTabValue(newValue)}
+            sx={{ borderBottom: 1, borderColor: "divider" }}
+          >
+            <Tab label="Profile" />
+            <Tab label="Donation History" />
+            <Tab label="Subscriptions" />
+          </Tabs>
+
+          {tabValue === 0 && (
+            <Box sx={{ p: 4 }}>
+              {success ? (
+                <Box sx={{ textAlign: "center", py: 4 }}>
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    {t("profileSavedSuccessfully")}
+                  </Alert>
+                  <Typography variant="h6" gutterBottom>
+                    {t("profileComplete")}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    {t("profileCompleteMessage")}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate("/")}
+                    sx={{ minWidth: 150 }}
+                  >
+                    {t("goToHome")}
+                  </Button>
+                </Box>
+              ) : (
+                <form onSubmit={handleSubmit}>
               {/* Email - Read-only, shown at top */}
               <TextField
                 fullWidth
@@ -467,7 +484,21 @@ export const CompleteProfilePage = () => {
                   {saving ? t("saving") : t("saveProfile")}
                 </Button>
               </Box>
-            </form>
+                </form>
+              )}
+            </Box>
+          )}
+
+          {tabValue === 1 && (
+            <Box sx={{ p: 3 }}>
+              <DonationHistory />
+            </Box>
+          )}
+
+          {tabValue === 2 && (
+            <Box sx={{ p: 3 }}>
+              <SubscriptionManagement />
+            </Box>
           )}
         </Paper>
       </Box>

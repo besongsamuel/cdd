@@ -21,6 +21,7 @@
     "@fullcalendar/timegrid": "^6.1.19",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
+    "@stripe/stripe-js": "^8.6.1",
     "@supabase/supabase-js": "^2.78.0",
     "@types/moment": "^2.11.29",
     "@types/react-big-calendar": "^1.16.3",

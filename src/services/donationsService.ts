@@ -103,7 +103,75 @@ export const donationsService = {
 
     return stats;
   },
+
+  async getByMemberId(memberId: string): Promise<Donation[]> {
+    const { data, error } = await supabase
+      .from("donations")
+      .select(
+        `
+        *,
+        donation_categories (
+          name
+        )
+      `
+      )
+      .eq("member_id", memberId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map((item: any) => ({
+      ...item,
+      category_name: item.donation_categories?.name,
+    }));
+  },
+
+  async getByMemberIdGroupedByCategory(
+    memberId: string
+  ): Promise<Record<string, Donation[]>> {
+    const donations = await this.getByMemberId(memberId);
+    const grouped: Record<string, Donation[]> = {};
+
+    donations.forEach((donation) => {
+      const categoryName = donation.category_name || "Unspecified";
+      if (!grouped[categoryName]) {
+        grouped[categoryName] = [];
+      }
+      grouped[categoryName].push(donation);
+    });
+
+    return grouped;
+  },
+
+  async getTaxYearDonations(
+    memberId: string,
+    year: number
+  ): Promise<Donation[]> {
+    const startDate = `${year}-01-01`;
+    const endDate = `${year}-12-31`;
+
+    const { data, error } = await supabase
+      .from("donations")
+      .select(
+        `
+        *,
+        donation_categories (
+          name
+        )
+      `
+      )
+      .eq("member_id", memberId)
+      .gte("created_at", startDate)
+      .lte("created_at", endDate)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map((item: any) => ({
+      ...item,
+      category_name: item.donation_categories?.name,
+    }));
+  },
 };
+
 
 
 

@@ -6,15 +6,19 @@ import {
   CardContent,
   Container,
   FormControl,
+  FormControlLabel,
   InputLabel,
   LinearProgress,
   MenuItem,
   Paper,
+  Radio,
+  RadioGroup,
   Select,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SEO } from "../components/SEO";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
@@ -22,18 +26,22 @@ import { useAuth } from "../hooks/useAuth";
 import { budgetService } from "../services/budgetService";
 import { donationCategoryService } from "../services/donationCategoryService";
 import { donationsService } from "../services/donationsService";
-import type { DonationCategory, YearlyBudget } from "../types";
+import { stripeService } from "../services/stripeService";
+import type { DonationCategory, PaymentType, YearlyBudget } from "../types";
 import { DONATION_EMAIL } from "../utils/constants";
 
 export const DonationsPage = () => {
   const { t } = useTranslation("donations");
   const { user, currentMember } = useAuth();
+  const [searchParams] = useSearchParams();
   const [categories, setCategories] = useState<DonationCategory[]>([]);
   const [budgets, setBudgets] = useState<YearlyBudget[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"etransfer" | "stripe">("stripe");
+  const [paymentType, setPaymentType] = useState<PaymentType>("one_time");
 
   const [formData, setFormData] = useState({
     amount: "",
@@ -42,6 +50,16 @@ export const DonationsPage = () => {
     category_id: "",
     notes: "",
   });
+
+  // Check for success/cancel from Stripe redirect
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      setSuccess(true);
+      setError(null);
+    } else if (searchParams.get("canceled") === "true") {
+      setError("Payment was canceled. You can try again anytime.");
+    }
+  }, [searchParams]);
 
   // Pre-fill form with member info when authenticated
   useEffect(() => {
@@ -82,33 +100,56 @@ export const DonationsPage = () => {
     setSuccess(false);
 
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      setError(t("form.amountRequired"));
+      setError(t("form.amountRequired") || "Amount is required");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!formData.donor_email) {
+      setError("Email is required");
       setSubmitting(false);
       return;
     }
 
     try {
-      await donationsService.create({
-        amount: parseFloat(formData.amount),
-        donor_name: formData.donor_name || undefined,
-        donor_email: formData.donor_email || undefined,
-        category_id: formData.category_id || undefined,
-        notes: formData.notes || undefined,
-        member_id: currentMember?.id || undefined,
-        etransfer_email: DONATION_EMAIL,
-        status: "pending",
-      });
+      if (paymentMethod === "stripe") {
+        // Create Stripe Checkout session
+        const { url } = await stripeService.createCheckoutSession({
+          amount: parseFloat(formData.amount),
+          categoryId: formData.category_id || undefined,
+          paymentType,
+          memberId: currentMember?.id,
+          email: formData.donor_email,
+          donorName: formData.donor_name || undefined,
+          notes: formData.notes || undefined,
+        });
 
-      setSuccess(true);
-      setFormData({
-        amount: "",
-        donor_name: currentMember?.name || "",
-        donor_email: currentMember?.email || "",
-        category_id: "",
-        notes: "",
-      });
+        // Redirect to Stripe Checkout
+        window.location.href = url;
+      } else {
+        // E-transfer flow (existing)
+        await donationsService.create({
+          amount: parseFloat(formData.amount),
+          donor_name: formData.donor_name || undefined,
+          donor_email: formData.donor_email || undefined,
+          category_id: formData.category_id || undefined,
+          notes: formData.notes || undefined,
+          member_id: currentMember?.id || undefined,
+          etransfer_email: DONATION_EMAIL,
+          status: "pending",
+        });
+
+        setSuccess(true);
+        setFormData({
+          amount: "",
+          donor_name: currentMember?.name || "",
+          donor_email: currentMember?.email || "",
+          category_id: "",
+          notes: "",
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("form.error"));
+      setError(err instanceof Error ? err.message : t("form.error") || "An error occurred");
     } finally {
       setSubmitting(false);
     }
@@ -165,38 +206,6 @@ export const DonationsPage = () => {
           >
             {t("subtitle")}
           </Typography>
-
-          {/* Donation Email Prominently Displayed */}
-          <Paper
-            sx={{
-              p: { xs: 3, sm: 4 },
-              backgroundColor: "primary.main",
-              color: "white",
-              maxWidth: "600px",
-              mx: "auto",
-            }}
-          >
-            <Typography variant="body1" gutterBottom sx={{ mb: 2 }}>
-              {t("etransferInstructions")}
-            </Typography>
-            <Typography
-              variant="h5"
-              component="a"
-              href={`mailto:${DONATION_EMAIL}`}
-              sx={{
-                color: "white",
-                textDecoration: "none",
-                fontWeight: 600,
-                display: "block",
-                wordBreak: "break-word",
-                "&:hover": {
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              {DONATION_EMAIL}
-            </Typography>
-          </Paper>
         </Box>
 
         {/* Donation Form */}
@@ -210,18 +219,6 @@ export const DonationsPage = () => {
           >
             {t("makeDonation")}
           </Typography>
-          <Box sx={{ maxWidth: "600px", mx: "auto", mb: 2 }}>
-            <Alert severity="info" icon={false}>
-              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                {t("form.submitAfterTransfer") ||
-                  "Important: Please submit this form after you have successfully sent your e-transfer."}
-              </Typography>
-              <Typography variant="body2">
-                {t("form.submitAfterTransferDescription") ||
-                  "This helps us track and process your donation. Fill out the form below and submit it once your e-transfer has been sent."}
-              </Typography>
-            </Alert>
-          </Box>
           <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: "600px", mx: "auto" }}>
             {user && currentMember && (
               <Alert severity="info" sx={{ mb: 2 }}>
@@ -233,6 +230,36 @@ export const DonationsPage = () => {
               </Alert>
             )}
             <form onSubmit={handleSubmit}>
+              <FormControl component="fieldset" fullWidth margin="normal">
+                <Typography variant="subtitle2" gutterBottom>
+                  Payment Method
+                </Typography>
+                <RadioGroup
+                  row
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value as "etransfer" | "stripe")}
+                >
+                  <FormControlLabel value="stripe" control={<Radio />} label="Credit/Debit Card (Stripe)" />
+                  <FormControlLabel value="etransfer" control={<Radio />} label="E-transfer" />
+                </RadioGroup>
+              </FormControl>
+
+              {paymentMethod === "stripe" && (
+                <FormControl component="fieldset" fullWidth margin="normal">
+                  <Typography variant="subtitle2" gutterBottom>
+                    Payment Type
+                  </Typography>
+                  <RadioGroup
+                    row
+                    value={paymentType}
+                    onChange={(e) => setPaymentType(e.target.value as PaymentType)}
+                  >
+                    <FormControlLabel value="one_time" control={<Radio />} label="One-time" />
+                    <FormControlLabel value="subscription" control={<Radio />} label="Monthly Subscription" />
+                  </RadioGroup>
+                </FormControl>
+              )}
+
               <TextField
                 fullWidth
                 label={t("form.amount")}
@@ -269,6 +296,7 @@ export const DonationsPage = () => {
                 type="email"
                 value={formData.donor_email}
                 onChange={handleChange}
+                required
                 margin="normal"
                 sx={{
                   "& .MuiInputBase-input": {
@@ -328,7 +356,15 @@ export const DonationsPage = () => {
                 }}
                 disabled={submitting}
               >
-                {submitting ? t("form.submitting") : t("form.submit")}
+                {submitting
+                  ? paymentMethod === "stripe"
+                    ? "Redirecting to payment..."
+                    : t("form.submitting")
+                  : paymentMethod === "stripe"
+                  ? paymentType === "subscription"
+                    ? "Subscribe with Stripe"
+                    : "Pay with Stripe"
+                  : t("form.submit")}
               </Button>
             </form>
           </Paper>
