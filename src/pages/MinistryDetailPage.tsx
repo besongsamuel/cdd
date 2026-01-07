@@ -988,16 +988,25 @@ export const MinistryDetailPage = () => {
                 : "No outreach events yet."}
             </Typography>
           ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(2, 1fr)",
+                },
+                gap: 2,
+              }}
+            >
               {outreachEvents.map((event) => (
                 <Card
                   key={event.id}
                   sx={{
-                    p: 3,
+                    p: 2,
                     background:
                       "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
                     border: "1px solid rgba(30, 58, 138, 0.1)",
-                    borderRadius: 3,
+                    borderRadius: 2,
                     transition: "all 0.3s ease",
                     "&:hover": {
                       boxShadow: "0 8px 24px rgba(30, 58, 138, 0.12)",
@@ -1010,15 +1019,15 @@ export const MinistryDetailPage = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "flex-start",
-                      mb: 2,
+                      mb: 1.5,
                     }}
                   >
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography
-                        variant="h6"
+                        variant="subtitle1"
                         component="h3"
                         gutterBottom
-                        sx={{ fontWeight: 700, color: "primary.main" }}
+                        sx={{ fontWeight: 700, color: "primary.main", fontSize: "16px" }}
                       >
                         {event.title}
                       </Typography>
@@ -1026,7 +1035,7 @@ export const MinistryDetailPage = () => {
                         <Typography
                           variant="body2"
                           color="text.secondary"
-                          sx={{ mb: 2 }}
+                          sx={{ mb: 1.5, fontSize: "13px" }}
                         >
                           {event.description}
                         </Typography>
@@ -1035,8 +1044,8 @@ export const MinistryDetailPage = () => {
                         sx={{
                           display: "flex",
                           flexWrap: "wrap",
-                          gap: 2,
-                          mb: 2,
+                          gap: 1.5,
+                          mb: 1.5,
                         }}
                       >
                         {event.event_date && (
@@ -1048,10 +1057,10 @@ export const MinistryDetailPage = () => {
                             }}
                           >
                             <CalendarTodayIcon
-                              fontSize="small"
+                              sx={{ fontSize: 16 }}
                               color="primary"
                             />
-                            <Typography variant="body2">
+                            <Typography variant="caption" sx={{ fontSize: "12px" }}>
                               {new Date(event.event_date).toLocaleDateString()}
                               {event.event_time && ` ${event.event_time}`}
                             </Typography>
@@ -1065,8 +1074,8 @@ export const MinistryDetailPage = () => {
                               gap: 0.5,
                             }}
                           >
-                            <LocationOnIcon fontSize="small" color="primary" />
-                            <Typography variant="body2">{event.location}</Typography>
+                            <LocationOnIcon sx={{ fontSize: 16 }} color="primary" />
+                            <Typography variant="caption" sx={{ fontSize: "12px" }}>{event.location}</Typography>
                           </Box>
                         )}
                       </Box>
@@ -1076,16 +1085,16 @@ export const MinistryDetailPage = () => {
                         <IconButton
                           size="small"
                           onClick={() => handleOpenOutreachEventDialog(event)}
-                          sx={{ color: "primary.main" }}
+                          sx={{ color: "primary.main", padding: "4px" }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                         <IconButton
                           size="small"
                           onClick={() => handleDeleteOutreachEvent(event.id)}
-                          sx={{ color: "error.main" }}
+                          sx={{ color: "error.main", padding: "4px" }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     )}
@@ -1098,23 +1107,23 @@ export const MinistryDetailPage = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        mb: 2,
+                        mb: 1.5,
                       }}
                     >
                       <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1 }}
+                        variant="body2"
+                        sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 0.5, fontSize: "13px" }}
                       >
-                        <PhotoLibraryIcon fontSize="small" />
+                        <PhotoLibraryIcon sx={{ fontSize: 16 }} />
                         Gallery ({outreachGalleryPhotos[event.id]?.length || 0} photos)
                       </Typography>
                       {canManageOutreach && (
                         <Button
                           variant="outlined"
                           size="small"
-                          startIcon={<AddIcon />}
+                          startIcon={<AddIcon sx={{ fontSize: 16 }} />}
                           onClick={() => handleOpenGalleryDialog(event.id)}
-                          sx={{ textTransform: "none" }}
+                          sx={{ textTransform: "none", fontSize: "12px", py: 0.5, px: 1 }}
                         >
                           Add Photos
                         </Button>
