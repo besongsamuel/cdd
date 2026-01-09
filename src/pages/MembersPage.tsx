@@ -807,8 +807,20 @@ export const MembersPage = () => {
               </Typography>
             ) : (
               (() => {
-                // Group leaders by title_name
-                const groupedLeaders = filteredLeaders.reduce(
+                // Separate founders from other leaders
+                const founders = filteredLeaders.filter(
+                  (leader) =>
+                    leader.title_name &&
+                    leader.title_name.toLowerCase() === "founder"
+                );
+                const otherLeaders = filteredLeaders.filter(
+                  (leader) =>
+                    !leader.title_name ||
+                    leader.title_name.toLowerCase() !== "founder"
+                );
+
+                // Group other leaders by title_name
+                const groupedLeaders = otherLeaders.reduce(
                   (acc, leader) => {
                     const title =
                       leader.title_name &&
@@ -825,8 +837,10 @@ export const MembersPage = () => {
                   {} as Record<string, Member[]>
                 );
 
-                // Custom sort order: Pastors, Elders, Deacons, Ministers, then others alphabetically
+                // Custom sort order: Founders first, then Pastors, Elders, Deacons, Ministers, then others alphabetically
                 const titleOrder = [
+                  "Founder",
+                  "Founders",
                   "Pastor",
                   "Pastors",
                   "Elder",
@@ -869,7 +883,103 @@ export const MembersPage = () => {
                   }
                 );
 
-                return sortedTitles.map((title, titleIndex) => (
+                return (
+                  <>
+                    {/* Founders Section - Centered and at the top */}
+                    {founders.length > 0 && (
+                      <Box
+                        sx={{
+                          mt: 2,
+                          mb: { xs: 5, md: 6 },
+                        }}
+                      >
+                        {/* Founders Title Section Header */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 2,
+                            mb: 3,
+                            position: "relative",
+                            "&::before": {
+                              content: '""',
+                              flex: 1,
+                              height: "2px",
+                              background:
+                                "linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.3) 50%, transparent 100%)",
+                            },
+                            "&::after": {
+                              content: '""',
+                              flex: 1,
+                              height: "2px",
+                              background:
+                                "linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.3) 50%, transparent 100%)",
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              px: 2,
+                              py: 0.75,
+                              backgroundColor: "primary.main",
+                              color: "white",
+                              borderRadius: 2,
+                              boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
+                              fontWeight: 600,
+                              fontSize: { xs: "16px", md: "18px" },
+                              letterSpacing: "0.02em",
+                            }}
+                          >
+                            {founders.length === 1 ? "Founder" : "Founders"}
+                          </Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              fontStyle: "italic",
+                              fontSize: { xs: "12px", md: "14px" },
+                            }}
+                          >
+                            {founders.length}{" "}
+                            {founders.length === 1 ? "member" : "members"}
+                          </Typography>
+                        </Box>
+
+                        {/* Founders Grid - Centered */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: 3,
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          {founders.map((leader) => (
+                            <Box
+                              key={leader.id}
+                              sx={{
+                                maxWidth: { xs: "100%", sm: "400px" },
+                                width: "100%",
+                              }}
+                            >
+                              <LeaderCard
+                                leader={leader}
+                                canManageMembers={canManageMembers}
+                                onPositionUpdate={handlePositionUpdate}
+                                isCurrentMemberVerified={isCurrentMemberVerified}
+                                currentMemberId={currentMember?.id}
+                                onEdit={canManageMembers ? handleOpenMemberDialog : undefined}
+                                onDelete={canManageMembers ? handleDeleteMember : undefined}
+                              />
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* Other Leaders Sections */}
+                    {sortedTitles.map((title, titleIndex) => (
                   <Box
                     key={title}
                     sx={{
@@ -949,7 +1059,9 @@ export const MembersPage = () => {
                       ))}
                     </Box>
                   </Box>
-                ));
+                    ))}
+                  </>
+                );
               })()
             )}
           </Box>
