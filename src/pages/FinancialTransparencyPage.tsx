@@ -10,11 +10,6 @@ import {
   Card,
   Container,
   LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -70,11 +65,6 @@ export const FinancialTransparencyPage = () => {
     facilities_operations: 10,
   };
 
-  const totalDonations = financialData?.total_donations || 125000;
-  const totalExpenses = financialData?.total_expenses || 118000;
-  const surplus = totalDonations - totalExpenses;
-  const currentYear = financialData?.year || new Date().getFullYear();
-
   const breakdownItems = [
     {
       key: "ministry_programs",
@@ -105,15 +95,6 @@ export const FinancialTransparencyPage = () => {
       color: "#60a5fa",
     },
   ];
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-CA", {
-      style: "currency",
-      currency: "CAD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   return (
     <>
