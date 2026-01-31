@@ -11,6 +11,7 @@
   "ministryLeads": "Responsables de Ministère",
   "otherMembers": "Membres",
   "joinMinistry": "Rejoindre le Ministère",
+  "joinConfirmation": "Êtes-vous sûr de vouloir demander à rejoindre ce ministère ?",
   "loginRequired": "Veuillez vous connecter pour rejoindre ce ministère",
   "memberCount": "{{count}} membre",
   "memberCount_plural": "{{count}} membres",

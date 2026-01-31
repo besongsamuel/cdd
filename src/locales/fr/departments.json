@@ -6,6 +6,7 @@
   "departmentLeads": "Responsables de Département",
   "otherMembers": "Membres",
   "joinDepartment": "Rejoindre le Département",
+  "joinConfirmation": "Êtes-vous sûr de vouloir demander à rejoindre ce département ?",
   "loginRequired": "Veuillez vous connecter pour rejoindre ce département",
   "memberCount": "{{count}} membre",
   "memberCount_plural": "{{count}} membres",

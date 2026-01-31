@@ -39,16 +39,16 @@ export const ServicesPage = () => {
       icon: <MusicNoteIcon sx={{ fontSize: 40, color: "primary.main" }} />,
     },
     {
-      time: t("schedule.moderation.time"),
-      title: t("schedule.moderation.title"),
-      description: t("schedule.moderation.description"),
-      icon: <CelebrationIcon sx={{ fontSize: 40, color: "primary.main" }} />,
-    },
-    {
       time: t("schedule.preaching.time"),
       title: t("schedule.preaching.title"),
       description: t("schedule.preaching.description"),
       icon: <GroupIcon sx={{ fontSize: 40, color: "primary.main" }} />,
+    },
+    {
+      time: t("schedule.moderation.time"),
+      title: t("schedule.moderation.title"),
+      description: t("schedule.moderation.description"),
+      icon: <CelebrationIcon sx={{ fontSize: 40, color: "primary.main" }} />,
     },
   ];
 

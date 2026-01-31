@@ -17,7 +17,7 @@ export const YOUTUBE_CHANNEL_ID = "UCFnaXnByX59_tWV2YajFjtA";
 export const REGULAR_PROGRAMS = [
   {
     day: "Sunday",
-    time: "9:30 AM - 1:00 PM",
+    time: "9:45 AM - 11:45 AM",
     location: "Church",
     description: "Service",
     order: 1,

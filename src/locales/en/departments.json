@@ -6,6 +6,7 @@
   "departmentLeads": "Department Leads",
   "otherMembers": "Members",
   "joinDepartment": "Join Department",
+  "joinConfirmation": "Are you sure you want to request to join this department?",
   "loginRequired": "Please log in to join this department",
   "memberCount": "{{count}} member",
   "memberCount_plural": "{{count}} members",

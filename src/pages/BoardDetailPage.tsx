@@ -181,15 +181,17 @@ export const BoardDetailPage = () => {
                 >
                   {board.name}
                 </Typography>
-                {board.description && (
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ mb: 2, lineHeight: 1.7 }}
-                  >
-                    {board.description}
-                  </Typography>
-                )}
+                {board.description &&
+                  board.access_type !== "department" &&
+                  board.access_type !== "ministry" && (
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ mb: 2, lineHeight: 1.7 }}
+                    >
+                      {board.description}
+                    </Typography>
+                  )}
               </Box>
             </Box>
 

@@ -8,24 +8,24 @@
   "schedule": {
     "title": "Horaire du Service",
     "openingPrayer": {
-      "time": "9h30 - 10h00",
-      "title": "Prière d'Ouverture et Intercession",
+      "time": "9h30 - 9h45",
+      "title": "Intercession",
       "description": "Nous commençons notre service par un temps de prière et d'intercession ciblées. C'est un moment sacré où nous cherchons la présence de Dieu, prions pour notre ville, notre nation et les besoins de notre assemblée. Tous sont invités à participer alors que nous élevons nos cœurs vers le Seigneur."
     },
     "praiseWorship": {
-      "time": "10h00 - 10h45",
-      "title": "Louange et Adoration",
-      "description": "Dirigés par notre équipe de louange ointe, nous entrons dans un temps de louange passionnée et d'adoration intime. C'est un temps pour célébrer la bonté de Dieu, élever Son nom au plus haut et expérimenter Sa présence à travers le chant, la prière et la manifestation du Saint-Esprit."
-    },
-    "moderation": {
-      "time": "10h45 - 11h00",
-      "title": "Modération / Témoignages",
-      "description": "Nous prenons un moment pour partager des témoignages de la fidélité de Dieu, annoncer les événements à venir et nous connecter en tant que famille. C'est un temps d'encouragement, de célébration et de communion alors que nous entendons ce que Dieu fait dans la vie de nos membres."
+      "time": "9h45 - 10h30",
+      "title": "Chœur",
+      "description": "Dirigés par notre chœur oint, nous entrons dans un temps de louange passionnée et d'adoration intime. C'est un temps pour célébrer la bonté de Dieu, élever Son nom au plus haut et expérimenter Sa présence à travers le chant, la prière et la manifestation du Saint-Esprit."
     },
     "preaching": {
-      "time": "11h00 - 12h00",
-      "title": "Prédication de la Parole - Fin du Service",
-      "description": "Le point central de notre service est la prédication de la Parole de Dieu. Nos pasteurs livrent des messages oints par l'Esprit qui sont pratiques, pertinents et transformateurs. À travers l'enseignement biblique, nous cherchons à équiper les croyants, à défier les cœurs et à voir des vies changées par la puissance de l'évangile. Le service se termine à 12h00."
+      "time": "10h30 - 11h20",
+      "title": "Prédication de la Parole",
+      "description": "Le point central de notre service est la prédication de la Parole de Dieu. Nos pasteurs livrent des messages oints par l'Esprit qui sont pratiques, pertinents et transformateurs. À travers l'enseignement biblique, nous cherchons à équiper les croyants, à défier les cœurs et à voir des vies changées par la puissance de l'évangile."
+    },
+    "moderation": {
+      "time": "11h30 - 11h45",
+      "title": "Modération",
+      "description": "Nous prenons un moment pour partager des témoignages de la fidélité de Dieu, annoncer les événements à venir et nous connecter en tant que famille. C'est un temps d'encouragement, de célébration et de communion alors que nous entendons ce que Dieu fait dans la vie de nos membres. Le service se termine à 11h45."
     }
   },
   "newMembers": {
