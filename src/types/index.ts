@@ -208,6 +208,8 @@ export interface DepartmentMember {
   member_picture_url?: string; // joined from members
   member_email?: string; // joined from members
   member_phone?: string; // joined from members
+  member_is_email_visible?: boolean; // joined from members
+  member_is_phone_visible?: boolean; // joined from members
 }
 
 export interface DepartmentJoinRequest {
@@ -262,6 +264,8 @@ export interface MinistryMember {
   member_picture_url?: string; // joined from members
   member_email?: string; // joined from members
   member_phone?: string; // joined from members
+  member_is_email_visible?: boolean; // joined from members
+  member_is_phone_visible?: boolean; // joined from members
 }
 
 export interface MinistryJoinRequest {

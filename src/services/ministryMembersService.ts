@@ -12,7 +12,9 @@ export const ministryMembersService = {
           name,
           picture_url,
           email,
-          phone
+          phone,
+          is_email_visible,
+          is_phone_visible
         )
       `
       )
@@ -27,6 +29,8 @@ export const ministryMembersService = {
       member_picture_url: item.members?.picture_url,
       member_email: item.members?.email,
       member_phone: item.members?.phone,
+      member_is_email_visible: item.members?.is_email_visible,
+      member_is_phone_visible: item.members?.is_phone_visible,
     }));
   },
 
@@ -49,7 +53,9 @@ export const ministryMembersService = {
           name,
           picture_url,
           email,
-          phone
+          phone,
+          is_email_visible,
+          is_phone_visible
         )
       `
       )
@@ -62,6 +68,8 @@ export const ministryMembersService = {
       member_picture_url: data.members?.picture_url,
       member_email: data.members?.email,
       member_phone: data.members?.phone,
+      member_is_email_visible: data.members?.is_email_visible,
+      member_is_phone_visible: data.members?.is_phone_visible,
     };
   },
 
@@ -92,7 +100,9 @@ export const ministryMembersService = {
           name,
           picture_url,
           email,
-          phone
+          phone,
+          is_email_visible,
+          is_phone_visible
         )
       `
       )
@@ -105,6 +115,8 @@ export const ministryMembersService = {
       member_picture_url: data.members?.picture_url,
       member_email: data.members?.email,
       member_phone: data.members?.phone,
+      member_is_email_visible: data.members?.is_email_visible,
+      member_is_phone_visible: data.members?.is_phone_visible,
     };
   },
 };

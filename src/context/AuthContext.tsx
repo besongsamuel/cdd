@@ -39,20 +39,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [memberLoading, setMemberLoading] = useState(true);
 
   useEffect(() => {
+    // Helper function to perform account linking
+    const performAccountLinking = async (userId: string | undefined) => {
+      if (!userId) return;
+      
+      try {
+        // Attempt to link auth user to existing member by email
+        // This is non-fatal - if it fails, getByUserId will handle it as fallback
+        const { error } = await supabase.rpc('link_current_user_to_member_by_email');
+        if (error) {
+          // Log but don't throw - account linking will happen in getByUserId as fallback
+          console.debug('Account linking attempt (non-fatal):', error.message);
+        }
+      } catch (error) {
+        // Silently handle - getByUserId will handle linking as fallback
+        console.debug('Account linking error (non-fatal):', error);
+      }
+    };
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session: _session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: _session } }) => {
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
+      
+      // Perform account linking for initial session if user exists
+      if (_session?.user) {
+        await performAccountLinking(_session.user.id);
+      }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, _session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
       setSession(_session);
       setUser(_session?.user ?? null);
       setLoading(false);
+      
+      // Perform account linking when user signs in
+      // This handles login, email verification, and other sign-in events
+      // We only do this on SIGNED_IN to avoid unnecessary database calls on token refresh
+      if (_session?.user && _event === 'SIGNED_IN') {
+        await performAccountLinking(_session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();

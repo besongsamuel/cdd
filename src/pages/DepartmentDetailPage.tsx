@@ -527,7 +527,8 @@ export const DepartmentDetailPage = () => {
                             <Typography variant="body1" fontWeight={500}>
                               {member.member_name}
                             </Typography>
-                            {(member.member_email || member.member_phone) && (
+                            {((member.member_email && (member.member_id === currentMember?.id || member.member_is_email_visible === true)) ||
+                              (member.member_phone && (member.member_id === currentMember?.id || member.member_is_phone_visible === true))) && (
                               <Box
                                 sx={{
                                   mt: 0.5,
@@ -536,7 +537,7 @@ export const DepartmentDetailPage = () => {
                                   gap: 0.25,
                                 }}
                               >
-                                {member.member_email && (
+                                {member.member_email && (member.member_id === currentMember?.id || member.member_is_email_visible === true) && (
                                   <Typography
                                     variant="caption"
                                     color="text.secondary"
@@ -544,7 +545,7 @@ export const DepartmentDetailPage = () => {
                                     {member.member_email}
                                   </Typography>
                                 )}
-                                {member.member_phone && (
+                                {member.member_phone && (member.member_id === currentMember?.id || member.member_is_phone_visible === true) && (
                                   <Typography
                                     variant="caption"
                                     color="text.secondary"
