@@ -43,6 +43,8 @@ export interface Member {
   passions?: string[];
   email?: string;
   phone?: string;
+  is_email_visible?: boolean;
+  is_phone_visible?: boolean;
   user_id?: string;
   is_admin?: boolean;
   is_verified?: boolean;

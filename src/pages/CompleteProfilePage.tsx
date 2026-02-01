@@ -10,10 +10,12 @@ import {
   Container,
   Divider,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Switch,
   Tab,
   Tabs,
   TextField,
@@ -47,6 +49,8 @@ export const CompleteProfilePage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [isEmailVisible, setIsEmailVisible] = useState(true);
+  const [isPhoneVisible, setIsPhoneVisible] = useState(true);
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -97,6 +101,8 @@ export const CompleteProfilePage = () => {
         setPassions(currentMember.passions || []);
         setEmail(currentMember.email || user.email || "");
         setPhone(currentMember.phone || "");
+        setIsEmailVisible(currentMember.is_email_visible ?? true);
+        setIsPhoneVisible(currentMember.is_phone_visible ?? true);
       }
       setLoading(false);
       return;
@@ -111,6 +117,8 @@ export const CompleteProfilePage = () => {
       setPassions(currentMember.passions || []);
       setEmail(currentMember.email || user.email || "");
       setPhone(currentMember.phone || "");
+      setIsEmailVisible(currentMember.is_email_visible ?? true);
+      setIsPhoneVisible(currentMember.is_phone_visible ?? true);
       setLoading(false);
       hasLoadedRef.current = userId;
     } else {
@@ -131,6 +139,8 @@ export const CompleteProfilePage = () => {
             setPassions(member.passions || []);
             setEmail(member.email || user.email || "");
             setPhone(member.phone || "");
+            setIsEmailVisible(member.is_email_visible ?? true);
+            setIsPhoneVisible(member.is_phone_visible ?? true);
           }
           setLoading(false);
           hasLoadedRef.current = userId;
@@ -192,6 +202,8 @@ export const CompleteProfilePage = () => {
           passions: passions.length > 0 ? passions : undefined,
           picture_url: profilePictureUrl,
           phone: phone || undefined,
+          is_email_visible: isEmailVisible,
+          is_phone_visible: isPhoneVisible,
         });
       } else {
         // Create new member profile first (with basic info)
@@ -208,6 +220,8 @@ export const CompleteProfilePage = () => {
           title_id: titleId || undefined,
           passions: passions.length > 0 ? passions : undefined,
           phone: phone || undefined,
+          is_email_visible: isEmailVisible,
+          is_phone_visible: isPhoneVisible,
         });
 
         memberId = newMember.id;
@@ -409,6 +423,35 @@ export const CompleteProfilePage = () => {
                   value={phone || undefined}
                   onChange={(value) => setPhone(value || "")}
                   className="phone-input-mui"
+                />
+              </Box>
+
+              {/* Visibility Settings */}
+              <Box sx={{ mt: 3, mb: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontSize: "1rem", fontWeight: 600 }}>
+                  {t("visibilitySettings") || "Visibility Settings"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {t("visibilitySettingsDescription") || "Control who can see your contact information"}
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isEmailVisible}
+                      onChange={(e) => setIsEmailVisible(e.target.checked)}
+                    />
+                  }
+                  label={t("showEmailToMembers") || "Show email to other members"}
+                  sx={{ mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isPhoneVisible}
+                      onChange={(e) => setIsPhoneVisible(e.target.checked)}
+                    />
+                  }
+                  label={t("showPhoneToMembers") || "Show phone to other members"}
                 />
               </Box>
 

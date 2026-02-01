@@ -264,11 +264,12 @@ const LeaderCard = ({
             )}
           </Box>
         )}
-        {(leader.email || leader.phone) && (
+        {((leader.email && (leader.id === currentMemberId || leader.is_email_visible !== false)) ||
+          (leader.phone && (leader.id === currentMemberId || leader.is_phone_visible !== false))) && (
           <Box
             sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
           >
-            {leader.email && (
+            {leader.email && (leader.id === currentMemberId || leader.is_email_visible !== false) && (
               <Typography
                 variant="caption"
                 color="text.secondary"
@@ -290,7 +291,7 @@ const LeaderCard = ({
                 📧 {leader.email}
               </Typography>
             )}
-            {leader.phone && (
+            {leader.phone && (leader.id === currentMemberId || leader.is_phone_visible !== false) && (
               <Typography
                 variant="caption"
                 color="text.secondary"
@@ -1175,7 +1176,8 @@ export const MembersPage = () => {
                             </Box>
                           )}
                         </Box>
-                        {(member.email || member.phone) && (
+                        {((member.email && (member.id === currentMember?.id || member.is_email_visible !== false)) ||
+                          (member.phone && (member.id === currentMember?.id || member.is_phone_visible !== false))) && (
                           <Box
                             sx={{
                               mt: 0.5,
@@ -1185,7 +1187,7 @@ export const MembersPage = () => {
                               gap: 0.5,
                             }}
                           >
-                            {member.email && (
+                            {member.email && (member.id === currentMember?.id || member.is_email_visible !== false) && (
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
@@ -1210,7 +1212,7 @@ export const MembersPage = () => {
                                 📧 {member.email}
                               </Typography>
                             )}
-                            {member.phone && (
+                            {member.phone && (member.id === currentMember?.id || member.is_phone_visible !== false) && (
                               <Typography
                                 variant="caption"
                                 color="text.secondary"

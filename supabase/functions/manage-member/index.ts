@@ -40,6 +40,8 @@ interface CreateMemberData {
   phone?: string;
   title_id?: string;
   profile_picture_position?: { x: number; y: number };
+  is_email_visible?: boolean;
+  is_phone_visible?: boolean;
 }
 
 interface UpdateMemberData {
@@ -55,6 +57,8 @@ interface UpdateMemberData {
   is_verified?: boolean;
   email?: string;
   profile_picture_position?: { x: number; y: number };
+  is_email_visible?: boolean;
+  is_phone_visible?: boolean;
 }
 
 serve(async (req) => {
@@ -281,6 +285,10 @@ serve(async (req) => {
       if (payload.data.profile_picture_position !== undefined)
         memberData.profile_picture_position =
           payload.data.profile_picture_position;
+      if (payload.data.is_email_visible !== undefined)
+        memberData.is_email_visible = payload.data.is_email_visible;
+      if (payload.data.is_phone_visible !== undefined)
+        memberData.is_phone_visible = payload.data.is_phone_visible;
 
       // For admins: if no user_id is set, leave it null (member will be linked when user signs up)
       // The email fallback in getByUserId will handle linking existing members to auth users
@@ -372,6 +380,10 @@ serve(async (req) => {
         updateData.phone = payload.data.phone;
       if (payload.data.title_id !== undefined)
         updateData.title_id = payload.data.title_id;
+      if (payload.data.is_email_visible !== undefined)
+        updateData.is_email_visible = payload.data.is_email_visible;
+      if (payload.data.is_phone_visible !== undefined)
+        updateData.is_phone_visible = payload.data.is_phone_visible;
 
       // Admin-only fields (only process if user is admin)
       if (isAdmin) {
@@ -383,6 +395,15 @@ serve(async (req) => {
           updateData.email = payload.data.email;
         if (payload.data.is_verified !== undefined)
           updateData.is_verified = payload.data.is_verified;
+        if (payload.data.profile_picture_position !== undefined)
+          updateData.profile_picture_position =
+            payload.data.profile_picture_position;
+      } else {
+        // Non-admin can update their own visibility settings
+        if (payload.data.is_email_visible !== undefined)
+          updateData.is_email_visible = payload.data.is_email_visible;
+        if (payload.data.is_phone_visible !== undefined)
+          updateData.is_phone_visible = payload.data.is_phone_visible;
         if (payload.data.profile_picture_position !== undefined)
           updateData.profile_picture_position =
             payload.data.profile_picture_position;
