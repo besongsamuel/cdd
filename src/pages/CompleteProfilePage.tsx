@@ -429,10 +429,10 @@ export const CompleteProfilePage = () => {
               {/* Visibility Settings */}
               <Box sx={{ mt: 3, mb: 2 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontSize: "1rem", fontWeight: 600 }}>
-                  {t("visibilitySettings") || "Visibility Settings"}
+                  {t("visibilitySettings")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {t("visibilitySettingsDescription") || "Control who can see your contact information"}
+                  {t("visibilitySettingsDescription")}
                 </Typography>
                 <FormControlLabel
                   control={
@@ -441,7 +441,7 @@ export const CompleteProfilePage = () => {
                       onChange={(e) => setIsEmailVisible(e.target.checked)}
                     />
                   }
-                  label={t("showEmailToMembers") || "Show email to other members"}
+                  label={t("showEmailToMembers")}
                   sx={{ mb: 1 }}
                 />
                 <FormControlLabel
@@ -451,7 +451,7 @@ export const CompleteProfilePage = () => {
                       onChange={(e) => setIsPhoneVisible(e.target.checked)}
                     />
                   }
-                  label={t("showPhoneToMembers") || "Show phone to other members"}
+                  label={t("showPhoneToMembers")}
                 />
               </Box>
 

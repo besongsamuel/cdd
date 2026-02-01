@@ -82,5 +82,9 @@
   "loginScripture": "Come to me, all you who are weary and burdened, and I will give you rest.",
   "loginScriptureReference": "Matthew 11:28",
   "signUpBibleVerse": "Now you are the body of Christ, and each one of you is a part of it.",
-  "signUpBibleVerseReference": "1 Corinthians 12:27"
+  "signUpBibleVerseReference": "1 Corinthians 12:27",
+  "visibilitySettings": "Visibility Settings",
+  "visibilitySettingsDescription": "Control who can see your contact information",
+  "showEmailToMembers": "Show email to other members",
+  "showPhoneToMembers": "Show phone to other members"
 }

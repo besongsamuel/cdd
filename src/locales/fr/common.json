@@ -82,5 +82,9 @@
   "loginScripture": "Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.",
   "loginScriptureReference": "Matthieu 11:28",
   "signUpBibleVerse": "Vous êtes le corps de Christ, et vous êtes ses membres, chacun pour sa part.",
-  "signUpBibleVerseReference": "1 Corinthiens 12:27"
+  "signUpBibleVerseReference": "1 Corinthiens 12:27",
+  "visibilitySettings": "Paramètres de visibilité",
+  "visibilitySettingsDescription": "Contrôlez qui peut voir vos informations de contact",
+  "showEmailToMembers": "Afficher le courriel aux autres membres",
+  "showPhoneToMembers": "Afficher le téléphone aux autres membres"
 }
