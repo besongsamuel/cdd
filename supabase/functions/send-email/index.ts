@@ -378,7 +378,7 @@ async function resolveRecipients(
           .select("email, name")
           .eq("title_id", titlesData.id)
           .not("email", "is", null)
-          .not("user_id", "is", null);
+          ;
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -490,7 +490,7 @@ async function resolveRecipients(
           .select("email, name")
           .eq("title_id", titlesData.id)
           .not("email", "is", null)
-          .not("user_id", "is", null);
+          ;
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -517,7 +517,7 @@ async function resolveRecipients(
           .select("email, name")
           .eq("title_id", titlesData.id)
           .not("email", "is", null)
-          .not("user_id", "is", null);
+          ;
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -547,7 +547,7 @@ async function resolveRecipients(
           .select("email, name")
           .in("title_id", titleIds)
           .not("email", "is", null)
-          .not("user_id", "is", null);
+          ;
 
         if (!error && data) {
           recipients = (data as MemberData[])
@@ -569,7 +569,6 @@ async function resolveRecipients(
           .from("members")
           .select("email, name")
           .eq("id", memberId)
-          .not("user_id", "is", null)
           .single();
 
         if (!error && data && data.email) {
@@ -607,7 +606,7 @@ async function getCCRecipients(
     .select("email, name")
     .in("title_id", titleIds)
     .not("email", "is", null)
-    .not("user_id", "is", null);
+    ;
 
   if (error || !data) {
     return [];
@@ -640,7 +639,7 @@ async function getApostleRecipients(
     .select("email, name")
     .eq("title_id", (titlesData as TitleData).id)
     .not("email", "is", null)
-    .not("user_id", "is", null);
+    ;
 
   if (error || !data) {
     return [];
