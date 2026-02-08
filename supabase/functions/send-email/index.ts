@@ -707,7 +707,28 @@ async function sendEmailViaResend(
 
   // Prepare template variables from event data
   const templateVariables = prepareTemplateVariables(eventData);
-  
+
+  // Suggestion template: ensure all required variables have a value (anonymous or optional fields may be missing)
+  const NOT_PROVIDED = "Not provided";
+  if (eventType === "suggestion") {
+    const suggestionDefaults: Record<string, string> = {
+      SUBMITTER_NAME: "Anonymous Member",
+      SUBMITTER_PHONE: NOT_PROVIDED,
+      CATEGORY_NAME: NOT_PROVIDED,
+      SUGGESTION_TEXT: NOT_PROVIDED,
+      CREATED_AT: new Date().toISOString(),
+    };
+    for (const [key, defaultVal] of Object.entries(suggestionDefaults)) {
+      if (
+        templateVariables[key] === undefined ||
+        templateVariables[key] === null ||
+        String(templateVariables[key]).trim() === ""
+      ) {
+        templateVariables[key] = defaultVal;
+      }
+    }
+  }
+
   // Debug logging for board-summary emails
   if (eventType === "board-summary") {
     console.log("Board summary template variables:", Object.keys(templateVariables));
