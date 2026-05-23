@@ -32,6 +32,7 @@ import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { DonationThankYouPage } from "./pages/DonationThankYouPage";
 import { DonationsPage } from "./pages/DonationsPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
+import { EventDetailPage } from "./pages/EventDetailPage";
 import { EventsPage } from "./pages/EventsPage";
 import { FinancialTransparencyPage } from "./pages/FinancialTransparencyPage";
 import { GalleryPage } from "./pages/GalleryPage";
@@ -188,6 +189,18 @@ function App() {
                           <Header />
                           <Box component="main" sx={{ flexGrow: 1 }}>
                             <ServicesPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/events/:slug"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <EventDetailPage />
                           </Box>
                           <Footer />
                         </>

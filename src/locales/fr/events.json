@@ -3,12 +3,43 @@
   "regularPrograms": "Programmes Réguliers",
   "upcomingEvents": "Événements à Venir",
   "noPrograms": "Aucun programme régulier trouvé.",
-  "noEvents": "Aucun événement trouvé."
+  "noEvents": "Aucun événement trouvé.",
+  "notFound": "Événement introuvable.",
+  "backToEvents": "Retour aux événements",
+  "viewEventPage": "Voir la page de l'événement",
+  "date": "Date",
+  "time": "Heure",
+  "location": "Lieu",
+  "description": "Description",
+  "ministry": "Ministère",
+  "department": "Département",
+  "rsvp": {
+    "title": "Participerez-vous?",
+    "attending": "Je participerai",
+    "maybe": "Peut-être",
+    "notAttending": "Je ne peux pas participer",
+    "countsAttending": "{{count}} participant(s)",
+    "countsMaybe": "{{count}} peut-être",
+    "countsNotAttending": "{{count}} ne peuvent pas participer",
+    "yourResponse": "Votre réponse",
+    "guestNameLabel": "Votre nom",
+    "guestNameRequired": "Veuillez entrer votre nom pour confirmer.",
+    "submitting": "Enregistrement...",
+    "saved": "Votre réponse a été enregistrée.",
+    "error": "Impossible d'enregistrer votre réponse. Veuillez réessayer.",
+    "editName": "Modifier",
+    "addName": "Ajouter",
+    "cancel": "Annuler",
+    "ok": "OK"
+  },
+  "form": {
+    "image": "Image de l'événement",
+    "slug": "Identifiant URL",
+    "slugHelp": "Utilisé dans l'URL : /events/votre-identifiant",
+    "slugRequired": "L'identifiant URL est requis.",
+    "slugTaken": "Cet identifiant est déjà utilisé.",
+    "ministry": "Ministère (optionnel)",
+    "department": "Département (optionnel)",
+    "none": "Aucun"
+  }
 }
-
-
-
-
-
-
-

@@ -56,15 +56,41 @@ export interface Member {
   updated_at: string;
 }
 
+export type EventRsvpStatus = 'attending' | 'maybe' | 'not_attending';
+
 export interface Event {
   id: string;
+  slug: string;
   title: string;
   description?: string;
   event_date: string;
   event_time?: string;
   location?: string;
+  image_url?: string;
+  ministry_id?: string;
+  department_id?: string;
+  ministry_name?: string;
+  department_name?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface EventRsvp {
+  id: string;
+  event_id: string;
+  status: EventRsvpStatus;
+  user_id?: string;
+  member_id?: string;
+  guest_name?: string;
+  anonymous_token: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventRsvpCounts {
+  attending: number;
+  maybe: number;
+  not_attending: number;
 }
 
 export interface RegularProgram {

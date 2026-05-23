@@ -1,5 +1,6 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import {
   Box,
   Button,
@@ -11,6 +12,8 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import type { Event } from "../../types";
 
 interface EventDetailDialogProps {
@@ -30,6 +33,8 @@ export const EventDetailDialog = ({
   onDelete,
   canManage = false,
 }: EventDetailDialogProps) => {
+  const { t } = useTranslation("events");
+
   if (!event) return null;
 
   const handleDelete = () => {
@@ -84,9 +89,23 @@ export const EventDetailDialog = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {event.image_url && (
+            <Box
+              component="img"
+              src={event.image_url}
+              alt={event.title}
+              sx={{
+                width: "100%",
+                maxHeight: 200,
+                objectFit: "cover",
+                borderRadius: 1,
+              }}
+            />
+          )}
+
           <Box>
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Date
+              {t("date")}
             </Typography>
             <Typography variant="body1">{formatDate(event.event_date)}</Typography>
           </Box>
@@ -96,7 +115,7 @@ export const EventDetailDialog = ({
               <Divider />
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Time
+                  {t("time")}
                 </Typography>
                 <Typography variant="body1">{event.event_time}</Typography>
               </Box>
@@ -108,7 +127,7 @@ export const EventDetailDialog = ({
               <Divider />
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Location
+                  {t("location")}
                 </Typography>
                 <Typography variant="body1">{event.location}</Typography>
               </Box>
@@ -120,7 +139,7 @@ export const EventDetailDialog = ({
               <Divider />
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Description
+                  {t("description")}
                 </Typography>
                 <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
                   {event.description}
@@ -130,14 +149,20 @@ export const EventDetailDialog = ({
           )}
         </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ flexWrap: "wrap", gap: 1, px: 2, pb: 2 }}>
+        {event.slug && (
+          <Button
+            component={RouterLink}
+            to={`/events/${event.slug}`}
+            variant="contained"
+            startIcon={<OpenInNewIcon />}
+            onClick={onClose}
+          >
+            {t("viewEventPage")}
+          </Button>
+        )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );
 };
-
-
-
-
-

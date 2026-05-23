@@ -27,12 +27,21 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EventDetailDialog } from "../components/common/EventDetailDialog";
+import {
+  emptyEventFormValues,
+  eventToFormValues,
+  EventFormFields,
+  formValuesToEventPayload,
+} from "../components/common/EventFormFields";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useHasPermission } from "../hooks/usePermissions";
+import { departmentsService } from "../services/departmentsService";
 import { eventsService } from "../services/eventsService";
+import { ministriesService } from "../services/ministriesService";
 import { regularProgramsService } from "../services/regularProgramsService";
-import type { Event, RegularProgram } from "../types";
+import { slugify } from "../utils/slugify";
+import type { Department, Event, Ministry, RegularProgram } from "../types";
 
 export const EventsPage = () => {
   const { t } = useTranslation("events");
@@ -44,13 +53,11 @@ export const EventsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [eventFormData, setEventFormData] = useState({
-    title: "",
-    description: "",
-    event_date: "",
-    event_time: "",
-    location: "",
-  });
+  const [eventFormData, setEventFormData] = useState(emptyEventFormValues);
+  const [slugManual, setSlugManual] = useState(false);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [ministries, setMinistries] = useState<Ministry[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [programDialogOpen, setProgramDialogOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<RegularProgram | null>(null);
   const [programFormData, setProgramFormData] = useState({
@@ -66,12 +73,17 @@ export const EventsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [programsData, eventsData] = await Promise.all([
-          regularProgramsService.getAll(),
-          eventsService.getAll(),
-        ]);
+        const [programsData, eventsData, ministriesData, departmentsData] =
+          await Promise.all([
+            regularProgramsService.getAll(),
+            eventsService.getAll(),
+            ministriesService.getActive(),
+            departmentsService.getActive(),
+          ]);
         setRegularPrograms(programsData);
         setEvents(eventsData);
+        setMinistries(ministriesData);
+        setDepartments(departmentsData);
       } catch (error) {
         console.error("Error loading events:", error);
       } finally {
@@ -87,24 +99,14 @@ export const EventsPage = () => {
   }
 
   const handleOpenEventDialog = (event?: Event) => {
+    setSlugError(null);
+    setSlugManual(false);
     if (event) {
       setEditingEvent(event);
-      setEventFormData({
-        title: event.title,
-        description: event.description || "",
-        event_date: event.event_date,
-        event_time: event.event_time || "",
-        location: event.location || "",
-      });
+      setEventFormData(eventToFormValues(event));
     } else {
       setEditingEvent(null);
-      setEventFormData({
-        title: "",
-        description: "",
-        event_date: "",
-        event_time: "",
-        location: "",
-      });
+      setEventFormData(emptyEventFormValues());
     }
     setEventDialogOpen(true);
   };
@@ -112,14 +114,30 @@ export const EventsPage = () => {
   const handleCloseEventDialog = () => {
     setEventDialogOpen(false);
     setEditingEvent(null);
+    setSlugError(null);
   };
 
   const handleSaveEvent = async () => {
+    const slug = eventFormData.slug.trim() || slugify(eventFormData.title);
+    if (!slug) {
+      setSlugError(t("form.slugRequired"));
+      return;
+    }
+    const available = await eventsService.isSlugAvailable(
+      slug,
+      editingEvent?.id
+    );
+    if (!available) {
+      setSlugError(t("form.slugTaken"));
+      return;
+    }
+    setSlugError(null);
+    const payload = formValuesToEventPayload({ ...eventFormData, slug });
     try {
       if (editingEvent) {
-        await eventsService.update(editingEvent.id, eventFormData);
+        await eventsService.update(editingEvent.id, payload);
       } else {
-        await eventsService.create(eventFormData);
+        await eventsService.create(payload);
       }
       handleCloseEventDialog();
       // Reload events
@@ -232,6 +250,7 @@ export const EventsPage = () => {
       title: event.title,
       start: eventDate.toISOString(),
       end: endDate.toISOString(),
+      url: event.slug ? `/events/${event.slug}` : undefined,
       extendedProps: {
         description: event.description,
         location: event.location,
@@ -640,74 +659,15 @@ export const EventsPage = () => {
             {editingEvent ? "Edit Event" : "Create Event"}
           </DialogTitle>
           <DialogContent>
-            <TextField
-              fullWidth
-              label="Title"
-              value={eventFormData.title}
-              onChange={(e) =>
-                setEventFormData({ ...eventFormData, title: e.target.value })
-              }
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={eventFormData.description}
-              onChange={(e) =>
-                setEventFormData({
-                  ...eventFormData,
-                  description: e.target.value,
-                })
-              }
-              margin="normal"
-              multiline
-              rows={4}
-            />
-            <TextField
-              fullWidth
-              label="Date"
-              type="date"
-              value={eventFormData.event_date}
-              onChange={(e) =>
-                setEventFormData({
-                  ...eventFormData,
-                  event_date: e.target.value,
-                })
-              }
-              margin="normal"
-              required
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Time"
-              type="time"
-              value={eventFormData.event_time}
-              onChange={(e) =>
-                setEventFormData({
-                  ...eventFormData,
-                  event_time: e.target.value,
-                })
-              }
-              margin="normal"
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Location"
-              value={eventFormData.location}
-              onChange={(e) =>
-                setEventFormData({
-                  ...eventFormData,
-                  location: e.target.value,
-                })
-              }
-              margin="normal"
+            <EventFormFields
+              value={eventFormData}
+              onChange={setEventFormData}
+              ministries={ministries}
+              departments={departments}
+              slugError={slugError}
+              isNewEvent={!editingEvent}
+              slugManual={slugManual}
+              onSlugManualEdit={() => setSlugManual(true)}
             />
           </DialogContent>
           <DialogActions>

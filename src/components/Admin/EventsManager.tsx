@@ -26,10 +26,20 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import { useTranslation } from 'react-i18next';
+import {
+  emptyEventFormValues,
+  eventToFormValues,
+  EventFormFields,
+  formValuesToEventPayload,
+} from '../common/EventFormFields';
+import { departmentsService } from '../../services/departmentsService';
 import { eventsService } from '../../services/eventsService';
+import { ministriesService } from '../../services/ministriesService';
 import { regularProgramsService } from '../../services/regularProgramsService';
+import { slugify } from '../../utils/slugify';
 import { LoadingSpinner } from '../common/LoadingSpinner';
-import type { Event, RegularProgram } from '../../types';
+import type { Department, Event, Ministry, RegularProgram } from '../../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -53,6 +63,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const EventsManager = () => {
+  const { t } = useTranslation('events');
   const [tabValue, setTabValue] = useState(0);
   const [events, setEvents] = useState<Event[]>([]);
   const [programs, setPrograms] = useState<RegularProgram[]>([]);
@@ -61,13 +72,11 @@ export const EventsManager = () => {
   const [dialogType, setDialogType] = useState<'event' | 'program'>('event');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingProgram, setEditingProgram] = useState<RegularProgram | null>(null);
-  const [eventFormData, setEventFormData] = useState({
-    title: '',
-    description: '',
-    event_date: '',
-    event_time: '',
-    location: '',
-  });
+  const [eventFormData, setEventFormData] = useState(emptyEventFormValues);
+  const [slugManual, setSlugManual] = useState(false);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [ministries, setMinistries] = useState<Ministry[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [programFormData, setProgramFormData] = useState({
     day: '',
     time: '',
@@ -82,10 +91,23 @@ export const EventsManager = () => {
     loadAllData();
   }, []);
 
+  const loadOrgData = async () => {
+    try {
+      const [ministriesData, departmentsData] = await Promise.all([
+        ministriesService.getActive(),
+        departmentsService.getActive(),
+      ]);
+      setMinistries(ministriesData);
+      setDepartments(departmentsData);
+    } catch (error) {
+      console.error('Error loading ministries/departments:', error);
+    }
+  };
+
   const loadAllData = async () => {
     setLoading(true);
     try {
-      await Promise.all([loadEvents(), loadPrograms()]);
+      await Promise.all([loadEvents(), loadPrograms(), loadOrgData()]);
     } finally {
       setLoading(false);
     }
@@ -115,24 +137,14 @@ export const EventsManager = () => {
 
   const handleOpenEventDialog = (event?: Event) => {
     setDialogType('event');
+    setSlugError(null);
+    setSlugManual(false);
     if (event) {
       setEditingEvent(event);
-      setEventFormData({
-        title: event.title,
-        description: event.description || '',
-        event_date: event.event_date,
-        event_time: event.event_time || '',
-        location: event.location || '',
-      });
+      setEventFormData(eventToFormValues(event));
     } else {
       setEditingEvent(null);
-      setEventFormData({
-        title: '',
-        description: '',
-        event_date: '',
-        event_time: '',
-        location: '',
-      });
+      setEventFormData(emptyEventFormValues());
     }
     setDialogOpen(true);
   };
@@ -172,11 +184,26 @@ export const EventsManager = () => {
   };
 
   const handleSubmitEvent = async () => {
+    const slug = eventFormData.slug.trim() || slugify(eventFormData.title);
+    if (!slug) {
+      setSlugError(t('form.slugRequired'));
+      return;
+    }
+    const available = await eventsService.isSlugAvailable(
+      slug,
+      editingEvent?.id
+    );
+    if (!available) {
+      setSlugError(t('form.slugTaken'));
+      return;
+    }
+    setSlugError(null);
+    const payload = formValuesToEventPayload({ ...eventFormData, slug });
     try {
       if (editingEvent) {
-        await eventsService.update(editingEvent.id, eventFormData);
+        await eventsService.update(editingEvent.id, payload);
       } else {
-        await eventsService.create(eventFormData);
+        await eventsService.create(payload);
       }
       handleCloseDialog();
       loadEvents();
@@ -260,9 +287,11 @@ export const EventsManager = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
+                <TableCell>Slug</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Time</TableCell>
                 <TableCell>Location</TableCell>
+                <TableCell>Ministry / Dept</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -270,11 +299,17 @@ export const EventsManager = () => {
               {events.map((event) => (
                 <TableRow key={event.id}>
                   <TableCell>{event.title}</TableCell>
+                  <TableCell>{event.slug}</TableCell>
                   <TableCell>
                     {new Date(event.event_date).toLocaleDateString()}
                   </TableCell>
                   <TableCell>{event.event_time || "-"}</TableCell>
                   <TableCell>{event.location || "-"}</TableCell>
+                  <TableCell>
+                    {[event.ministry_name, event.department_name]
+                      .filter(Boolean)
+                      .join(" / ") || "-"}
+                  </TableCell>
                   <TableCell>
                     <IconButton
                       size="small"
@@ -376,67 +411,15 @@ export const EventsManager = () => {
           {editingEvent ? "Edit Event" : "Add Event"}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth
-            label="Title"
-            value={eventFormData.title}
-            onChange={(e) =>
-              setEventFormData({ ...eventFormData, title: e.target.value })
-            }
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            value={eventFormData.description}
-            onChange={(e) =>
-              setEventFormData({
-                ...eventFormData,
-                description: e.target.value,
-              })
-            }
-            margin="normal"
-            multiline
-            rows={3}
-          />
-          <TextField
-            fullWidth
-            label="Date"
-            type="date"
-            value={eventFormData.event_date}
-            onChange={(e) =>
-              setEventFormData({
-                ...eventFormData,
-                event_date: e.target.value,
-              })
-            }
-            margin="normal"
-            required
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            fullWidth
-            label="Time"
-            type="time"
-            value={eventFormData.event_time}
-            onChange={(e) =>
-              setEventFormData({
-                ...eventFormData,
-                event_time: e.target.value,
-              })
-            }
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            fullWidth
-            label="Location"
-            value={eventFormData.location}
-            onChange={(e) =>
-              setEventFormData({ ...eventFormData, location: e.target.value })
-            }
-            margin="normal"
+          <EventFormFields
+            value={eventFormData}
+            onChange={setEventFormData}
+            ministries={ministries}
+            departments={departments}
+            slugError={slugError}
+            isNewEvent={!editingEvent}
+            slugManual={slugManual}
+            onSlugManualEdit={() => setSlugManual(true)}
           />
         </DialogContent>
         <DialogActions>

@@ -3,12 +3,43 @@
   "regularPrograms": "Regular Programs",
   "upcomingEvents": "Upcoming Events",
   "noPrograms": "No regular programs found.",
-  "noEvents": "No events found."
+  "noEvents": "No events found.",
+  "notFound": "Event not found.",
+  "backToEvents": "Back to events",
+  "viewEventPage": "View event page",
+  "date": "Date",
+  "time": "Time",
+  "location": "Location",
+  "description": "Description",
+  "ministry": "Ministry",
+  "department": "Department",
+  "rsvp": {
+    "title": "Will you attend?",
+    "attending": "I will attend",
+    "maybe": "Maybe",
+    "notAttending": "I cannot attend",
+    "countsAttending": "{{count}} attending",
+    "countsMaybe": "{{count}} maybe",
+    "countsNotAttending": "{{count}} cannot attend",
+    "yourResponse": "Your response",
+    "guestNameLabel": "Your name",
+    "guestNameRequired": "Please enter your name to RSVP.",
+    "submitting": "Saving...",
+    "saved": "Your response has been saved.",
+    "error": "Could not save your response. Please try again.",
+    "editName": "Edit",
+    "addName": "Add",
+    "cancel": "Cancel",
+    "ok": "OK"
+  },
+  "form": {
+    "image": "Event image",
+    "slug": "URL slug",
+    "slugHelp": "Used in the event page URL: /events/your-slug",
+    "slugRequired": "Slug is required.",
+    "slugTaken": "This slug is already in use.",
+    "ministry": "Ministry (optional)",
+    "department": "Department (optional)",
+    "none": "None"
+  }
 }
-
-
-
-
-
-
-
