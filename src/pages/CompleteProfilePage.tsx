@@ -38,7 +38,7 @@ import type { Title } from "../types";
 
 export const CompleteProfilePage = () => {
   const { t } = useTranslation("common");
-  const { user, currentMember, getCurrentMember } = useAuth();
+  const { user, currentMember, getCurrentMember, memberLoading } = useAuth();
   const navigate = useNavigate();
 
   const [tabValue, setTabValue] = useState(0);
@@ -84,6 +84,14 @@ export const CompleteProfilePage = () => {
       hasLoadedRef.current = null;
     }
   }, [user?.id, navigate]);
+
+  // Profile already complete — do not keep user on this page (e.g. after reload redirect)
+  useEffect(() => {
+    if (!user || memberLoading) return;
+    if (currentMember) {
+      navigate("/", { replace: true });
+    }
+  }, [user, currentMember, memberLoading, navigate]);
 
   // Sync form fields with currentMember when it loads or changes
   useEffect(() => {

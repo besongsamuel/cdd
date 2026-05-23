@@ -38,6 +38,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [memberLoading, setMemberLoading] = useState(false);
 
+  const loadMemberForUser = useCallback(async (userId: string) => {
+    const member = await membersService.getByUserId(userId);
+    setCurrentMember(member);
+
+    if (member) {
+      try {
+        const memberPermissions = await roleService.getMemberPermissions(
+          member.id
+        );
+        setPermissions(memberPermissions);
+      } catch (permError) {
+        console.error("Error loading permissions:", permError);
+        setPermissions([]);
+      }
+    } else {
+      setPermissions([]);
+    }
+
+    return member;
+  }, []);
+
   useEffect(() => {
     // Helper function to perform account linking (must not run inside auth callbacks)
     const performAccountLinking = (userId: string | undefined) => {
@@ -53,6 +74,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               "Account linking attempt (non-fatal):",
               error.message
             );
+            return;
+          }
+
+          // Member fetch may have completed before linking finished
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (session?.user?.id === userId) {
+            await loadMemberForUser(userId);
           }
         } catch (error) {
           console.debug("Account linking error (non-fatal):", error);
@@ -70,12 +100,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       _session: Session | null,
       options?: { linkAccount?: boolean }
     ) => {
+      const nextUser = _session?.user ?? null;
       setSession(_session);
-      setUser(_session?.user ?? null);
       setLoading(false);
 
-      if (options?.linkAccount && _session?.user) {
-        scheduleAccountLinking(_session.user.id);
+      setUser((prevUser) => {
+        const prevId = prevUser?.id ?? null;
+        const nextId = nextUser?.id ?? null;
+
+        if (nextId !== prevId) {
+          if (nextId) {
+            // Set before member effect runs so ProfileRedirect waits instead of redirecting
+            setMemberLoading(true);
+          } else {
+            setCurrentMember(null);
+            setPermissions([]);
+            setMemberLoading(false);
+          }
+        }
+
+        return nextUser;
+      });
+
+      if (options?.linkAccount && nextUser) {
+        scheduleAccountLinking(nextUser.id);
       }
     };
 
@@ -100,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadMemberForUser]);
 
   // Load member when user changes
   useEffect(() => {
@@ -116,28 +164,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const loadMemberData = async () => {
       try {
-        const member = await membersService.getByUserId(user.id);
-        if (cancelled) return;
-
-        setCurrentMember(member);
-
-        if (member) {
-          try {
-            const memberPermissions = await roleService.getMemberPermissions(
-              member.id
-            );
-            if (!cancelled) {
-              setPermissions(memberPermissions);
-            }
-          } catch (permError) {
-            console.error("Error loading permissions:", permError);
-            if (!cancelled) {
-              setPermissions([]);
-            }
-          }
-        } else {
-          setPermissions([]);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (cancelled || !session?.user || session.user.id !== user.id) {
+          return;
         }
+
+        await loadMemberForUser(user.id);
       } catch (error) {
         if (!cancelled) {
           console.error("Error loading member:", error);
@@ -156,7 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [user?.id, loadMemberForUser]);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -167,6 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (error) throw error;
     setSession(data.session);
     setUser(data.user);
+    setMemberLoading(true);
   };
 
   const signUp = async (email: string, password: string) => {
@@ -203,30 +238,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const getCurrentMember = useCallback(async (): Promise<Member | null> => {
     if (!user) return null;
     try {
-      const member = await membersService.getByUserId(user.id);
-      setCurrentMember(member);
-      
-      // Reload permissions when member is refreshed
-      if (member) {
-        try {
-          const memberPermissions = await roleService.getMemberPermissions(member.id);
-          setPermissions(memberPermissions);
-        } catch (permError) {
-          console.error("Error loading permissions:", permError);
-          setPermissions([]);
-        }
-      } else {
-        setPermissions([]);
-      }
-      
-      return member;
+      return await loadMemberForUser(user.id);
     } catch (error) {
       console.error("Error loading member:", error);
       setCurrentMember(null);
       setPermissions([]);
       return null;
     }
-  }, [user?.id]);
+  }, [user?.id, loadMemberForUser]);
 
   // Check if current member has a specific permission
   const hasPermission = useCallback((permission: string): boolean => {

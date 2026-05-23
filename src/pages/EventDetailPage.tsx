@@ -1,8 +1,11 @@
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EditIcon from "@mui/icons-material/Edit";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
   Alert,
   Box,
@@ -14,13 +17,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   Link as MuiLink,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
@@ -30,6 +34,82 @@ import { useHasPermission } from "../hooks/usePermissions";
 import { eventRsvpsService } from "../services/eventRsvpsService";
 import { eventsService } from "../services/eventsService";
 import type { Event, EventRsvpCounts, EventRsvpStatus } from "../types";
+
+const formatEventTime = (time: string) => {
+  const parts = time.split(":").map(Number);
+  const hours = parts[0];
+  const minutes = parts[1];
+  if (hours === undefined || minutes === undefined || Number.isNaN(hours)) {
+    return time;
+  }
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+const EventInfoItem = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+}) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 2,
+      p: 2,
+      borderRadius: 2,
+      bgcolor: "background.paper",
+      border: "1px solid",
+      borderColor: "divider",
+      height: "100%",
+    }}
+  >
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 48,
+        height: 48,
+        borderRadius: 2,
+        flexShrink: 0,
+        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+        color: "primary.main",
+      }}
+    >
+      {icon}
+    </Box>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography
+        variant="overline"
+        sx={{
+          display: "block",
+          lineHeight: 1.4,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          color: "primary.main",
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="body1"
+        component="div"
+        sx={{ fontWeight: 600, fontSize: "1.05rem", lineHeight: 1.5 }}
+      >
+        {value}
+      </Typography>
+    </Box>
+  </Box>
+);
 
 export const EventDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -252,37 +332,56 @@ export const EventDetailPage = () => {
           )}
         </Box>
 
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                {t("date")}
-              </Typography>
-              <Typography variant="body1">
-                {formatDate(event.event_date)}
-              </Typography>
-            </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(auto-fit, minmax(220px, 1fr))",
+              },
+              gap: 2,
+            }}
+          >
+            <EventInfoItem
+              icon={<CalendarTodayIcon />}
+              label={t("date")}
+              value={formatDate(event.event_date)}
+            />
             {event.event_time && (
-              <>
-                <Divider />
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {t("time")}
-                  </Typography>
-                  <Typography variant="body1">{event.event_time}</Typography>
-                </Box>
-              </>
+              <EventInfoItem
+                icon={<AccessTimeIcon />}
+                label={t("time")}
+                value={formatEventTime(event.event_time)}
+              />
             )}
             {event.location && (
-              <>
-                <Divider />
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {t("location")}
-                  </Typography>
-                  <Typography variant="body1">{event.location}</Typography>
-                </Box>
-              </>
+              <EventInfoItem
+                icon={<LocationOnIcon />}
+                label={t("location")}
+                value={
+                  <MuiLink
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    color="inherit"
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {event.location}
+                  </MuiLink>
+                }
+              />
             )}
           </Box>
         </Paper>

@@ -32,12 +32,8 @@ export const ProfileRedirect = ({
     return <LoadingSpinner />;
   }
 
-  // If user is authenticated but has no member profile, redirect to complete profile
-  // Skip this check for excluded paths
-  if (user && !currentMember && !isExcludedPath) {
-    console.log(
-      "ProfileRedirect: Redirecting to /profile/complete - no member found"
-    );
+  // Redirect only after member lookup finished and found no profile
+  if (user && !currentMember && !memberLoading && !isExcludedPath) {
     return <Navigate to="/profile/complete" replace />;
   }
 
