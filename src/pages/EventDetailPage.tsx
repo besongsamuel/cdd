@@ -1,4 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -25,6 +26,7 @@ import { Link, useParams } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
+import { useHasPermission } from "../hooks/usePermissions";
 import { eventRsvpsService } from "../services/eventRsvpsService";
 import { eventsService } from "../services/eventsService";
 import type { Event, EventRsvpCounts, EventRsvpStatus } from "../types";
@@ -33,6 +35,7 @@ export const EventDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation("events");
   const { user, currentMember } = useAuth();
+  const canManageEvents = useHasPermission("manage:events");
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -181,14 +184,30 @@ export const EventDetailPage = () => {
     <>
       <SEO title={event.title} description={event.description?.slice(0, 160)} />
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          component={Link}
-          to="/events"
-          sx={{ mb: 2 }}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            mb: 2,
+          }}
         >
-          {t("backToEvents")}
-        </Button>
+          <Button startIcon={<ArrowBackIcon />} component={Link} to="/events">
+            {t("backToEvents")}
+          </Button>
+          {canManageEvents && slug && (
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              component={Link}
+              to={`/events/${slug}/edit`}
+            >
+              {t("edit.action")}
+            </Button>
+          )}
+        </Box>
 
         {event.image_url && (
           <Box
@@ -196,9 +215,10 @@ export const EventDetailPage = () => {
             src={event.image_url}
             alt={event.title}
             sx={{
+              display: "block",
               width: "100%",
-              maxHeight: 360,
-              objectFit: "cover",
+              height: "auto",
+              objectFit: "contain",
               borderRadius: 2,
               mb: 3,
             }}

@@ -33,6 +33,7 @@ import { DonationThankYouPage } from "./pages/DonationThankYouPage";
 import { DonationsPage } from "./pages/DonationsPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { EventDetailPage } from "./pages/EventDetailPage";
+import { EventEditPage } from "./pages/EventEditPage";
 import { EventsPage } from "./pages/EventsPage";
 import { FinancialTransparencyPage } from "./pages/FinancialTransparencyPage";
 import { GalleryPage } from "./pages/GalleryPage";
@@ -189,6 +190,18 @@ function App() {
                           <Header />
                           <Box component="main" sx={{ flexGrow: 1 }}>
                             <ServicesPage />
+                          </Box>
+                          <Footer />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/events/:slug/edit"
+                      element={
+                        <>
+                          <Header />
+                          <Box component="main" sx={{ flexGrow: 1 }}>
+                            <EventEditPage />
                           </Box>
                           <Footer />
                         </>

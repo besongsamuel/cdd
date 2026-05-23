@@ -26,7 +26,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { EventDetailDialog } from "../components/common/EventDetailDialog";
+import { useNavigate } from "react-router-dom";
 import {
   emptyEventFormValues,
   eventToFormValues,
@@ -45,12 +45,11 @@ import type { Department, Event, Ministry, RegularProgram } from "../types";
 
 export const EventsPage = () => {
   const { t } = useTranslation("events");
+  const navigate = useNavigate();
   const canManageEvents = useHasPermission("manage:events");
   const [regularPrograms, setRegularPrograms] = useState<RegularProgram[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [eventFormData, setEventFormData] = useState(emptyEventFormValues);
@@ -149,21 +148,6 @@ export const EventsPage = () => {
     }
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) {
-      return;
-    }
-    try {
-      await eventsService.delete(eventId);
-      // Reload events
-      const eventsData = await eventsService.getAll();
-      setEvents(eventsData);
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Failed to delete event");
-    }
-  };
-
   const handleOpenProgramDialog = (program?: RegularProgram) => {
     if (program) {
       setEditingProgram(program);
@@ -250,7 +234,6 @@ export const EventsPage = () => {
       title: event.title,
       start: eventDate.toISOString(),
       end: endDate.toISOString(),
-      url: event.slug ? `/events/${event.slug}` : undefined,
       extendedProps: {
         description: event.description,
         location: event.location,
@@ -612,15 +595,18 @@ export const EventsPage = () => {
                 }}
                 events={calendarEvents}
                 eventClick={(info) => {
+                  info.jsEvent.preventDefault();
                   const eventData = events.find((e) => e.id === info.event.id);
-                  if (eventData) {
-                    if (canManageEvents && (info.jsEvent.ctrlKey || info.jsEvent.metaKey)) {
-                      // Ctrl/Cmd+Click opens edit dialog
-                      handleOpenEventDialog(eventData);
-                    } else {
-                      setSelectedEvent(eventData);
-                      setDialogOpen(true);
-                    }
+                  if (!eventData) return;
+                  if (
+                    canManageEvents &&
+                    (info.jsEvent.ctrlKey || info.jsEvent.metaKey)
+                  ) {
+                    handleOpenEventDialog(eventData);
+                    return;
+                  }
+                  if (eventData.slug) {
+                    navigate(`/events/${eventData.slug}`);
                   }
                 }}
                 height="auto"
@@ -793,18 +779,6 @@ export const EventsPage = () => {
           </DialogActions>
         </Dialog>
       </Box>
-
-      <EventDetailDialog
-        open={dialogOpen}
-        event={selectedEvent}
-        onClose={() => {
-          setDialogOpen(false);
-          setSelectedEvent(null);
-        }}
-        onEdit={canManageEvents ? handleOpenEventDialog : undefined}
-        onDelete={canManageEvents ? handleDeleteEvent : undefined}
-        canManage={canManageEvents}
-      />
     </>
   );
 };

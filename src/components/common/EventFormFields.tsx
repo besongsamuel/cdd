@@ -60,7 +60,7 @@ export const EventFormFields = ({
 
   const update = (patch: Partial<EventFormValues>) => {
     const next = { ...value, ...patch };
-    if (isNewEvent && !slugManual && patch.title !== undefined) {
+    if (!slugManual && patch.title !== undefined) {
       next.slug = slugify(patch.title);
     }
     onChange(next);

@@ -32,6 +32,15 @@
     "cancel": "Cancel",
     "ok": "OK"
   },
+  "edit": {
+    "action": "Edit event",
+    "title": "Edit: {{title}}",
+    "backToEvent": "Back to event",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saveFailed": "Failed to save event. Please try again."
+  },
   "form": {
     "image": "Event image",
     "slug": "URL slug",

@@ -32,6 +32,15 @@
     "cancel": "Annuler",
     "ok": "OK"
   },
+  "edit": {
+    "action": "Modifier l'événement",
+    "title": "Modifier : {{title}}",
+    "backToEvent": "Retour à l'événement",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saveFailed": "Impossible d'enregistrer l'événement. Veuillez réessayer."
+  },
   "form": {
     "image": "Image de l'événement",
     "slug": "Identifiant URL",

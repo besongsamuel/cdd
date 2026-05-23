@@ -36,53 +36,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [memberLoading, setMemberLoading] = useState(true);
+  const [memberLoading, setMemberLoading] = useState(false);
 
   useEffect(() => {
-    // Helper function to perform account linking
-    const performAccountLinking = async (userId: string | undefined) => {
+    // Helper function to perform account linking (must not run inside auth callbacks)
+    const performAccountLinking = (userId: string | undefined) => {
       if (!userId) return;
-      
-      try {
-        // Attempt to link auth user to existing member by email
-        // This is non-fatal - if it fails, getByUserId will handle it as fallback
-        const { error } = await supabase.rpc('link_current_user_to_member_by_email');
-        if (error) {
-          // Log but don't throw - account linking will happen in getByUserId as fallback
-          console.debug('Account linking attempt (non-fatal):', error.message);
+
+      void (async () => {
+        try {
+          const { error } = await supabase.rpc(
+            "link_current_user_to_member_by_email"
+          );
+          if (error) {
+            console.debug(
+              "Account linking attempt (non-fatal):",
+              error.message
+            );
+          }
+        } catch (error) {
+          console.debug("Account linking error (non-fatal):", error);
         }
-      } catch (error) {
-        // Silently handle - getByUserId will handle linking as fallback
-        console.debug('Account linking error (non-fatal):', error);
+      })();
+    };
+
+    const scheduleAccountLinking = (userId: string | undefined) => {
+      // Defer past the auth lock — async work in onAuthStateChange/getSession
+      // callbacks can deadlock the client (no network, spinner forever).
+      setTimeout(() => performAccountLinking(userId), 0);
+    };
+
+    const applySession = (
+      _session: Session | null,
+      options?: { linkAccount?: boolean }
+    ) => {
+      setSession(_session);
+      setUser(_session?.user ?? null);
+      setLoading(false);
+
+      if (options?.linkAccount && _session?.user) {
+        scheduleAccountLinking(_session.user.id);
       }
     };
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session: _session } }) => {
-      setSession(_session);
-      setUser(_session?.user ?? null);
-      setLoading(false);
-      
-      // Perform account linking for initial session if user exists
-      if (_session?.user) {
-        await performAccountLinking(_session.user.id);
-      }
-    });
+    // Get initial session — keep callback synchronous (no await)
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: _session } }) => {
+        applySession(_session, { linkAccount: true });
+      })
+      .catch((error) => {
+        console.error("Error loading auth session:", error);
+        applySession(null);
+      });
 
-    // Listen for auth changes
+    // Listen for auth changes — callback must stay synchronous
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
-      setSession(_session);
-      setUser(_session?.user ?? null);
-      setLoading(false);
-      
-      // Perform account linking when user signs in
-      // This handles login, email verification, and other sign-in events
-      // We only do this on SIGNED_IN to avoid unnecessary database calls on token refresh
-      if (_session?.user && _event === 'SIGNED_IN') {
-        await performAccountLinking(_session.user.id);
-      }
+    } = supabase.auth.onAuthStateChange((_event, _session) => {
+      applySession(_session, {
+        linkAccount: _event === "SIGNED_IN" && !!_session?.user,
+      });
     });
 
     return () => subscription.unsubscribe();
@@ -90,23 +104,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Load member when user changes
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
+      setCurrentMember(null);
+      setPermissions([]);
+      setMemberLoading(false);
       return;
     }
 
     let cancelled = false;
     setMemberLoading(true);
 
-    // Load member and permissions asynchronously
     const loadMemberData = async () => {
       try {
         const member = await membersService.getByUserId(user.id);
-        if (!cancelled && member) {
-          setCurrentMember(member);
-          
-          // Load permissions for the member
+        if (cancelled) return;
+
+        setCurrentMember(member);
+
+        if (member) {
           try {
-            const memberPermissions = await roleService.getMemberPermissions(member.id);
+            const memberPermissions = await roleService.getMemberPermissions(
+              member.id
+            );
             if (!cancelled) {
               setPermissions(memberPermissions);
             }
@@ -116,29 +135,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               setPermissions([]);
             }
           }
-          
-          setMemberLoading(false);
-        } else if (!cancelled) {
-          setCurrentMember(null);
+        } else {
           setPermissions([]);
-          setMemberLoading(false);
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Error loading member:", error);
           setCurrentMember(null);
           setPermissions([]);
+        }
+      } finally {
+        if (!cancelled) {
           setMemberLoading(false);
         }
       }
     };
 
-    loadMemberData();
+    void loadMemberData();
 
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const signIn = async (email: string, password: string) => {
