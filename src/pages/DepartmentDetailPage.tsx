@@ -13,7 +13,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   IconButton,
+  Switch,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -24,7 +26,7 @@ import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { MarkdownRenderer } from "../components/common/MarkdownRenderer";
 import { SEO } from "../components/SEO";
 import { useAuth } from "../hooks/useAuth";
-import { useHasPermission } from "../hooks/usePermissions";
+import { useHasPermission, useIsSuperuser } from "../hooks/usePermissions";
 import { departmentJoinRequestsService } from "../services/departmentJoinRequestsService";
 import { departmentMembersService } from "../services/departmentMembersService";
 import { departmentsService } from "../services/departmentsService";
@@ -38,6 +40,7 @@ export const DepartmentDetailPage = () => {
   const navigate = useNavigate();
   const { user, currentMember } = useAuth();
   const canManageDepartments = useHasPermission("manage:departments");
+  const isSuperuser = useIsSuperuser();
   const [department, setDepartment] = useState<Department | null>(null);
   const [members, setMembers] = useState<DepartmentMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,7 @@ export const DepartmentDetailPage = () => {
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [isDepartmentLead, setIsDepartmentLead] = useState(false);
   const [addingMember, setAddingMember] = useState(false);
+  const [togglingLeadId, setTogglingLeadId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDepartment = async () => {
@@ -90,6 +94,7 @@ export const DepartmentDetailPage = () => {
   }, [currentMember, id]);
 
   const canAddMembers = canManageDepartments || isDepartmentLead;
+  const canAssignLead = isSuperuser;
   const [imagePosition, setImagePosition] = useState(
     department?.image_position || { x: 50, y: 50 }
   );
@@ -194,6 +199,133 @@ export const DepartmentDetailPage = () => {
       alert(err instanceof Error ? err.message : "Failed to remove member");
     }
   };
+
+  const handleToggleLead = async (
+    memberId: string,
+    currentLeadStatus: boolean
+  ) => {
+    if (!id || !canAssignLead) return;
+    setTogglingLeadId(memberId);
+    try {
+      await departmentMembersService.setLead(id, memberId, !currentLeadStatus);
+      const deptMembers = await departmentMembersService.getByDepartment(id);
+      setMembers(deptMembers);
+    } catch (err) {
+      console.error("Error updating lead status:", err);
+      alert(err instanceof Error ? err.message : t("leadToggleFailed"));
+    } finally {
+      setTogglingLeadId(null);
+    }
+  };
+
+  const renderMemberCard = (member: DepartmentMember, isLeadSection: boolean) => (
+    <Card
+      key={member.id}
+      sx={{
+        mb: 2,
+        p: 2.5,
+        background: isLeadSection
+          ? "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)"
+          : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+        border: isLeadSection
+          ? "1px solid rgba(30, 58, 138, 0.1)"
+          : "1px solid rgba(0, 0, 0, 0.08)",
+        borderRadius: 2,
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: isLeadSection
+            ? "0 4px 16px rgba(30, 58, 138, 0.12)"
+            : "0 4px 16px rgba(0, 0, 0, 0.08)",
+          transform: "translateX(4px)",
+          borderColor: isLeadSection ? "rgba(30, 58, 138, 0.2)" : undefined,
+        },
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Avatar
+          src={member.member_picture_url}
+          alt={member.member_name}
+          sx={{ width: 48, height: 48 }}
+        >
+          {member.member_name?.charAt(0) || "?"}
+        </Avatar>
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+            <Typography variant="body1" fontWeight={isLeadSection ? 500 : 400}>
+              {member.member_name}
+            </Typography>
+            {member.is_lead && (
+              <Chip label={t("leadBadge")} size="small" color="primary" />
+            )}
+          </Box>
+          {isLeadSection &&
+            ((member.member_email &&
+              (member.member_id === currentMember?.id ||
+                member.member_is_email_visible === true)) ||
+              (member.member_phone &&
+                (member.member_id === currentMember?.id ||
+                  member.member_is_phone_visible === true))) && (
+              <Box
+                sx={{
+                  mt: 0.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.25,
+                }}
+              >
+                {member.member_email &&
+                  (member.member_id === currentMember?.id ||
+                    member.member_is_email_visible === true) && (
+                    <Typography variant="caption" color="text.secondary">
+                      {member.member_email}
+                    </Typography>
+                  )}
+                {member.member_phone &&
+                  (member.member_id === currentMember?.id ||
+                    member.member_is_phone_visible === true) && (
+                    <Typography variant="caption" color="text.secondary">
+                      {member.member_phone}
+                    </Typography>
+                  )}
+              </Box>
+            )}
+        </Box>
+        {canAssignLead && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={member.is_lead}
+                onChange={() =>
+                  handleToggleLead(member.member_id, member.is_lead)
+                }
+                disabled={togglingLeadId === member.member_id}
+                size="small"
+              />
+            }
+            label={t("assignAsLead")}
+            sx={{
+              m: 0,
+              flexShrink: 0,
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
+                whiteSpace: "nowrap",
+              },
+            }}
+          />
+        )}
+        {canAddMembers && (
+          <IconButton
+            size="small"
+            onClick={() => handleRemoveMember(member.member_id)}
+            sx={{ color: "error.main", flexShrink: 0 }}
+            title="Remove member"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+    </Card>
+  );
 
   const availableMembers = allMembers.filter(
     (m) => !members.some((dm) => dm.member_id === m.id)
@@ -495,80 +627,7 @@ export const DepartmentDetailPage = () => {
                     >
                       {t("departmentLeads")}
                     </Typography>
-                    {leads.map((member) => (
-                      <Card
-                        key={member.id}
-                        sx={{
-                          mb: 2,
-                          p: 2.5,
-                          background:
-                            "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                          border: "1px solid rgba(30, 58, 138, 0.1)",
-                          borderRadius: 2,
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0 4px 16px rgba(30, 58, 138, 0.12)",
-                            transform: "translateX(4px)",
-                            borderColor: "rgba(30, 58, 138, 0.2)",
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                        >
-                          <Avatar
-                            src={member.member_picture_url}
-                            alt={member.member_name}
-                            sx={{ width: 48, height: 48 }}
-                          >
-                            {member.member_name?.charAt(0) || "?"}
-                          </Avatar>
-                          <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="body1" fontWeight={500}>
-                              {member.member_name}
-                            </Typography>
-                            {((member.member_email && (member.member_id === currentMember?.id || member.member_is_email_visible === true)) ||
-                              (member.member_phone && (member.member_id === currentMember?.id || member.member_is_phone_visible === true))) && (
-                              <Box
-                                sx={{
-                                  mt: 0.5,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 0.25,
-                                }}
-                              >
-                                {member.member_email && (member.member_id === currentMember?.id || member.member_is_email_visible === true) && (
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    {member.member_email}
-                                  </Typography>
-                                )}
-                                {member.member_phone && (member.member_id === currentMember?.id || member.member_is_phone_visible === true) && (
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    {member.member_phone}
-                                  </Typography>
-                                )}
-                              </Box>
-                            )}
-                          </Box>
-                          {canAddMembers && (
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRemoveMember(member.member_id)}
-                              sx={{ color: "error.main" }}
-                              title="Remove member"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </Box>
-                      </Card>
-                    ))}
+                    {leads.map((member) => renderMemberCard(member, true))}
                   </Box>
                 )}
 
@@ -583,51 +642,7 @@ export const DepartmentDetailPage = () => {
                         {t("otherMembers")}
                       </Typography>
                     )}
-                    {regularMembers.map((member) => (
-                      <Card
-                        key={member.id}
-                        sx={{
-                          mb: 2,
-                          p: 2.5,
-                          background:
-                            "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                          border: "1px solid rgba(0, 0, 0, 0.08)",
-                          borderRadius: 2,
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-                            transform: "translateX(4px)",
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                        >
-                          <Avatar
-                            src={member.member_picture_url}
-                            alt={member.member_name}
-                            sx={{ width: 48, height: 48 }}
-                          >
-                            {member.member_name?.charAt(0) || "?"}
-                          </Avatar>
-                          <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="body1">
-                              {member.member_name}
-                            </Typography>
-                          </Box>
-                          {canAddMembers && (
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRemoveMember(member.member_id)}
-                              sx={{ color: "error.main" }}
-                              title="Remove member"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </Box>
-                      </Card>
-                    ))}
+                    {regularMembers.map((member) => renderMemberCard(member, false))}
                   </Box>
                 )}
               </Box>

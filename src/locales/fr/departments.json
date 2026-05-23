@@ -15,6 +15,9 @@
   "noDescription": "Aucune description disponible",
   "requestSubmitted": "Votre demande d'adhésion a été soumise avec succès. Nous l'examinerons et vous répondrons bientôt.",
   "viewDetails": "Voir les Détails",
+  "assignAsLead": "Responsable",
+  "leadBadge": "Responsable",
+  "leadToggleFailed": "Impossible de mettre à jour le statut de responsable.",
   "form": {
     "name": "Nom",
     "nameRequired": "Le nom est requis",
