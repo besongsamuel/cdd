@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -20,50 +20,37 @@ import {
   Chip,
   Checkbox,
   FormControlLabel,
-  Tabs,
-  Tab,
   List,
   ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction,
   Tooltip,
   Autocomplete,
+  Grid,
+  Divider,
+  Stack,
+  Avatar,
+  alpha,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import GroupIcon from '@mui/icons-material/Group';
+import ShieldIcon from '@mui/icons-material/Shield';
 import { roleService } from '../../services/roleService';
 import { permissionsService } from '../../services/permissionsService';
 import { membersService } from '../../services/membersService';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import type { Role, Permission, Member } from '../../types';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`roles-tabpanel-${index}`}
-      aria-labelledby={`roles-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
 export const RolesManager = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tabValue, setTabValue] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
@@ -80,53 +67,70 @@ export const RolesManager = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
+  const [roleMemberCounts, setRoleMemberCounts] = useState<Record<string, number>>({});
+  const [roleMembers, setRoleMembers] = useState<Member[]>([]);
+  const [loadingRoleMembers, setLoadingRoleMembers] = useState(false);
 
-  useEffect(() => {
-    loadAllData();
+  const loadRoleMembers = useCallback(async (roleId: string) => {
+    setLoadingRoleMembers(true);
+    try {
+      const data = await roleService.getMembersByRole(roleId);
+      setRoleMembers(data);
+    } catch (err) {
+      console.error('Error loading role members:', err);
+      setRoleMembers([]);
+    } finally {
+      setLoadingRoleMembers(false);
+    }
   }, []);
 
-  const loadAllData = async () => {
+  const loadRoleMemberCounts = useCallback(async () => {
+    const counts = await roleService.getRoleMemberCounts();
+    setRoleMemberCounts(counts);
+  }, []);
+
+  const loadAllData = useCallback(async () => {
     setLoading(true);
     try {
-      await Promise.all([loadRoles(), loadPermissions(), loadMembers()]);
+      const [rolesData, permissionsData, membersData, counts] = await Promise.all([
+        roleService.getAllRoles(),
+        permissionsService.getAll(),
+        membersService.getAll(),
+        roleService.getRoleMemberCounts(),
+      ]);
+      setRoles(rolesData);
+      setPermissions(permissionsData);
+      setMembers(membersData);
+      setRoleMemberCounts(counts);
+
+      setSelectedRole((prev) => {
+        if (prev && rolesData.some((r) => r.id === prev.id)) {
+          return rolesData.find((r) => r.id === prev.id) ?? prev;
+        }
+        return rolesData[0] ?? null;
+      });
     } catch (err) {
       console.error('Error loading data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadMembers = async () => {
-    try {
-      const data = await membersService.getAll();
-      setMembers(data);
-    } catch (err) {
-      console.error('Error loading members:', err);
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
+
+  useEffect(() => {
+    if (selectedRole) {
+      loadRoleMembers(selectedRole.id);
+    } else {
+      setRoleMembers([]);
     }
-  };
+  }, [selectedRole, loadRoleMembers]);
 
-  const loadRoles = async () => {
-    try {
-      const data = await roleService.getAllRoles();
-      setRoles(data);
-    } catch (err) {
-      console.error('Error loading roles:', err);
-    }
-  };
-
-  const loadPermissions = async () => {
-    try {
-      const data = await permissionsService.getAll();
-      setPermissions(data);
-    } catch (err) {
-      console.error('Error loading permissions:', err);
-    }
-  };
-
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  const handleSelectRole = (role: Role) => {
+    setSelectedRole(role);
   };
 
   const handleOpenDialog = (role?: Role) => {
@@ -180,7 +184,7 @@ export const RolesManager = () => {
           is_superuser: formData.is_superuser,
         });
       }
-      await loadRoles();
+      await loadAllData();
       handleCloseDialog();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save role');
@@ -194,17 +198,19 @@ export const RolesManager = () => {
 
     try {
       await roleService.deleteRole(id);
-      await loadRoles();
+      if (selectedRole?.id === id) {
+        setSelectedRole(null);
+      }
+      await loadAllData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete role');
     }
   };
 
-  const handleOpenPermissionsDialog = async (role: Role) => {
+  const handleOpenPermissionsDialog = (role: Role) => {
     setSelectedRole(role);
-    // Load current permissions for this role
     const rolePermissions = role.permissions || [];
-    setSelectedPermissions(rolePermissions.map(p => p.id));
+    setSelectedPermissions(rolePermissions.map((p) => p.id));
     setPermissionsDialogOpen(true);
   };
 
@@ -212,15 +218,12 @@ export const RolesManager = () => {
     if (!selectedRole) return;
 
     try {
-      // Get current permissions
-      const currentRole = roles.find(r => r.id === selectedRole.id);
-      const currentPermissionIds = (currentRole?.permissions || []).map(p => p.id);
+      const currentRole = roles.find((r) => r.id === selectedRole.id);
+      const currentPermissionIds = (currentRole?.permissions || []).map((p) => p.id);
 
-      // Find permissions to add and remove
-      const toAdd = selectedPermissions.filter(id => !currentPermissionIds.includes(id));
-      const toRemove = currentPermissionIds.filter(id => !selectedPermissions.includes(id));
+      const toAdd = selectedPermissions.filter((id) => !currentPermissionIds.includes(id));
+      const toRemove = currentPermissionIds.filter((id) => !selectedPermissions.includes(id));
 
-      // Apply changes
       for (const permId of toAdd) {
         await roleService.assignPermissionToRole(selectedRole.id, permId);
       }
@@ -228,9 +231,8 @@ export const RolesManager = () => {
         await roleService.removePermissionFromRole(selectedRole.id, permId);
       }
 
-      await loadRoles();
+      await loadAllData();
       setPermissionsDialogOpen(false);
-      setSelectedRole(null);
       setSelectedPermissions([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update permissions');
@@ -258,9 +260,8 @@ export const RolesManager = () => {
     }
 
     try {
-      // Check if member already has this role
       const memberRoles = await roleService.getMemberRoles(selectedMember.id);
-      const hasRole = memberRoles.some(r => r.id === selectedRoleForAssignment.id);
+      const hasRole = memberRoles.some((r) => r.id === selectedRoleForAssignment.id);
 
       if (hasRole) {
         setError('Member already has this role');
@@ -270,25 +271,60 @@ export const RolesManager = () => {
       await roleService.assignRole(selectedMember.id, selectedRoleForAssignment.id);
       handleCloseAssignRoleDialog();
       setError(null);
+      await loadRoleMemberCounts();
+      if (selectedRole?.id === selectedRoleForAssignment.id) {
+        await loadRoleMembers(selectedRole.id);
+      }
+      setRoleMemberCounts((prev) => ({
+        ...prev,
+        [selectedRoleForAssignment.id]: (prev[selectedRoleForAssignment.id] || 0) + 1,
+      }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to assign role');
     }
   };
 
+  const handleRemoveMemberFromRole = async (member: Member) => {
+    if (!selectedRole) return;
+
+    if (!window.confirm(`Remove "${member.name}" from the ${selectedRole.name} role?`)) {
+      return;
+    }
+
+    try {
+      await roleService.removeRole(member.id, selectedRole.id);
+      await loadRoleMembers(selectedRole.id);
+      await loadRoleMemberCounts();
+      setRoleMemberCounts((prev) => ({
+        ...prev,
+        [selectedRole.id]: Math.max(0, (prev[selectedRole.id] || 1) - 1),
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove member from role');
+    }
+  };
+
+  const getMemberInitials = (name: string) =>
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
+  const detailRole = selectedRole
+    ? roles.find((r) => r.id === selectedRole.id) ?? selectedRole
+    : null;
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Roles</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
           Add Role
         </Button>
       </Box>
@@ -299,108 +335,273 @@ export const RolesManager = () => {
         </Alert>
       )}
 
-      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
-        <Tab label="All Roles" />
-        <Tab label="Role Details" />
-      </Tabs>
-
-      <TabPanel value={tabValue} index={0}>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Superuser</TableCell>
-                <TableCell>Permissions</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {roles.length === 0 ? (
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, lg: 7 }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            Select a role to view details
+          </Typography>
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Typography color="text.secondary">No roles found</Typography>
-                  </TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Members</TableCell>
+                  <TableCell>Permissions</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
-              ) : (
-                roles.map((role) => (
-                  <TableRow key={role.id}>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                        {role.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{role.description || '-'}</TableCell>
-                    <TableCell>
-                      {role.is_superuser ? (
-                        <Chip label="Yes" color="primary" size="small" />
-                      ) : (
-                        <Chip label="No" size="small" />
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {(role.permissions || []).length} permission(s)
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Assign Role to Member">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenAssignRoleDialog(role)}
-                          color="primary"
-                        >
-                          <PersonAddIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Manage Permissions">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenPermissionsDialog(role)}
-                          color="primary"
-                        >
-                          <SettingsIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Edit Role">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDialog(role)}
-                          color="primary"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Role">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(role.id)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+              </TableHead>
+              <TableBody>
+                {roles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                      <Typography color="text.secondary">No roles found. Create one to get started.</Typography>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
+                ) : (
+                  roles.map((role) => {
+                    const isSelected = selectedRole?.id === role.id;
+                    return (
+                      <TableRow
+                        key={role.id}
+                        hover
+                        selected={isSelected}
+                        onClick={() => handleSelectRole(role)}
+                        sx={{
+                          cursor: 'pointer',
+                          ...(isSelected && {
+                            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                          }),
+                        }}
+                      >
+                        <TableCell>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="body2" fontWeight={600}>
+                              {role.name}
+                            </Typography>
+                            {role.is_superuser && (
+                              <Chip label="Superuser" color="primary" size="small" variant="outlined" />
+                            )}
+                          </Stack>
+                          {role.description && (
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              {role.description}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            icon={<GroupIcon />}
+                            label={roleMemberCounts[role.id] ?? 0}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {role.is_superuser ? 'All' : `${(role.permissions || []).length}`}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip title="Assign to member">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenAssignRoleDialog(role)}
+                              color="primary"
+                            >
+                              <PersonAddIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Manage permissions">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenPermissionsDialog(role)}
+                              color="primary"
+                            >
+                              <SettingsIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit role">
+                            <IconButton size="small" onClick={() => handleOpenDialog(role)} color="primary">
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete role">
+                            <IconButton size="small" onClick={() => handleDelete(role.id)} color="error">
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
 
-      <TabPanel value={tabValue} index={1}>
-        <Typography variant="body1" color="text.secondary">
-          Select a role from the table above and click "Manage Permissions" to view details.
-        </Typography>
-      </TabPanel>
+        <Grid size={{ xs: 12, lg: 5 }}>
+          <Paper variant="outlined" sx={{ p: 3, minHeight: 400 }}>
+            {!detailRole ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 320,
+                  textAlign: 'center',
+                  color: 'text.secondary',
+                }}
+              >
+                <ShieldIcon sx={{ fontSize: 48, mb: 2, opacity: 0.4 }} />
+                <Typography variant="h6" gutterBottom>
+                  No role selected
+                </Typography>
+                <Typography variant="body2">
+                  Click a role in the table to view its permissions and assigned members.
+                </Typography>
+              </Box>
+            ) : (
+              <Stack spacing={2}>
+                <Box>
+                  <Typography variant="overline" color="text.secondary">
+                    Role details
+                  </Typography>
+                  <Typography variant="h5" sx={{ mt: 0.5 }}>
+                    {detailRole.name}
+                  </Typography>
+                  {detailRole.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {detailRole.description}
+                    </Typography>
+                  )}
+                  {detailRole.is_superuser && (
+                    <Chip label="Superuser — all permissions" color="primary" size="small" sx={{ mt: 1 }} />
+                  )}
+                </Box>
 
-      {/* Role Create/Edit Dialog */}
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => handleOpenAssignRoleDialog(detailRole)}
+                  >
+                    Assign member
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<SettingsIcon />}
+                    onClick={() => handleOpenPermissionsDialog(detailRole)}
+                  >
+                    Permissions
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleOpenDialog(detailRole)}
+                  >
+                    Edit
+                  </Button>
+                </Stack>
+
+                <Divider />
+
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Permissions
+                  </Typography>
+                  {detailRole.is_superuser ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Superuser roles automatically grant every permission.
+                    </Typography>
+                  ) : (detailRole.permissions || []).length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No permissions assigned. Use &quot;Permissions&quot; to add some.
+                    </Typography>
+                  ) : (
+                    <Stack direction="row" flexWrap="wrap" gap={0.5} useFlexGap>
+                      {(detailRole.permissions || []).map((perm) => (
+                        <Chip
+                          key={perm.id}
+                          label={perm.name}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
+                        />
+                      ))}
+                    </Stack>
+                  )}
+                </Box>
+
+                <Divider />
+
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Typography variant="subtitle2">
+                      Assigned members ({roleMembers.length})
+                    </Typography>
+                  </Stack>
+
+                  {loadingRoleMembers ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Loading members…
+                    </Typography>
+                  ) : roleMembers.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No members have this role yet. Use &quot;Assign member&quot; to add someone.
+                    </Typography>
+                  ) : (
+                    <List dense disablePadding>
+                      {roleMembers.map((member) => (
+                        <ListItem
+                          key={member.id}
+                          sx={{
+                            px: 0,
+                            borderRadius: 1,
+                            '&:hover': { bgcolor: 'action.hover' },
+                          }}
+                        >
+                          <ListItemAvatar>
+                            <Avatar src={member.picture_url} sx={{ width: 36, height: 36 }}>
+                              {getMemberInitials(member.name)}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={member.name}
+                            secondary={member.email || 'No email'}
+                            primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                            secondaryTypographyProps={{ variant: 'caption' }}
+                          />
+                          <ListItemSecondaryAction>
+                            <Tooltip title="Remove from role">
+                              <IconButton
+                                edge="end"
+                                size="small"
+                                color="error"
+                                onClick={() => handleRemoveMemberFromRole(member)}
+                                aria-label={`Remove ${member.name} from role`}
+                              >
+                                <PersonRemoveIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+                </Box>
+              </Stack>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingRole ? 'Edit Role' : 'Add Role'}
-        </DialogTitle>
+        <DialogTitle>{editingRole ? 'Edit Role' : 'Add Role'}</DialogTitle>
         <DialogContent>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -443,11 +644,13 @@ export const RolesManager = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Permissions Management Dialog */}
-      <Dialog open={permissionsDialogOpen} onClose={() => setPermissionsDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          Manage Permissions: {selectedRole?.name}
-        </DialogTitle>
+      <Dialog
+        open={permissionsDialogOpen}
+        onClose={() => setPermissionsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Manage Permissions: {selectedRole?.name}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -455,8 +658,9 @@ export const RolesManager = () => {
             </Typography>
             <List>
               {permissions.map((permission) => (
-                <ListItem key={permission.id}>
+                <ListItem key={permission.id} disablePadding>
                   <FormControlLabel
+                    sx={{ width: '100%', mx: 0 }}
                     control={
                       <Checkbox
                         checked={selectedPermissions.includes(permission.id)}
@@ -464,7 +668,9 @@ export const RolesManager = () => {
                           if (e.target.checked) {
                             setSelectedPermissions([...selectedPermissions, permission.id]);
                           } else {
-                            setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id));
+                            setSelectedPermissions(
+                              selectedPermissions.filter((id) => id !== permission.id)
+                            );
                           }
                         }}
                       />
@@ -495,11 +701,8 @@ export const RolesManager = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Assign Role to Member Dialog */}
       <Dialog open={assignRoleDialogOpen} onClose={handleCloseAssignRoleDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Assign Role: {selectedRoleForAssignment?.name}
-        </DialogTitle>
+        <DialogTitle>Assign Role: {selectedRoleForAssignment?.name}</DialogTitle>
         <DialogContent>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -508,7 +711,11 @@ export const RolesManager = () => {
           )}
           <Box sx={{ mt: 2 }}>
             <Autocomplete
-              options={members}
+              options={
+                selectedRoleForAssignment?.id === selectedRole?.id
+                  ? members.filter((m) => !roleMembers.some((rm) => rm.id === m.id))
+                  : members
+              }
               getOptionLabel={(option) => option.name}
               value={selectedMember}
               onChange={(_, newValue) => {
@@ -528,11 +735,11 @@ export const RolesManager = () => {
                   fullWidth
                 />
               )}
-              filterOptions={(options, { inputValue }) => {
-                return options.filter((option) =>
+              filterOptions={(options, { inputValue }) =>
+                options.filter((option) =>
                   option.name.toLowerCase().includes(inputValue.toLowerCase())
-                );
-              }}
+                )
+              }
             />
             {selectedMember && (
               <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
@@ -553,11 +760,7 @@ export const RolesManager = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAssignRoleDialog}>Cancel</Button>
-          <Button
-            onClick={handleAssignRoleToMember}
-            variant="contained"
-            disabled={!selectedMember}
-          >
+          <Button onClick={handleAssignRoleToMember} variant="contained" disabled={!selectedMember}>
             Assign Role
           </Button>
         </DialogActions>
@@ -565,4 +768,3 @@ export const RolesManager = () => {
     </Box>
   );
 };
-

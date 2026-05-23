@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { EventGalleryPreview } from "../components/events/EventGalleryPreview";
 import { EventRsvpSection } from "../components/common/EventRsvpSection";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { SEO } from "../components/SEO";
@@ -293,6 +294,8 @@ export const EventDetailPage = () => {
             </Typography>
           </Paper>
         )}
+
+        <EventGalleryPreview eventId={event.id} eventSlug={slug!} />
 
         <EventRsvpSection eventId={event.id} />
       </Container>

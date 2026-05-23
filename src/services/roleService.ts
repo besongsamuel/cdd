@@ -1,4 +1,4 @@
-import type { Department, Ministry, Role, Permission } from '../types';
+import type { Department, Ministry, Member, Role, Permission } from '../types';
 import { supabase } from './supabase';
 
 export const roleService = {
@@ -209,6 +209,59 @@ export const roleService = {
       ...role,
       permissions: (role.permissions || []).map((rp: any) => rp.permission).filter(Boolean),
     }));
+  },
+
+  /**
+   * Get member counts per role (role_id -> count)
+   */
+  async getRoleMemberCounts(): Promise<Record<string, number>> {
+    const { data, error } = await supabase.from('member_roles').select('role_id');
+
+    if (error) {
+      console.error('Error getting role member counts:', error);
+      return {};
+    }
+
+    const counts: Record<string, number> = {};
+    (data || []).forEach((row: { role_id: string }) => {
+      counts[row.role_id] = (counts[row.role_id] || 0) + 1;
+    });
+    return counts;
+  },
+
+  /**
+   * Get all members assigned to a role
+   */
+  async getMembersByRole(roleId: string): Promise<Member[]> {
+    const { data, error } = await supabase
+      .from('member_roles')
+      .select(
+        `
+        member:members (
+          id,
+          name,
+          email,
+          type,
+          picture_url,
+          is_verified,
+          created_at,
+          updated_at
+        )
+      `
+      )
+      .eq('role_id', roleId);
+
+    if (error) {
+      console.error('Error getting members by role:', error);
+      return [];
+    }
+
+    return (data || [])
+      .map((item: { member: Member | Member[] | null }) => {
+        const member = item.member;
+        return Array.isArray(member) ? member[0] : member;
+      })
+      .filter((member): member is Member => member != null);
   },
 
   /**
