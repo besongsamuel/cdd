@@ -651,7 +651,6 @@ export const EventsPage = () => {
               ministries={ministries}
               departments={departments}
               slugError={slugError}
-              isNewEvent={!editingEvent}
               slugManual={slugManual}
               onSlugManualEdit={() => setSlugManual(true)}
             />

@@ -148,7 +148,6 @@ export const EventEditPage = () => {
             ministries={ministries}
             departments={departments}
             slugError={slugError}
-            isNewEvent={false}
             slugManual={slugManual}
             onSlugManualEdit={() => setSlugManual(true)}
           />

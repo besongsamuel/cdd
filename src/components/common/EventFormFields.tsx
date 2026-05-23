@@ -41,7 +41,6 @@ interface EventFormFieldsProps {
   ministries: Ministry[];
   departments: Department[];
   slugError?: string | null;
-  isNewEvent?: boolean;
   slugManual?: boolean;
   onSlugManualEdit?: () => void;
 }
@@ -52,7 +51,6 @@ export const EventFormFields = ({
   ministries,
   departments,
   slugError,
-  isNewEvent = false,
   slugManual = false,
   onSlugManualEdit,
 }: EventFormFieldsProps) => {
