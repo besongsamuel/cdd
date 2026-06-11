@@ -885,6 +885,10 @@ async function enrichThreadMentionData(
     }
   }
 
+  if (boardId) {
+    enriched.BOARD_URL = `${frontendUrl}/message-boards/${boardId}`;
+  }
+
   if (boardId && threadId) {
     enriched.THREAD_URL = `${frontendUrl}/message-boards/${boardId}/threads/${threadId}`;
   }
