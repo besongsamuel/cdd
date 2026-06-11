@@ -67,6 +67,23 @@
     "department": "Department",
     "ministry": "Ministry"
   },
+  "mention": {
+    "noResults": "No members found"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mentionedYouTitle": "You were mentioned",
+    "mentionedYou": "Someone mentioned you on {{board}}",
+    "mentionedOnBoard": "You were mentioned on {{board}}",
+    "unseenReplies": "New replies on {{board}}",
+    "board": "a message board",
+    "activity": "Board activity",
+    "enableBrowser": "Enable browser alerts when someone mentions you",
+    "enable": "Enable alerts",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications yet",
+    "loading": "Loading..."
+  },
   "editor": {
     "bold": "Bold",
     "italic": "Italic",

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You Were Mentioned - City of David</title>
+  </head>
+  <body
+    style="
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    "
+  >
+    <table
+      role="presentation"
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #f5f5f5;
+        padding: 40px 20px;
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 0">
+          <table
+            role="presentation"
+            style="
+              max-width: 600px;
+              width: 100%;
+              border-collapse: collapse;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  padding: 30px;
+                  text-align: center;
+                  border-radius: 8px 8px 0 0;
+                "
+              >
+                <h1
+                  style="
+                    color: #ffffff;
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin: 0;
+                  "
+                >
+                  You Were Mentioned
+                </h1>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 40px 30px">
+                <p style="color: #333333; font-size: 16px; margin: 0 0 25px 0">
+                  Hello {{{MEMBER_NAME}}},
+                </p>
+                <p style="color: #555555; font-size: 15px; margin: 0 0 30px 0">
+                  <strong>{{{MENTIONER_NAME}}}</strong> mentioned you on the
+                  <strong>{{{BOARD_NAME}}}</strong> message board.
+                </p>
+
+                <div
+                  style="
+                    background-color: #f8f9fa;
+                    border-left: 4px solid #667eea;
+                    padding: 25px;
+                    border-radius: 4px;
+                    margin-bottom: 25px;
+                  "
+                >
+                  <div
+                    style="
+                      color: #666666;
+                      font-size: 12px;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                      font-weight: 600;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    Thread
+                  </div>
+                  <div
+                    style="
+                      color: #2c3e50;
+                      font-size: 16px;
+                      font-weight: 500;
+                      margin-bottom: 15px;
+                    "
+                  >
+                    {{{THREAD_TITLE}}}
+                  </div>
+                  <div
+                    style="
+                      color: #666666;
+                      font-size: 12px;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                      font-weight: 600;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    Message
+                  </div>
+                  <div
+                    style="
+                      color: #555555;
+                      font-size: 14px;
+                      line-height: 1.6;
+                      white-space: pre-wrap;
+                    "
+                  >
+                    {{{MESSAGE_PREVIEW}}}
+                  </div>
+                </div>
+
+                <table
+                  role="presentation"
+                  style="width: 100%; margin-bottom: 30px"
+                >
+                  <tr>
+                    <td align="center">
+                      <a
+                        href="{{{THREAD_URL}}}"
+                        style="
+                          display: inline-block;
+                          background: linear-gradient(
+                            135deg,
+                            #667eea 0%,
+                            #764ba2 100%
+                          );
+                          color: #ffffff;
+                          text-decoration: none;
+                          padding: 14px 32px;
+                          border-radius: 6px;
+                          font-weight: 600;
+                          font-size: 15px;
+                        "
+                      >
+                        View Discussion
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="
+                    color: #888888;
+                    font-size: 13px;
+                    margin: 0;
+                    text-align: center;
+                  "
+                >
+                  You will receive at most one mention email per day. Additional
+                  mentions are delivered as in-app notifications.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

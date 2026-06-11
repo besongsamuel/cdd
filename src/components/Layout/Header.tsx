@@ -20,11 +20,14 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { NotificationBell } from "../common/NotificationBell";
+import { useBoardNotifications } from "../../hooks/useBoardNotifications";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 
 export const Header = () => {
   const location = useLocation();
   const { user, currentMember, isAdmin, signOut } = useAuth();
+  useBoardNotifications();
   const { t } = useTranslation("navigation");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -732,6 +735,7 @@ export const Header = () => {
             )}
             {user && (
               <>
+                <NotificationBell />
                 <IconButton
                   onClick={handleUserMenuOpen}
                   sx={{

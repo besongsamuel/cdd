@@ -32,6 +32,7 @@ const EVENT_TEMPLATE_MAP: Record<string, string> = {
   "contact-submission": "contact-submission",
   "weekly-digest": "weekly-digest",
   "board-summary": "board-summary",
+  "thread-mention": "thread-mention",
 };
 
 const corsHeaders = {
@@ -211,8 +212,19 @@ serve(async (req: Request) => {
     let ccRecipients: EmailRecipient[] = [];
     if (payload.eventType === "donation") {
       ccRecipients = await getApostleRecipients(supabase);
-    } else if (payload.eventType !== "weekly-digest" && payload.eventType !== "board-summary") {
+    } else if (
+      payload.eventType !== "weekly-digest" &&
+      payload.eventType !== "board-summary" &&
+      payload.eventType !== "thread-mention"
+    ) {
       ccRecipients = await getCCRecipients(supabase);
+    }
+
+    if (payload.eventType === "thread-mention") {
+      payload.eventData = await enrichThreadMentionData(
+        payload.eventData,
+        supabase
+      );
     }
 
     // Get template ID for this event type
@@ -561,17 +573,22 @@ async function resolveRecipients(
       break;
     }
 
-    case "board-summary": {
-      // Get member email from member_id
+    case "board-summary":
+    case "thread-mention": {
       const memberId = eventData.member_id;
       if (memberId && typeof memberId === "string") {
         const { data, error } = await supabase
           .from("members")
-          .select("email, name")
+          .select("email, name, user_id")
           .eq("id", memberId)
           .single();
 
-        if (!error && data && data.email) {
+        if (
+          !error &&
+          data &&
+          data.email &&
+          data.user_id
+        ) {
           recipients = [
             {
               email: data.email,
@@ -798,6 +815,79 @@ function getEventTypeLabel(eventType: string): string {
     "contact-submission": "Contact Submission",
     "weekly-digest": "Weekly Digest",
     "board-summary": "Board Activity Summary",
+    "thread-mention": "Board Mention",
   };
   return labels[eventType] || eventType;
+}
+
+async function enrichThreadMentionData(
+  eventData: Record<string, unknown>,
+  supabase: SupabaseClient
+): Promise<Record<string, unknown>> {
+  const memberId = eventData.member_id as string | undefined;
+  const boardId = eventData.board_id as string | undefined;
+  const threadId = eventData.thread_id as string | undefined;
+  const messageId = eventData.message_id as string | undefined;
+  const mentionerId = eventData.mentioner_id as string | undefined;
+
+  const frontendUrl =
+    Deno.env.get("FRONTEND_URL") || "https://eglisecitededavid.com";
+
+  const enriched: Record<string, unknown> = { ...eventData };
+
+  if (memberId) {
+    const { data } = await supabase
+      .from("members")
+      .select("name")
+      .eq("id", memberId)
+      .single();
+    if (data?.name) enriched.MEMBER_NAME = data.name;
+  }
+
+  if (boardId) {
+    const { data } = await supabase
+      .from("message_boards")
+      .select("name")
+      .eq("id", boardId)
+      .single();
+    if (data?.name) enriched.BOARD_NAME = data.name;
+  }
+
+  if (threadId) {
+    const { data } = await supabase
+      .from("message_threads")
+      .select("title")
+      .eq("id", threadId)
+      .single();
+    if (data?.title) enriched.THREAD_TITLE = data.title;
+  }
+
+  if (mentionerId) {
+    const { data } = await supabase
+      .from("members")
+      .select("name")
+      .eq("id", mentionerId)
+      .single();
+    if (data?.name) enriched.MENTIONER_NAME = data.name;
+  }
+
+  if (messageId) {
+    const { data } = await supabase
+      .from("messages")
+      .select("content")
+      .eq("id", messageId)
+      .single();
+    if (data?.content) {
+      const preview = String(data.content)
+        .replace(/@\[([^\]]+)\]\(member:[^)]+\)/g, "@$1")
+        .substring(0, 200);
+      enriched.MESSAGE_PREVIEW = preview;
+    }
+  }
+
+  if (boardId && threadId) {
+    enriched.THREAD_URL = `${frontendUrl}/message-boards/${boardId}/threads/${threadId}`;
+  }
+
+  return enriched;
 }

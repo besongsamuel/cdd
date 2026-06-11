@@ -31,9 +31,9 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
+import { MessageContent } from "../components/common/MessageContent";
 import { MessageEditor } from "../components/common/MessageEditor";
 import { ReplyModal } from "../components/common/ReplyModal";
 import { SEO } from "../components/SEO";
@@ -444,22 +444,8 @@ export const ThreadDetailPage = () => {
                   </Box>
                 ) : (
                   <>
-                    <Box
-                      sx={{
-                        mb: 2,
-                        "& p": { marginBottom: 1.5 },
-                        "& p:last-child": { marginBottom: 0 },
-                        "& ul, & ol": {
-                          marginBottom: 1.5,
-                          paddingLeft: 3,
-                        },
-                        "& h1, & h2, & h3": {
-                          marginTop: 2,
-                          marginBottom: 1,
-                        },
-                      }}
-                    >
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <Box sx={{ mb: 2 }}>
+                      <MessageContent content={message.content} />
                     </Box>
 
                     <Divider sx={{ my: 2 }} />

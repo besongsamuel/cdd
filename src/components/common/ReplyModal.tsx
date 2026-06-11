@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ReactMarkdown from "react-markdown";
+import { MessageContent } from "./MessageContent";
 import { MessageEditor } from "./MessageEditor";
 import type { Message } from "../../types";
 
@@ -133,21 +133,14 @@ export const ReplyModal = ({
             </Box>
           </Box>
 
-          <Box
-            sx={{
-              "& p": { marginBottom: 1, marginTop: 0 },
-              "& p:last-child": { marginBottom: 0 },
-              "& ul, & ol": { marginBottom: 1, paddingLeft: 3 },
-              color: "text.secondary",
-              fontSize: "0.9rem",
-            }}
-          >
-            <ReactMarkdown>
-              {parentMessage.content.length > 300
+          <MessageContent
+            content={
+              parentMessage.content.length > 300
                 ? `${parentMessage.content.substring(0, 300)}...`
-                : parentMessage.content}
-            </ReactMarkdown>
-          </Box>
+                : parentMessage.content
+            }
+            compact
+          />
         </Paper>
 
         {/* Reply Editor */}

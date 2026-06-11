@@ -6,33 +6,81 @@ import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import InsertLinkIcon from "@mui/icons-material/InsertLink";
 import PreviewIcon from "@mui/icons-material/Preview";
 import {
+  Avatar,
   Box,
   IconButton,
   Paper,
-  TextField,
   Tooltip,
+  Typography,
   alpha,
+  useTheme,
 } from "@mui/material";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
+import { Mention, MentionsInput } from "react-mentions";
 import { useTranslation } from "react-i18next";
-import ReactMarkdown from "react-markdown";
+import { membersService } from "../../services/membersService";
+import { MessageContent } from "./MessageContent";
 
 interface MessageEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   minRows?: number;
+  enableMentions?: boolean;
 }
+
+const getMentionsInputStyle = (primaryColor: string) => ({
+  control: {
+    fontSize: "0.95rem",
+    lineHeight: 1.6,
+    fontFamily: "inherit",
+  },
+  input: {
+    margin: 0,
+    padding: "14px",
+    border: "1px solid rgba(0, 0, 0, 0.23)",
+    borderRadius: 8,
+    outline: "none",
+    minHeight: 120,
+    overflow: "auto",
+  },
+  highlighter: {
+    padding: "14px",
+    border: "1px solid transparent",
+    borderRadius: 8,
+    minHeight: 120,
+  },
+  suggestions: {
+    list: {
+      backgroundColor: "#fff",
+      border: "1px solid rgba(0, 0, 0, 0.12)",
+      borderRadius: 8,
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.12)",
+      fontSize: "0.9rem",
+      maxHeight: 240,
+      overflowY: "auto" as const,
+    },
+    item: {
+      padding: "8px 12px",
+      borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+      "&focused": {
+        backgroundColor: alpha(primaryColor, 0.08),
+      },
+    },
+  },
+});
 
 export const MessageEditor = ({
   value,
   onChange,
   placeholder = "Share your thoughts...",
   minRows = 5,
+  enableMentions = true,
 }: MessageEditorProps) => {
   const { t } = useTranslation("messageBoards");
+  const theme = useTheme();
   const [showPreview, setShowPreview] = useState(false);
-  const textFieldRef = useRef<HTMLTextAreaElement>(null);
+  const textFieldRef = useRef<HTMLTextAreaElement | null>(null);
 
   const insertText = (before: string, after: string = "") => {
     const textarea = textFieldRef.current;
@@ -50,7 +98,6 @@ export const MessageEditor = ({
 
     onChange(newText);
 
-    // Restore cursor position
     setTimeout(() => {
       textarea.focus();
       const newCursorPos = start + before.length + selectedText.length;
@@ -81,8 +128,46 @@ export const MessageEditor = ({
     }
   };
 
+  const fetchMembers = useCallback(
+    (query: string, callback: (results: { id: string; display: string }[]) => void) => {
+      membersService
+        .searchByName(query, 10)
+        .then((members) => {
+          callback(
+            members.map((m) => ({
+              id: m.id,
+              display: m.name,
+              picture_url: m.picture_url,
+              title_name: m.title_name,
+            }))
+          );
+        })
+        .catch(() => callback([]));
+    },
+    []
+  );
+
+  const minHeight = minRows * 24;
+
   return (
-    <Box>
+    <Box
+      sx={{
+        "& .mentions__input": {
+          minHeight,
+          transition: "border-color 0.2s",
+        },
+        "& .mentions__highlighter": {
+          minHeight,
+        },
+        "& .mentions__mention": {
+          backgroundColor: (t) => alpha(t.palette.primary.main, 0.15),
+          color: "primary.main",
+          fontWeight: 600,
+          borderRadius: 4,
+          padding: "0 2px",
+        },
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -92,7 +177,7 @@ export const MessageEditor = ({
           px: 1,
           py: 0.5,
           borderRadius: 2,
-          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
+          bgcolor: (t) => alpha(t.palette.primary.main, 0.03),
           border: "1px solid",
           borderColor: "divider",
         }}
@@ -104,7 +189,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("bold")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -117,7 +202,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("italic")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -130,7 +215,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("link")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -143,7 +228,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("quote")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -156,7 +241,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("bullet")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -169,7 +254,7 @@ export const MessageEditor = ({
               onClick={() => handleFormat("number")}
               sx={{
                 "&:hover": {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -187,7 +272,7 @@ export const MessageEditor = ({
             sx={{
               color: showPreview ? "primary.main" : "text.secondary",
               "&:hover": {
-                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
               },
             }}
           >
@@ -203,25 +288,22 @@ export const MessageEditor = ({
             p: 2,
             minHeight: 120,
             borderRadius: 2,
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.02),
+            bgcolor: (t) => alpha(t.palette.primary.main, 0.02),
             border: "1px solid",
             borderColor: "divider",
-            "& p": { marginBottom: 1, marginTop: 0 },
-            "& p:last-child": { marginBottom: 0 },
-            "& ul, & ol": { marginBottom: 1, paddingLeft: 3 },
             "& blockquote": {
               borderLeft: "3px solid",
               borderColor: "primary.main",
               pl: 2,
               py: 0.5,
               my: 1,
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.05),
+              bgcolor: (t) => alpha(t.palette.primary.main, 0.05),
               fontStyle: "italic",
             },
           }}
         >
           {value.trim() ? (
-            <ReactMarkdown>{value}</ReactMarkdown>
+            <MessageContent content={value} />
           ) : (
             <Box
               sx={{
@@ -235,34 +317,90 @@ export const MessageEditor = ({
             </Box>
           )}
         </Paper>
-      ) : (
-        <TextField
-          inputRef={textFieldRef}
-          fullWidth
-          multiline
-          minRows={minRows}
+      ) : enableMentions ? (
+        <MentionsInput
+          value={value}
+          onChange={(_e, newValue) => onChange(newValue)}
           placeholder={placeholder}
+          inputRef={textFieldRef as RefObject<HTMLTextAreaElement>}
+          allowSuggestionsAboveCursor
+          className="mentions"
+          style={getMentionsInputStyle(theme.palette.primary.main)}
+        >
+          <Mention
+            trigger="@"
+            markup="@[__display__](member:__id__)"
+            displayTransform={(_id, display) => `@${display}`}
+            appendSpaceOnAdd
+            data={fetchMembers}
+            renderSuggestion={(
+              suggestion,
+              _search,
+              highlightedDisplay,
+              _index,
+              focused
+            ) => {
+              const entry = suggestion as {
+                display: string;
+                picture_url?: string;
+                title_name?: string;
+              };
+              return (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    py: 0.5,
+                    bgcolor: focused
+                      ? (t) => alpha(t.palette.primary.main, 0.08)
+                      : "transparent",
+                  }}
+                >
+                  <Avatar
+                    src={entry.picture_url}
+                    sx={{ width: 28, height: 28, fontSize: "0.75rem" }}
+                  >
+                    {entry.display?.[0]?.toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight={500} noWrap>
+                      {highlightedDisplay}
+                    </Typography>
+                    {entry.title_name && (
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {entry.title_name}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              );
+            }}
+          />
+        </MentionsInput>
+      ) : (
+        <Box
+          component="textarea"
+          ref={textFieldRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
           sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
-              fontSize: "0.95rem",
-              "& textarea": {
-                resize: "vertical",
-                fontFamily: "inherit",
-                lineHeight: 1.6,
-              },
-              "&:hover": {
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.main",
-                },
-              },
-              "&.Mui-focused": {
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderWidth: 2,
-                },
-              },
+            width: "100%",
+            minHeight,
+            p: "14px",
+            fontSize: "0.95rem",
+            lineHeight: 1.6,
+            fontFamily: "inherit",
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            resize: "vertical",
+            "&:focus": {
+              outline: "none",
+              borderColor: "primary.main",
+              borderWidth: 2,
+              p: "13px",
             },
           }}
         />
@@ -270,5 +408,3 @@ export const MessageEditor = ({
     </Box>
   );
 };
-
-

@@ -7,7 +7,45 @@ import type {
   MessageThread,
   Notification,
 } from "../types";
+import { uniqueMentionMemberIds } from "../utils/mentions";
 import { supabase } from "./supabase";
+
+async function syncMessageMentions(
+  messageId: string,
+  content: string,
+  authorId: string
+): Promise<void> {
+  const memberIds = uniqueMentionMemberIds(content, authorId);
+  const { data: existing } = await supabase
+    .from("message_mentions")
+    .select("member_id")
+    .eq("message_id", messageId);
+
+  const existingIds = new Set((existing || []).map((r) => r.member_id));
+  const targetIds = new Set(memberIds);
+
+  const toRemove = [...existingIds].filter((id) => !targetIds.has(id));
+  const toAdd = memberIds.filter((id) => !existingIds.has(id));
+
+  if (toRemove.length > 0) {
+    const { error } = await supabase
+      .from("message_mentions")
+      .delete()
+      .eq("message_id", messageId)
+      .in("member_id", toRemove);
+    if (error) throw error;
+  }
+
+  if (toAdd.length > 0) {
+    const { error } = await supabase.from("message_mentions").insert(
+      toAdd.map((memberId) => ({
+        message_id: messageId,
+        member_id: memberId,
+      }))
+    );
+    if (error) throw error;
+  }
+}
 
 export const messageBoardsService = {
   // Boards
@@ -274,6 +312,8 @@ export const messageBoardsService = {
 
     if (!thread || !message) throw new Error("Failed to create thread");
 
+    await syncMessageMentions(message.id, content, member.id);
+
     return { thread, message };
   },
 
@@ -472,6 +512,8 @@ export const messageBoardsService = {
 
     if (error) throw error;
 
+    await syncMessageMentions(data.id, content, member.id);
+
     return {
       ...data,
       author_name: (data as any).author?.name,
@@ -480,6 +522,20 @@ export const messageBoardsService = {
   },
 
   async updateMessage(messageId: string, content: string): Promise<Message> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Not authenticated");
+
+    const { data: member } = await supabase
+      .from("members")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!member) throw new Error("Member not found");
+
     const { data, error } = await supabase
       .from("messages")
       .update({
@@ -500,6 +556,8 @@ export const messageBoardsService = {
       .single();
 
     if (error) throw error;
+
+    await syncMessageMentions(messageId, content, member.id);
 
     return {
       ...data,

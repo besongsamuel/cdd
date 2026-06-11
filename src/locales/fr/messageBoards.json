@@ -67,6 +67,23 @@
     "department": "Département",
     "ministry": "Ministère"
   },
+  "mention": {
+    "noResults": "Aucun membre trouvé"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mentionedYouTitle": "Vous avez été mentionné",
+    "mentionedYou": "Quelqu'un vous a mentionné sur {{board}}",
+    "mentionedOnBoard": "Vous avez été mentionné sur {{board}}",
+    "unseenReplies": "Nouvelles réponses sur {{board}}",
+    "board": "un tableau de messages",
+    "activity": "Activité du tableau",
+    "enableBrowser": "Activer les alertes du navigateur lorsqu'on vous mentionne",
+    "enable": "Activer les alertes",
+    "markAllRead": "Tout marquer comme lu",
+    "empty": "Aucune notification pour le moment",
+    "loading": "Chargement..."
+  },
   "editor": {
     "bold": "Gras",
     "italic": "Italique",

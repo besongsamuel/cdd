@@ -120,6 +120,47 @@ export const membersService = {
     });
   },
 
+  async searchByName(query: string, limit = 10): Promise<Member[]> {
+    let builder = supabase
+      .from("members")
+      .select(
+        `
+        id,
+        name,
+        picture_url,
+        titles:title_id (
+          name
+        )
+      `
+      )
+      .order("name", { ascending: true })
+      .limit(limit);
+
+    if (query.trim()) {
+      builder = builder.ilike("name", `%${query.trim()}%`);
+    }
+
+    const { data, error } = await builder;
+
+    if (error) throw error;
+
+    return (data || []).map((row) => {
+      const titles = row.titles as { name: string } | { name: string }[] | null;
+      const titleName = Array.isArray(titles)
+        ? titles[0]?.name
+        : titles?.name;
+      return {
+        id: row.id,
+        name: row.name,
+        picture_url: row.picture_url ?? undefined,
+        title_name: titleName,
+        type: "regular" as const,
+        created_at: "",
+        updated_at: "",
+      };
+    });
+  },
+
   async getRegularMembers(): Promise<Member[]> {
     const { data, error } = await supabase
       .from("members")
