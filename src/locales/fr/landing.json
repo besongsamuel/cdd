@@ -8,6 +8,41 @@
   "joinUs": "Rejoignez-nous",
   "contactUs": "Contactez-nous",
   "viewMinistries": "Nos Ministères",
+  "whatsAppUs": "WhatsApp",
+  "callUs": "Appelez-nous",
+  "campusSwitcherLabel": "Choisir une localisation",
+  "campuses": {
+    "montreal": {
+      "label": "Montréal",
+      "subtitle": "Une église chrétienne bilingue située à Montréal, fondée en 2004 par les Pasteurs Mireille et John BISOKA",
+      "address": "6506 Av. Papineau, Montréal, QC H2G 2X2",
+      "schedule": [
+        {
+          "when": "Dimanche",
+          "time": "9h30 - 11h45",
+          "title": "Culte Principal"
+        }
+      ]
+    },
+    "kinshasa": {
+      "label": "Kinshasa",
+      "subtitle": "Église Cité de David Kinshasa — une famille d'église grandissante au cœur de Kinshasa, dirigée par l'Apôtre Mireille et le Pasteur John BISOKA",
+      "address": "Avenue Bisengemana / Avenue Okapi, Kinshasa",
+      "socialHandle": "Cité de David Kinshasa",
+      "schedule": [
+        {
+          "when": "Mercredi et vendredi",
+          "time": "17h00",
+          "title": "Culte de la Semaine"
+        },
+        {
+          "when": "Dimanche",
+          "time": "09h00",
+          "title": "Culte Principal"
+        }
+      ]
+    }
+  },
   "ourMission": "Notre Mission",
   "missionDescription": "Nous sommes appelés à transformer des vies, restaurer l'espoir et construire une communauté où chaque croyant découvre son but et marche dans sa destinée donnée par Dieu.",
   "missionSubDescription": "À travers un enseignement sans compromis, une intercession intense et des soins compatissants, nous équipons le corps de Christ pour avoir un impact sur notre ville et au-delà.",

@@ -8,6 +8,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SecurityIcon from "@mui/icons-material/Security";
 import TopicIcon from "@mui/icons-material/Topic";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   alpha,
   Box,
@@ -15,21 +16,40 @@ import {
   Card,
   CardContent,
   Container,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import foundersImage from "../assets/pastors-bisoka.png";
 import cddLogo from "../assets/cddLogo.png";
+import cddLogoKinshasa from "../assets/cddLogoKinshasa.png";
 import dancingImage from "../assets/dancing.jpg";
+import foundersImage from "../assets/pastors-bisoka.png";
 import { MissionCard } from "../components/MissionCard";
 import { SEO } from "../components/SEO";
 import { TestimoniesSlider } from "../components/TestimoniesSlider";
 import { YouTubeVideos } from "../components/YouTubeVideos";
-import { CHURCH_PHONE } from "../utils/constants";
+import { useCampus } from "../hooks/useCampus";
+import type { CampusId } from "../utils/campuses";
+
+type ScheduleItem = {
+  when: string;
+  time: string;
+  title: string;
+};
 
 export const LandingPage = () => {
   const { t } = useTranslation("landing");
+  const { campus, setCampus, config, isKinshasa, isMontreal } = useCampus();
+
+  const campusSubtitle = t(`campuses.${campus}.subtitle`);
+  const campusAddress = t(`campuses.${campus}.address`);
+  const schedule = t(`campuses.${campus}.schedule`, {
+    returnObjects: true,
+  }) as ScheduleItem[];
+  const heroLogo = isKinshasa ? cddLogoKinshasa : cddLogo;
+  const primaryWhatsApp = config.phones.find((phone) => phone.whatsapp);
 
   const missions = [
     {
@@ -56,23 +76,19 @@ export const LandingPage = () => {
     <>
       <SEO
         title={t("title")}
-        description={t("subtitle")}
+        description={campusSubtitle}
         url="/"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "Organization",
           name: t("title"),
-          description: t("subtitle"),
+          description: campusSubtitle,
           url: typeof window !== "undefined" ? window.location.origin : "",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "6506 Av. Papineau",
-            addressLocality: "Montréal",
-            addressRegion: "QC",
-            postalCode: "H2G 2X2",
-            addressCountry: "CA",
+            ...config.schema.address,
           },
-          telephone: "+1-514-712-2927",
+          telephone: config.schema.telephone,
         }}
       />
       <Box sx={{ bgcolor: "background.default" }}>
@@ -128,37 +144,102 @@ export const LandingPage = () => {
               zIndex: 2,
               px: 3,
               py: { xs: 8, md: 12 },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             <Box
-              component="img"
-              src={cddLogo}
-              alt="City of David Logo"
               sx={{
-                width: { xs: 200, md: 280 },
-                height: "auto",
-                mx: "auto",
-                mb: 5,
-                objectFit: "contain",
-                opacity: 0,
-                animation: "fadeInScale 1s ease-in-out 0.3s forwards",
-                filter: "drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4))",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                padding: { xs: 2, md: 2.5 },
-                borderRadius: 3,
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                "@keyframes fadeInScale": {
-                  from: {
-                    opacity: 0,
-                    transform: "scale(0.9)",
-                  },
-                  to: {
-                    opacity: 1,
-                    transform: "scale(1)",
-                  },
-                },
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+                mb: { xs: 4, md: 5 },
               }}
-            />
+            >
+              <Box
+                component="img"
+                key={campus}
+                src={heroLogo}
+                alt={
+                  isKinshasa
+                    ? "Église Cité de David Kinshasa Logo"
+                    : "City of David Logo"
+                }
+                sx={{
+                  width: { xs: 200, md: 280 },
+                  height: "auto",
+                  display: "block",
+                  mb: 2.5,
+                  objectFit: "contain",
+                  opacity: 0,
+                  animation: "fadeInScale 0.6s ease-in-out forwards",
+                  filter: "drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4))",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  padding: { xs: 2, md: 2.5 },
+                  borderRadius: 3,
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+                  "@keyframes fadeInScale": {
+                    from: {
+                      opacity: 0,
+                      transform: "scale(0.9)",
+                    },
+                    to: {
+                      opacity: 1,
+                      transform: "scale(1)",
+                    },
+                  },
+                }}
+              />
+
+              <ToggleButtonGroup
+                exclusive
+                value={campus}
+                onChange={(_event, value: CampusId | null) => {
+                  if (value) setCampus(value);
+                }}
+                aria-label={t("campusSwitcherLabel")}
+                sx={{
+                  display: "inline-flex",
+                  alignSelf: "center",
+                  bgcolor: "rgba(255, 255, 255, 0.14)",
+                  borderRadius: 999,
+                  p: 0.5,
+                  border: "1px solid rgba(255, 255, 255, 0.28)",
+                  backdropFilter: "blur(10px)",
+                  "& .MuiToggleButtonGroup-grouped": {
+                    border: 0,
+                    borderRadius: "999px !important",
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: 0.85,
+                    color: "rgba(255, 255, 255, 0.88)",
+                    fontSize: { xs: 13, sm: 14 },
+                    fontWeight: 600,
+                    textTransform: "none",
+                    letterSpacing: "0.01em",
+                    "&.Mui-selected": {
+                      bgcolor: "rgba(255, 255, 255, 0.95)",
+                      color: "primary.main",
+                      "&:hover": {
+                        bgcolor: "rgba(255, 255, 255, 1)",
+                      },
+                    },
+                    "&:hover": {
+                      bgcolor: "rgba(255, 255, 255, 0.12)",
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="montreal">
+                  {t("campuses.montreal.label")}
+                </ToggleButton>
+                <ToggleButton value="kinshasa">
+                  {t("campuses.kinshasa.label")}
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
             <Typography
               variant="h1"
               component="h1"
@@ -168,6 +249,7 @@ export const LandingPage = () => {
                 mb: 3,
                 letterSpacing: "-0.02em",
                 color: "white",
+                textAlign: "center",
                 textShadow: "0 2px 20px rgba(0, 0, 0, 0.5)",
                 opacity: 0,
                 animation: "fadeInUp 0.8s ease-out 0.5s forwards",
@@ -186,6 +268,7 @@ export const LandingPage = () => {
               {t("title")}
             </Typography>
             <Typography
+              key={`${campus}-subtitle`}
               variant="h5"
               component="p"
               sx={{
@@ -194,21 +277,21 @@ export const LandingPage = () => {
                 color: "rgba(255, 255, 255, 0.95)",
                 mb: 6,
                 maxWidth: "700px",
-                mx: "auto",
+                width: "100%",
+                textAlign: "center",
                 lineHeight: 1.47059,
                 textShadow: "0 1px 10px rgba(0, 0, 0, 0.4)",
-                opacity: 0,
-                animation: "fadeInUp 0.8s ease-out 0.7s forwards",
+                animation: "fadeInUp 0.45s ease-out forwards",
               }}
             >
-              {t("subtitle")}
+              {campusSubtitle}
             </Typography>
             {/* Service Info Banner */}
             <Box
+              key={`${campus}-info`}
               sx={{
                 mb: 4,
-                opacity: 0,
-                animation: "fadeInUp 0.8s ease-out 0.9s forwards",
+                animation: "fadeInUp 0.45s ease-out forwards",
               }}
             >
               <Card
@@ -217,100 +300,110 @@ export const LandingPage = () => {
                   backdropFilter: "blur(10px)",
                   borderRadius: 3,
                   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-                  maxWidth: "600px",
+                  maxWidth: isKinshasa ? 640 : 600,
                   mx: "auto",
+                  textAlign: "left",
                 }}
               >
-                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                    }}
-                  >
+                <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {Array.isArray(schedule) &&
+                      schedule.map((item) => (
+                        <Box
+                          key={`${item.when}-${item.time}`}
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1.25,
+                          }}
+                        >
+                          <AccessTimeIcon
+                            sx={{
+                              color: "primary.main",
+                              fontSize: 22,
+                              mt: 0.25,
+                            }}
+                          />
+                          <Box>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: { xs: "15px", sm: "16px" },
+                                color: "text.primary",
+                              }}
+                            >
+                              {item.when} · {item.time}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "text.secondary", fontSize: 14 }}
+                            >
+                              {item.title}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
+
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        alignItems: { xs: "flex-start", sm: "center" },
-                        gap: 2,
-                        flexWrap: "wrap",
-                        justifyContent: "center",
+                        alignItems: "flex-start",
+                        gap: 1.25,
                       }}
                     >
+                      <LocationOnIcon
+                        sx={{
+                          color: "primary.main",
+                          fontSize: 22,
+                          mt: 0.25,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: { xs: "14px", sm: "15px" },
+                          color: "text.secondary",
+                          pt: 0.25,
+                        }}
+                      >
+                        {campusAddress}
+                      </Typography>
+                    </Box>
+
+                    {config.phones.map((phone) => (
                       <Box
+                        key={phone.tel}
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 1,
-                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                          justifyContent: { xs: "center", sm: "flex-start" },
+                          gap: 1.25,
+                          flexWrap: "wrap",
                         }}
                       >
-                        <AccessTimeIcon
-                          sx={{
-                            color: "primary.main",
-                            fontSize: { xs: 20, sm: 24 },
-                          }}
-                        />
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: "15px", sm: "17px" },
-                            color: "text.primary",
-                          }}
-                        >
-                          {t("serviceTime")}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                          justifyContent: { xs: "center", sm: "flex-start" },
-                        }}
-                      >
-                        <LocationOnIcon
-                          sx={{
-                            color: "primary.main",
-                            fontSize: { xs: 20, sm: 24 },
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontSize: { xs: "14px", sm: "16px" },
-                            color: "text.secondary",
-                          }}
-                        >
-                          {t("address")}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                          justifyContent: { xs: "center", sm: "flex-start" },
-                        }}
-                      >
-                        <PhoneIcon
-                          sx={{
-                            color: "primary.main",
-                            fontSize: { xs: 20, sm: 24 },
-                          }}
-                        />
+                        {phone.whatsapp ? (
+                          <WhatsAppIcon
+                            sx={{ color: "#25D366", fontSize: 22 }}
+                          />
+                        ) : (
+                          <PhoneIcon
+                            sx={{ color: "primary.main", fontSize: 22 }}
+                          />
+                        )}
                         <Typography
                           component="a"
-                          href={`tel:${CHURCH_PHONE.replace(/\s/g, "")}`}
+                          href={
+                            phone.whatsapp
+                              ? `https://wa.me/${phone.whatsapp}`
+                              : `tel:${phone.tel}`
+                          }
+                          target={phone.whatsapp ? "_blank" : undefined}
+                          rel={
+                            phone.whatsapp ? "noopener noreferrer" : undefined
+                          }
                           variant="body2"
                           sx={{
-                            fontSize: { xs: "14px", sm: "16px" },
+                            fontSize: { xs: "14px", sm: "15px" },
                             color: "text.secondary",
                             textDecoration: "none",
                             "&:hover": {
@@ -319,10 +412,23 @@ export const LandingPage = () => {
                             },
                           }}
                         >
-                          {CHURCH_PHONE}
+                          {phone.display}
                         </Typography>
                       </Box>
-                    </Box>
+                    ))}
+
+                    {isKinshasa && config.socialHandle && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: 13,
+                          color: "text.secondary",
+                          pl: 4.5,
+                        }}
+                      >
+                        {t("campuses.kinshasa.socialHandle")}
+                      </Typography>
+                    )}
                   </Box>
                 </CardContent>
               </Card>
@@ -334,97 +440,161 @@ export const LandingPage = () => {
                 gap: { xs: 1.5, sm: 2 },
                 justifyContent: "center",
                 flexWrap: "wrap",
-                opacity: 0,
-                animation: "fadeInUp 0.8s ease-out 1.1s forwards",
+                animation: "fadeInUp 0.45s ease-out forwards",
               }}
             >
-              <Button
-                component={Link}
-                to="/signup"
-                variant="contained"
-                size="large"
-                sx={{
-                  backgroundColor: "white",
-                  color: "primary.main",
-                  px: { xs: 4, sm: 5 },
-                  py: { xs: 1.5, sm: 1.8 },
-                  fontSize: { xs: "16px", sm: "17px" },
-                  fontWeight: 500,
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-                  minHeight: "48px",
-                  minWidth: { xs: "140px", sm: "auto" },
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    transform: "scale(1.05) translateY(-2px)",
-                    boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
-                  },
-                  "&:active": {
-                    transform: "scale(0.98) translateY(0)",
-                  },
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {t("joinUs")}
-              </Button>
-              <Button
-                component={Link}
-                to="/ministries"
-                variant="contained"
-                size="large"
-                sx={{
-                  backgroundColor: "white",
-                  color: "primary.main",
-                  px: { xs: 4, sm: 5 },
-                  py: { xs: 1.5, sm: 1.8 },
-                  fontSize: { xs: "16px", sm: "17px" },
-                  fontWeight: 500,
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-                  minHeight: "48px",
-                  minWidth: { xs: "140px", sm: "auto" },
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    transform: "scale(1.05) translateY(-2px)",
-                    boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
-                  },
-                  "&:active": {
-                    transform: "scale(0.98) translateY(0)",
-                  },
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {t("viewMinistries")}
-              </Button>
-              <Button
-                component={Link}
-                to="/contact"
-                variant="outlined"
-                size="large"
-                sx={{
-                  borderColor: "rgba(255, 255, 255, 0.8)",
-                  borderWidth: 2,
-                  color: "white",
-                  px: { xs: 4, sm: 5 },
-                  py: { xs: 1.5, sm: 1.8 },
-                  fontSize: { xs: "16px", sm: "17px" },
-                  fontWeight: 500,
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  backdropFilter: "blur(10px)",
-                  minHeight: "48px",
-                  minWidth: { xs: "140px", sm: "auto" },
-                  "&:hover": {
-                    borderColor: "white",
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                    transform: "scale(1.05) translateY(-2px)",
-                    boxShadow: "0 6px 25px rgba(0, 0, 0, 0.3)",
-                  },
-                  "&:active": {
-                    transform: "scale(0.98) translateY(0)",
-                  },
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {t("contactUs")}
-              </Button>
+              {isMontreal && (
+                <>
+                  <Button
+                    component={Link}
+                    to="/signup"
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "primary.main",
+                      px: { xs: 4, sm: 5 },
+                      py: { xs: 1.5, sm: 1.8 },
+                      fontSize: { xs: "16px", sm: "17px" },
+                      fontWeight: 500,
+                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                      minHeight: "48px",
+                      minWidth: { xs: "140px", sm: "auto" },
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        transform: "scale(1.05) translateY(-2px)",
+                        boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
+                      },
+                      "&:active": {
+                        transform: "scale(0.98) translateY(0)",
+                      },
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    {t("joinUs")}
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/ministries"
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "primary.main",
+                      px: { xs: 4, sm: 5 },
+                      py: { xs: 1.5, sm: 1.8 },
+                      fontSize: { xs: "16px", sm: "17px" },
+                      fontWeight: 500,
+                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                      minHeight: "48px",
+                      minWidth: { xs: "140px", sm: "auto" },
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        transform: "scale(1.05) translateY(-2px)",
+                        boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
+                      },
+                      "&:active": {
+                        transform: "scale(0.98) translateY(0)",
+                      },
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    {t("viewMinistries")}
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/contact"
+                    variant="outlined"
+                    size="large"
+                    sx={{
+                      borderColor: "rgba(255, 255, 255, 0.8)",
+                      borderWidth: 2,
+                      color: "white",
+                      px: { xs: 4, sm: 5 },
+                      py: { xs: 1.5, sm: 1.8 },
+                      fontSize: { xs: "16px", sm: "17px" },
+                      fontWeight: 500,
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      backdropFilter: "blur(10px)",
+                      minHeight: "48px",
+                      minWidth: { xs: "140px", sm: "auto" },
+                      "&:hover": {
+                        borderColor: "white",
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        transform: "scale(1.05) translateY(-2px)",
+                        boxShadow: "0 6px 25px rgba(0, 0, 0, 0.3)",
+                      },
+                      "&:active": {
+                        transform: "scale(0.98) translateY(0)",
+                      },
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    {t("contactUs")}
+                  </Button>
+                </>
+              )}
+
+              {isKinshasa && (
+                <>
+                  {primaryWhatsApp && (
+                    <Button
+                      component="a"
+                      href={`https://wa.me/${primaryWhatsApp.whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="contained"
+                      size="large"
+                      startIcon={<WhatsAppIcon />}
+                      sx={{
+                        backgroundColor: "white",
+                        color: "primary.main",
+                        px: { xs: 4, sm: 5 },
+                        py: { xs: 1.5, sm: 1.8 },
+                        fontSize: { xs: "16px", sm: "17px" },
+                        fontWeight: 500,
+                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                        minHeight: "48px",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          transform: "scale(1.05) translateY(-2px)",
+                          boxShadow: "0 6px 25px rgba(0, 0, 0, 0.4)",
+                        },
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      }}
+                    >
+                      {t("whatsAppUs")}
+                    </Button>
+                  )}
+                  <Button
+                    component="a"
+                    href={`tel:${config.phones[0].tel}`}
+                    variant="outlined"
+                    size="large"
+                    startIcon={<PhoneIcon />}
+                    sx={{
+                      borderColor: "rgba(255, 255, 255, 0.8)",
+                      borderWidth: 2,
+                      color: "white",
+                      px: { xs: 4, sm: 5 },
+                      py: { xs: 1.5, sm: 1.8 },
+                      fontSize: { xs: "16px", sm: "17px" },
+                      fontWeight: 500,
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      backdropFilter: "blur(10px)",
+                      minHeight: "48px",
+                      "&:hover": {
+                        borderColor: "white",
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        transform: "scale(1.05) translateY(-2px)",
+                      },
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    {t("callUs")}
+                  </Button>
+                </>
+              )}
             </Box>
           </Container>
         </Box>

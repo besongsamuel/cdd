@@ -8,6 +8,41 @@
   "joinUs": "Join Us",
   "contactUs": "Contact Us",
   "viewMinistries": "Our Ministries",
+  "whatsAppUs": "WhatsApp Us",
+  "callUs": "Call Us",
+  "campusSwitcherLabel": "Choose a location",
+  "campuses": {
+    "montreal": {
+      "label": "Montreal",
+      "subtitle": "A bilingual Christian church in Montreal, founded in 2004 by Pastors Mireille and John BISOKA",
+      "address": "6506 Av. Papineau, Montréal, QC H2G 2X2",
+      "schedule": [
+        {
+          "when": "Sunday",
+          "time": "9:30 AM - 11:45 AM",
+          "title": "Main Service"
+        }
+      ]
+    },
+    "kinshasa": {
+      "label": "Kinshasa",
+      "subtitle": "Église Cité de David Kinshasa — a growing church family in the heart of Kinshasa, led by Apostle Mireille and Pastor John BISOKA",
+      "address": "Avenue Bisengemana / Avenue Okapi, Kinshasa",
+      "socialHandle": "Cité de David Kinshasa",
+      "schedule": [
+        {
+          "when": "Wednesday & Friday",
+          "time": "5:00 PM",
+          "title": "Weekday Service"
+        },
+        {
+          "when": "Sunday",
+          "time": "9:00 AM",
+          "title": "Main Service"
+        }
+      ]
+    }
+  },
   "ourMission": "Our Mission",
   "missionDescription": "We are called to transform lives, restore hope, and build a community where every believer discovers their purpose and walks in their God-given destiny.",
   "missionSubDescription": "Through uncompromising teaching, intense intercession, and compassionate care, we equip the body of Christ to impact our city and beyond.",
