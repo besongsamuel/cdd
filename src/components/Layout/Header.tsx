@@ -5,6 +5,8 @@ import {
   Avatar,
   Box,
   Button,
+  Container,
+  Divider,
   Drawer,
   IconButton,
   List,
@@ -19,22 +21,77 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
+import cddLogoIcon from "../../assets/cddLogoIcon.png";
 import { useAuth } from "../../hooks/useAuth";
 import { NotificationBell } from "../common/NotificationBell";
 import { useBoardNotifications } from "../../hooks/useBoardNotifications";
 import { LanguageSwitcher } from "../LanguageSwitcher";
+
+type NavItem = { label: string; path: string };
+type MenuKey = "about" | "activities" | "getInvolved";
+
+const navButtonSx = (active: boolean) => ({
+  color: active ? "primary.main" : "text.primary",
+  fontSize: "15px",
+  fontWeight: active ? 600 : 500,
+  px: 1.75,
+  py: 1,
+  borderRadius: 0,
+  minHeight: 48,
+  whiteSpace: "nowrap" as const,
+  position: "relative" as const,
+  textTransform: "none" as const,
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: 12,
+    right: 12,
+    height: "2px",
+    borderRadius: "2px 2px 0 0",
+    background: "linear-gradient(90deg, #005078 0%, #0077a8 100%)",
+    transform: active ? "scaleX(1)" : "scaleX(0)",
+    transition: "transform 0.2s ease",
+  },
+  "&:hover": {
+    backgroundColor: "transparent",
+    color: "primary.main",
+    "&::after": {
+      transform: "scaleX(1)",
+    },
+  },
+});
+
+const utilityLinkSx = {
+  color: "text.secondary",
+  fontSize: "13px",
+  fontWeight: 500,
+  px: 1.25,
+  py: 0.5,
+  minWidth: 0,
+  minHeight: 0,
+  textTransform: "none" as const,
+  whiteSpace: "nowrap" as const,
+  "&:hover": {
+    backgroundColor: "transparent",
+    color: "primary.main",
+  },
+};
 
 export const Header = () => {
   const location = useLocation();
   const { user, currentMember, isAdmin, signOut } = useAuth();
   useBoardNotifications();
   const { t } = useTranslation("navigation");
+  const { t: tCommon } = useTranslation("common");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null
   );
+  const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -45,18 +102,7 @@ export const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const [aboutAnchor, setAboutAnchor] = useState<null | HTMLElement>(null);
-  const [activitiesAnchor, setActivitiesAnchor] = useState<null | HTMLElement>(
-    null
-  );
-  const [getInvolvedAnchor, setGetInvolvedAnchor] =
-    useState<null | HTMLElement>(null);
-
   const navGroups = {
-    standalone: [
-      { label: t("home"), path: "/" },
-      { label: t("contactUs"), path: "/contact" },
-    ],
     about: [
       { label: t("services"), path: "/services" },
       { label: t("ourMembers"), path: "/members" },
@@ -77,239 +123,182 @@ export const Header = () => {
     ],
   };
 
-  const handleMenuOpen =
-    (menu: "about" | "activities" | "getInvolved") =>
-    (event: React.MouseEvent<HTMLElement>) => {
-      if (menu === "about") setAboutAnchor(event.currentTarget);
-      if (menu === "activities") setActivitiesAnchor(event.currentTarget);
-      if (menu === "getInvolved") setGetInvolvedAnchor(event.currentTarget);
-    };
-
-  const handleMenuClose =
-    (menu: "about" | "activities" | "getInvolved") => () => {
-      if (menu === "about") setAboutAnchor(null);
-      if (menu === "activities") setActivitiesAnchor(null);
-      if (menu === "getInvolved") setGetInvolvedAnchor(null);
-    };
+  const dropdownMenus: { key: MenuKey; label: string; items: NavItem[] }[] = [
+    { key: "about", label: t("about"), items: navGroups.about },
+    { key: "activities", label: t("activities"), items: navGroups.activities },
+    {
+      key: "getInvolved",
+      label: t("getInvolved"),
+      items: navGroups.getInvolved,
+    },
+  ];
 
   const isPathActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
     return (
       location.pathname === path || location.pathname.startsWith(path + "/")
     );
   };
 
-  const isGroupActive = (items: typeof navGroups.about) => {
-    return items.some((item) => isPathActive(item.path));
-  };
+  const isGroupActive = (items: NavItem[]) =>
+    items.some((item) => isPathActive(item.path));
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
+
+  const handleDropdownOpen =
+    (key: MenuKey) => (event: React.MouseEvent<HTMLElement>) => {
+      setOpenMenu(key);
+      setMenuAnchor(event.currentTarget);
+    };
+
+  const handleDropdownClose = () => {
+    setOpenMenu(null);
+    setMenuAnchor(null);
   };
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
   };
 
-  const handleUserMenuClose = () => {
-    setUserMenuAnchor(null);
-  };
+  const handleUserMenuClose = () => setUserMenuAnchor(null);
 
   const handleSignOut = async () => {
     await signOut();
     handleUserMenuClose();
   };
 
+  const brand = (
+    <Box
+      component={Link}
+      to="/"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 0.25,
+        textDecoration: "none",
+        color: "inherit",
+        flexShrink: 0,
+        transition: "opacity 0.2s ease",
+        "&:hover": { opacity: 0.85 },
+      }}
+    >
+      <Box
+        component="img"
+        src={cddLogoIcon}
+        alt={tCommon("appName")}
+        sx={{
+          height: { xs: 28, md: 34 },
+          width: "auto",
+          display: "block",
+          objectFit: "contain",
+        }}
+      />
+      <Typography
+        component="div"
+        sx={{
+          fontWeight: 600,
+          fontSize: { xs: "10px", md: "11px" },
+          lineHeight: 1.15,
+          letterSpacing: "-0.01em",
+          textAlign: "center",
+          whiteSpace: "nowrap",
+          background: "linear-gradient(135deg, #005078 0%, #0077a8 100%)",
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {tCommon("appName")}
+      </Typography>
+    </Box>
+  );
+
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", pt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>{brand}</Box>
+      <Divider sx={{ mb: 1 }} />
       <List>
-        {navGroups.standalone.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              selected={isPathActive(item.path)}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mb: 0.5,
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&.Mui-selected": {
-                  backgroundColor: "rgba(30, 58, 138, 0.08)",
-                  color: "primary.main",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    left: 0,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "3px",
-                    height: "60%",
-                    background:
-                      "linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%)",
-                    borderRadius: "0 2px 2px 0",
-                  },
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateX(4px)",
-                },
-              }}
-            >
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: "17px",
-                  fontWeight: isPathActive(item.path) ? 600 : 400,
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-
         <ListItem disablePadding>
-          <ListItemText
-            primary={t("about")}
-            primaryTypographyProps={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "text.secondary",
-              px: 2,
-              pt: 2,
-            }}
-          />
-        </ListItem>
-        {navGroups.about.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              selected={isPathActive(item.path)}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mb: 0.5,
-                pl: 3,
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&.Mui-selected": {
-                  backgroundColor: "rgba(30, 58, 138, 0.08)",
-                  color: "primary.main",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateX(4px)",
-                },
+          <ListItemButton
+            component={Link}
+            to="/"
+            selected={isPathActive("/")}
+            sx={{ borderRadius: 2, mx: 1, mb: 0.5 }}
+          >
+            <ListItemText
+              primary={t("home")}
+              primaryTypographyProps={{
+                fontSize: "16px",
+                fontWeight: isPathActive("/") ? 600 : 400,
               }}
-            >
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: "16px",
-                  fontWeight: isPathActive(item.path) ? 600 : 400,
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-
+            />
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding>
-          <ListItemText
-            primary={t("activities")}
-            primaryTypographyProps={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "text.secondary",
-              px: 2,
-              pt: 2,
-            }}
-          />
-        </ListItem>
-        {navGroups.activities.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              selected={isPathActive(item.path)}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mb: 0.5,
-                pl: 3,
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&.Mui-selected": {
-                  backgroundColor: "rgba(30, 58, 138, 0.08)",
-                  color: "primary.main",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateX(4px)",
-                },
+          <ListItemButton
+            component={Link}
+            to="/contact"
+            selected={isPathActive("/contact")}
+            sx={{ borderRadius: 2, mx: 1, mb: 0.5 }}
+          >
+            <ListItemText
+              primary={t("contactUs")}
+              primaryTypographyProps={{
+                fontSize: "16px",
+                fontWeight: isPathActive("/contact") ? 600 : 400,
               }}
-            >
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: "16px",
-                  fontWeight: isPathActive(item.path) ? 600 : 400,
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+            />
+          </ListItemButton>
+        </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemText
-            primary={t("getInvolved")}
-            primaryTypographyProps={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "text.secondary",
-              px: 2,
-              pt: 2,
-            }}
-          />
-        </ListItem>
-        {navGroups.getInvolved.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              selected={isPathActive(item.path)}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mb: 0.5,
-                pl: 3,
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&.Mui-selected": {
-                  backgroundColor: "rgba(30, 58, 138, 0.08)",
-                  color: "primary.main",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateX(4px)",
-                },
-              }}
-            >
+        {dropdownMenus.map((group) => (
+          <Box key={group.key}>
+            <ListItem disablePadding>
               <ListItemText
-                primary={item.label}
+                primary={group.label}
                 primaryTypographyProps={{
-                  fontSize: "16px",
-                  fontWeight: isPathActive(item.path) ? 600 : 400,
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: "text.secondary",
+                  px: 2,
+                  pt: 2,
+                  pb: 0.5,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
                 }}
               />
-            </ListItemButton>
-          </ListItem>
+            </ListItem>
+            {group.items.map((item) => (
+              <ListItem key={item.path} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to={item.path}
+                  selected={isPathActive(item.path)}
+                  sx={{ borderRadius: 2, mx: 1, mb: 0.5, pl: 3 }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: "15px",
+                      fontWeight: isPathActive(item.path) ? 600 : 400,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </Box>
         ))}
 
         {!user && (
-          <ListItem disablePadding>
+          <ListItem disablePadding sx={{ mt: 1 }}>
             <ListItemButton component={Link} to="/login">
               <ListItemText
-                primary="Member Login"
+                primary={tCommon("login")}
                 primaryTypographyProps={{
                   fontSize: "15px",
                   color: "text.secondary",
-                  fontWeight: 400,
                 }}
               />
             </ListItemButton>
@@ -318,11 +307,12 @@ export const Header = () => {
 
         {user && (
           <>
+            <Divider sx={{ my: 1.5 }} />
             <ListItem disablePadding>
               <ListItemButton component={Link} to="/profile/complete">
                 <ListItemText
-                  primary="Profile"
-                  primaryTypographyProps={{ fontSize: "17px" }}
+                  primary={tCommon("profile")}
+                  primaryTypographyProps={{ fontSize: "16px" }}
                 />
               </ListItemButton>
             </ListItem>
@@ -331,20 +321,16 @@ export const Header = () => {
                 <ListItemButton component={Link} to="/admin/dashboard">
                   <ListItemText
                     primary={t("admin")}
-                    primaryTypographyProps={{ fontSize: "17px" }}
+                    primaryTypographyProps={{ fontSize: "16px" }}
                   />
                 </ListItemButton>
               </ListItem>
             )}
             <ListItem disablePadding>
-              <ListItemButton
-                onClick={async () => {
-                  await signOut();
-                }}
-              >
+              <ListItemButton onClick={handleSignOut}>
                 <ListItemText
-                  primary="Logout"
-                  primaryTypographyProps={{ fontSize: "17px" }}
+                  primary={tCommon("logout")}
+                  primaryTypographyProps={{ fontSize: "16px" }}
                 />
               </ListItemButton>
             </ListItem>
@@ -354,6 +340,11 @@ export const Header = () => {
     </Box>
   );
 
+  const activeDropdownItems =
+    openMenu != null
+      ? dropdownMenus.find((menu) => menu.key === openMenu)?.items ?? []
+      : [];
+
   return (
     <>
       <AppBar
@@ -361,472 +352,247 @@ export const Header = () => {
         elevation={0}
         sx={{
           backgroundColor: scrolled
-            ? "rgba(255, 255, 255, 0.95)"
-            : "rgba(255, 255, 255, 0.8)",
+            ? "rgba(255, 255, 255, 0.97)"
+            : "rgba(255, 255, 255, 0.92)",
           backdropFilter: "blur(20px)",
-          borderBottom: scrolled
-            ? "1px solid rgba(0, 0, 0, 0.12)"
-            : "1px solid rgba(0, 0, 0, 0.08)",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
           color: "text.primary",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "all 0.3s ease",
           opacity: mounted ? 1 : 0,
-          transform: mounted ? "translateY(0)" : "translateY(-20px)",
-          boxShadow: scrolled ? "0 2px 20px rgba(0, 0, 0, 0.08)" : "none",
+          boxShadow: scrolled ? "0 2px 16px rgba(0, 0, 0, 0.06)" : "none",
         }}
       >
-        <Toolbar sx={{ px: { xs: 2, sm: 4 } }}>
+        {/* Utility bar — contact & account tools */}
+        <Box
+          sx={{
+            display: { xs: "none", md: "block" },
+            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            backgroundColor: "rgba(245, 247, 250, 0.9)",
+          }}
+        >
+          <Container maxWidth="lg" disableGutters sx={{ px: { md: 3, lg: 4 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 0.5,
+                minHeight: 36,
+              }}
+            >
+              <Button
+                component={Link}
+                to="/contact"
+                sx={{
+                  ...utilityLinkSx,
+                  color: isPathActive("/contact")
+                    ? "primary.main"
+                    : "text.secondary",
+                  fontWeight: isPathActive("/contact") ? 600 : 500,
+                }}
+              >
+                {t("contactUs")}
+              </Button>
+
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
+
+              {isAdmin && (
+                <Button
+                  component={Link}
+                  to="/admin/dashboard"
+                  sx={utilityLinkSx}
+                >
+                  {t("admin")}
+                </Button>
+              )}
+
+              {user ? (
+                <>
+                  <NotificationBell />
+                  <IconButton
+                    onClick={handleUserMenuOpen}
+                    size="small"
+                    sx={{ ml: 0.25 }}
+                    aria-label={tCommon("profile")}
+                  >
+                    <Avatar
+                      src={currentMember?.picture_url}
+                      alt={currentMember?.name || user.email || "User"}
+                      sx={{ width: 28, height: 28, fontSize: 13 }}
+                    >
+                      {(
+                        currentMember?.name ||
+                        user.email ||
+                        "U"
+                      )[0].toUpperCase()}
+                    </Avatar>
+                  </IconButton>
+                  <Menu
+                    anchorEl={userMenuAnchor}
+                    open={Boolean(userMenuAnchor)}
+                    onClose={handleUserMenuClose}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  >
+                    <MenuItem
+                      component={Link}
+                      to="/profile/complete"
+                      onClick={handleUserMenuClose}
+                    >
+                      {tCommon("profile")}
+                    </MenuItem>
+                    <MenuItem onClick={handleSignOut}>
+                      {tCommon("logout")}
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <Button component={Link} to="/login" sx={utilityLinkSx}>
+                  {tCommon("login")}
+                </Button>
+              )}
+
+              <LanguageSwitcher compact />
+            </Box>
+          </Container>
+        </Box>
+
+        {/* Primary navigation */}
+        <Toolbar
+          sx={{
+            px: { xs: 2, md: 3, lg: 4 },
+            minHeight: { xs: 64, md: 72 },
+            gap: 2,
+          }}
+        >
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
             sx={{
-              mr: 2,
-              display: { sm: "none" },
-              transition: "all 0.2s ease",
-              minWidth: "44px",
-              minHeight: "44px",
-              "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.06)",
-                transform: "scale(1.05)",
-              },
-              "&:active": {
-                transform: "scale(0.95)",
-              },
+              display: { md: "none" },
+              mr: 0.5,
+              minWidth: 44,
+              minHeight: 44,
             }}
           >
             <MenuIcon />
           </IconButton>
-          <Box
-            component={Link}
-            to="/"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              textDecoration: "none",
-              color: "inherit",
-              mr: { xs: 2, sm: 4 },
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              minHeight: "44px",
-              minWidth: "44px",
-              "&:hover": {
-                transform: "scale(1.02)",
-                opacity: 0.8,
-              },
-              "&:active": {
-                transform: "scale(0.98)",
-              },
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: 600,
-                fontSize: { xs: "16px", sm: "18px" },
-                letterSpacing: "-0.01em",
-                background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                transition: "all 0.3s ease",
-              }}
-            >
-              {t("appName", { ns: "common" })}
-            </Typography>
-          </Box>
+
+          {brand}
+
           <Box sx={{ flexGrow: 1 }} />
+
+          {/* Desktop primary nav */}
           <Box
             sx={{
-              display: { xs: "none", sm: "flex" },
-              gap: 0.5,
-              alignItems: "center",
+              display: { xs: "none", md: "flex" },
+              alignItems: "stretch",
+              gap: 0.25,
             }}
           >
-            {navGroups.standalone.map((item, index) => (
-              <Button
-                key={item.path}
-                component={Link}
-                to={item.path}
-                sx={{
-                  color: "text.primary",
-                  fontSize: { xs: "16px", sm: "17px" },
-                  fontWeight: isPathActive(item.path) ? 600 : 400,
-                  px: { xs: 2, sm: 2.5 },
-                  py: { xs: 1, sm: 1.2 },
-                  borderRadius: 2,
-                  position: "relative",
-                  overflow: "hidden",
-                  minHeight: "44px",
-                  minWidth: "44px",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    bottom: 0,
-                    left: "50%",
-                    width: isPathActive(item.path) ? "80%" : "0%",
-                    height: "2px",
-                    background:
-                      "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                    transform: "translateX(-50%)",
-                    transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  },
-                  "&:hover::before": {
-                    width: "80%",
-                  },
-                  "&:hover": {
-                    backgroundColor: "rgba(30, 58, 138, 0.06)",
-                    transform: "translateY(-2px)",
-                    color: isPathActive(item.path)
-                      ? "primary.main"
-                      : "text.primary",
-                  },
-                  "&:active": {
-                    transform: "translateY(0)",
-                  },
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  opacity: mounted ? 1 : 0,
-                  animation: mounted
-                    ? `fadeInUp 0.5s ease ${index * 0.05}s both`
-                    : "none",
-                  "@keyframes fadeInUp": {
-                    from: {
-                      opacity: 0,
-                      transform: "translateY(10px)",
-                    },
-                    to: {
-                      opacity: 1,
-                      transform: "translateY(0)",
-                    },
-                  },
-                }}
-              >
-                {item.label}
-              </Button>
-            ))}
-
-            {/* About Dropdown */}
             <Button
-              onClick={handleMenuOpen("about")}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                color: isGroupActive(navGroups.about)
-                  ? "primary.main"
-                  : "text.primary",
-                fontSize: { xs: "16px", sm: "17px" },
-                fontWeight: isGroupActive(navGroups.about) ? 600 : 400,
-                px: { xs: 2, sm: 2.5 },
-                py: { xs: 1, sm: 1.2 },
-                borderRadius: 2,
-                position: "relative",
-                minHeight: "44px",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: 0,
-                  left: "50%",
-                  width: isGroupActive(navGroups.about) ? "80%" : "0%",
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                  transform: "translateX(-50%)",
-                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateY(-2px)",
-                },
-                "&:active": {
-                  transform: "translateY(0)",
-                },
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
+              component={Link}
+              to="/"
+              sx={navButtonSx(isPathActive("/"))}
             >
-              {t("about")}
+              {t("home")}
             </Button>
-            <Menu
-              anchorEl={aboutAnchor}
-              open={Boolean(aboutAnchor)}
-              onClose={handleMenuClose("about")}
-              MenuListProps={{
-                "aria-labelledby": "about-button",
-              }}
-              sx={{ mt: 1 }}
-            >
-              {navGroups.about.map((item) => (
-                <MenuItem
-                  key={item.path}
-                  component={Link}
-                  to={item.path}
-                  onClick={handleMenuClose("about")}
-                  selected={isPathActive(item.path)}
-                  sx={{
-                    minWidth: 180,
-                    color: isPathActive(item.path)
-                      ? "primary.main"
-                      : "text.primary",
-                    fontWeight: isPathActive(item.path) ? 600 : 400,
-                  }}
-                >
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Menu>
 
-            {/* Activities Dropdown */}
-            <Button
-              onClick={handleMenuOpen("activities")}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                color: isGroupActive(navGroups.activities)
-                  ? "primary.main"
-                  : "text.primary",
-                fontSize: { xs: "16px", sm: "17px" },
-                fontWeight: isGroupActive(navGroups.activities) ? 600 : 400,
-                px: { xs: 2, sm: 2.5 },
-                py: { xs: 1, sm: 1.2 },
-                borderRadius: 2,
-                position: "relative",
-                minHeight: "44px",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: 0,
-                  left: "50%",
-                  width: isGroupActive(navGroups.activities) ? "80%" : "0%",
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                  transform: "translateX(-50%)",
-                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateY(-2px)",
-                },
-                "&:active": {
-                  transform: "translateY(0)",
-                },
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-            >
-              {t("activities")}
-            </Button>
-            <Menu
-              anchorEl={activitiesAnchor}
-              open={Boolean(activitiesAnchor)}
-              onClose={handleMenuClose("activities")}
-              MenuListProps={{
-                "aria-labelledby": "activities-button",
-              }}
-              sx={{ mt: 1 }}
-            >
-              {navGroups.activities.map((item) => (
-                <MenuItem
-                  key={item.path}
-                  component={Link}
-                  to={item.path}
-                  onClick={handleMenuClose("activities")}
-                  selected={isPathActive(item.path)}
-                  sx={{
-                    minWidth: 180,
-                    color: isPathActive(item.path)
-                      ? "primary.main"
-                      : "text.primary",
-                    fontWeight: isPathActive(item.path) ? 600 : 400,
-                  }}
+            {dropdownMenus.map((menu) => {
+              const active = isGroupActive(menu.items);
+              const isOpen = openMenu === menu.key;
+              return (
+                <Button
+                  key={menu.key}
+                  onClick={handleDropdownOpen(menu.key)}
+                  endIcon={
+                    <ArrowDropDownIcon
+                      sx={{
+                        fontSize: 18,
+                        ml: -0.5,
+                        transition: "transform 0.2s ease",
+                        transform: isOpen ? "rotate(180deg)" : "none",
+                      }}
+                    />
+                  }
+                  sx={navButtonSx(active || isOpen)}
+                  aria-haspopup="true"
+                  aria-expanded={isOpen}
                 >
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Menu>
+                  {menu.label}
+                </Button>
+              );
+            })}
+          </Box>
 
-            {/* Get Involved Dropdown */}
-            <Button
-              onClick={handleMenuOpen("getInvolved")}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                color: isGroupActive(navGroups.getInvolved)
-                  ? "primary.main"
-                  : "text.primary",
-                fontSize: { xs: "16px", sm: "17px" },
-                fontWeight: isGroupActive(navGroups.getInvolved) ? 600 : 400,
-                px: { xs: 2, sm: 2.5 },
-                py: { xs: 1, sm: 1.2 },
-                borderRadius: 2,
-                position: "relative",
-                minHeight: "44px",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: 0,
-                  left: "50%",
-                  width: isGroupActive(navGroups.getInvolved) ? "80%" : "0%",
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)",
-                  transform: "translateX(-50%)",
-                  transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(30, 58, 138, 0.06)",
-                  transform: "translateY(-2px)",
-                },
-                "&:active": {
-                  transform: "translateY(0)",
-                },
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-            >
-              {t("getInvolved")}
-            </Button>
-            <Menu
-              anchorEl={getInvolvedAnchor}
-              open={Boolean(getInvolvedAnchor)}
-              onClose={handleMenuClose("getInvolved")}
-              MenuListProps={{
-                "aria-labelledby": "getInvolved-button",
-              }}
-              sx={{ mt: 1 }}
-            >
-              {navGroups.getInvolved.map((item) => (
-                <MenuItem
-                  key={item.path}
-                  component={Link}
-                  to={item.path}
-                  onClick={handleMenuClose("getInvolved")}
-                  selected={isPathActive(item.path)}
-                  sx={{
-                    minWidth: 180,
-                    color: isPathActive(item.path)
-                      ? "primary.main"
-                      : "text.primary",
-                    fontWeight: isPathActive(item.path) ? 600 : 400,
-                  }}
-                >
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Menu>
-            {isAdmin && (
-              <Button
-                component={Link}
-                to="/admin/dashboard"
-                sx={{
-                  color: "text.primary",
-                  fontSize: { xs: "16px", sm: "17px" },
-                  px: { xs: 2, sm: 2.5 },
-                  py: { xs: 1, sm: 1.2 },
-                  borderRadius: 2,
-                  minHeight: "44px",
-                  minWidth: "44px",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover": {
-                    backgroundColor: "rgba(30, 58, 138, 0.06)",
-                    transform: "translateY(-2px)",
-                  },
-                  "&:active": {
-                    transform: "translateY(0)",
-                  },
-                }}
-              >
-                {t("admin")}
-              </Button>
-            )}
-            {user && (
-              <>
-                <NotificationBell />
-                <IconButton
-                  onClick={handleUserMenuOpen}
-                  sx={{
-                    ml: 1,
-                    minWidth: "44px",
-                    minHeight: "44px",
-                  }}
-                >
-                  <Avatar
-                    src={currentMember?.picture_url}
-                    alt={currentMember?.name || user.email || "User"}
-                    sx={{ width: 32, height: 32 }}
-                  >
-                    {(currentMember?.name ||
-                      user.email ||
-                      "U")[0].toUpperCase()}
-                  </Avatar>
-                </IconButton>
-                <Menu
-                  anchorEl={userMenuAnchor}
-                  open={Boolean(userMenuAnchor)}
-                  onClose={handleUserMenuClose}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                >
-                  <MenuItem
-                    component={Link}
-                    to="/profile/complete"
-                    onClick={handleUserMenuClose}
-                  >
-                    Profile
-                  </MenuItem>
-                  <MenuItem onClick={handleSignOut}>Logout</MenuItem>
-                </Menu>
-              </>
-            )}
-            {!user && (
-              <Button
-                component={Link}
-                to="/login"
-                sx={{
-                  color: "text.secondary",
-                  fontSize: "14px",
-                  fontWeight: 400,
-                  px: 2,
-                  py: 1,
-                  textTransform: "none",
-                  minHeight: "44px",
-                  minWidth: "44px",
-                  opacity: 0.7,
-                  "&:hover": {
-                    opacity: 1,
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                Member Login
-              </Button>
-            )}
-            <Box
-              sx={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "scale(1)" : "scale(0.8)",
-                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s",
-              }}
-            >
-              <LanguageSwitcher />
-            </Box>
+          {/* Mobile utility cluster */}
+          <Box
+            sx={{
+              display: { xs: "flex", md: "none" },
+              alignItems: "center",
+              gap: 0.5,
+              ml: "auto",
+            }}
+          >
+            {user && <NotificationBell />}
+            <LanguageSwitcher compact />
           </Box>
         </Toolbar>
+
+        <Menu
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor) && openMenu != null}
+          onClose={handleDropdownClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 0.5,
+                minWidth: 220,
+                borderRadius: 2,
+                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.12)",
+                border: "1px solid rgba(0, 0, 0, 0.06)",
+              },
+            },
+          }}
+        >
+          {activeDropdownItems.map((item) => (
+            <MenuItem
+              key={item.path}
+              component={Link}
+              to={item.path}
+              onClick={handleDropdownClose}
+              selected={isPathActive(item.path)}
+              sx={{
+                py: 1.25,
+                px: 2,
+                fontSize: 14,
+                fontWeight: isPathActive(item.path) ? 600 : 400,
+                color: isPathActive(item.path)
+                  ? "primary.main"
+                  : "text.primary",
+              }}
+            >
+              {item.label}
+            </MenuItem>
+          ))}
+        </Menu>
       </AppBar>
+
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-        }}
+        ModalProps={{ keepMounted: true }}
         sx={{
-          display: { xs: "block", sm: "none" },
+          display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: 280,
-            pt: 2,
+            width: 300,
+            pt: 1,
             background: "rgba(255, 255, 255, 0.98)",
             backdropFilter: "blur(20px)",
             borderRight: "1px solid rgba(0, 0, 0, 0.08)",

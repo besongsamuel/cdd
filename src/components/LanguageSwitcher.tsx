@@ -3,7 +3,11 @@ import { Box, Button, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const LanguageSwitcher = () => {
+type LanguageSwitcherProps = {
+  compact?: boolean;
+};
+
+export const LanguageSwitcher = ({ compact = false }: LanguageSwitcherProps) => {
   const { i18n } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -19,41 +23,61 @@ export const LanguageSwitcher = () => {
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     handleClose();
-    // Update HTML lang attribute
     document.documentElement.lang = lang;
   };
 
-  const currentLang = i18n.language || "en";
+  const currentLang = (i18n.language || "en").split("-")[0];
   const languages = [
-    { code: "en", label: "English" },
-    { code: "fr", label: "Français" },
+    { code: "en", label: "English", short: "EN" },
+    { code: "fr", label: "Français", short: "FR" },
   ];
+  const current = languages.find((l) => l.code === currentLang) || languages[0];
 
   return (
     <Box>
       <Button
         onClick={handleClick}
-        startIcon={<LanguageIcon />}
-        sx={{
-          color: "text.primary",
-          fontSize: { xs: "16px", sm: "17px" },
-          px: { xs: 2, sm: 2.5 },
-          py: { xs: 1, sm: 1.2 },
-          borderRadius: 2,
-          minWidth: { xs: "44px", sm: "auto" },
-          minHeight: "44px",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          "&:hover": {
-            backgroundColor: "rgba(30, 58, 138, 0.06)",
-            transform: "translateY(-2px)",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          },
-          "&:active": {
-            transform: "translateY(0)",
-          },
-        }}
+        startIcon={<LanguageIcon sx={{ fontSize: compact ? 16 : 20 }} />}
+        sx={
+          compact
+            ? {
+                color: "text.secondary",
+                fontSize: "12px",
+                fontWeight: 600,
+                px: 1,
+                py: 0.25,
+                minWidth: 0,
+                minHeight: 0,
+                borderRadius: 1,
+                textTransform: "none",
+                letterSpacing: "0.02em",
+                "& .MuiButton-startIcon": { mr: 0.5 },
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: "primary.main",
+                },
+              }
+            : {
+                color: "text.primary",
+                fontSize: { xs: "16px", sm: "17px" },
+                px: { xs: 2, sm: 2.5 },
+                py: { xs: 1, sm: 1.2 },
+                borderRadius: 2,
+                minWidth: { xs: "44px", sm: "auto" },
+                minHeight: "44px",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: "rgba(30, 58, 138, 0.06)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+              }
+        }
       >
-        {languages.find((l) => l.code === currentLang)?.label || "EN"}
+        {compact ? current.short : current.label}
       </Button>
       <Menu
         anchorEl={anchorEl}
@@ -72,19 +96,15 @@ export const LanguageSwitcher = () => {
           <MenuItem
             key={lang.code}
             onClick={() => handleLanguageChange(lang.code)}
-            selected={currentLang === lang.code}
+            selected={lang.code === currentLang}
             sx={{
-              fontSize: "17px",
+              fontSize: "15px",
               minHeight: "44px",
               borderRadius: 1,
               mx: 0.5,
               my: 0.5,
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: "rgba(30, 58, 138, 0.08)",
-              },
               "&.Mui-selected": {
-                backgroundColor: "rgba(30, 58, 138, 0.12)",
+                backgroundColor: "rgba(0, 80, 120, 0.1)",
                 color: "primary.main",
                 fontWeight: 600,
               },

@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import foundersImage from "../assets/491100347_18079396636707663_2804182089416872660_n.jpg";
+import foundersImage from "../assets/pastors-bisoka.png";
 import cddLogo from "../assets/cddLogo.png";
 import dancingImage from "../assets/dancing.jpg";
 import { MissionCard } from "../components/MissionCard";
@@ -135,7 +135,7 @@ export const LandingPage = () => {
               src={cddLogo}
               alt="City of David Logo"
               sx={{
-                width: { xs: 140, md: 200 },
+                width: { xs: 200, md: 280 },
                 height: "auto",
                 mx: "auto",
                 mb: 5,
@@ -144,7 +144,7 @@ export const LandingPage = () => {
                 animation: "fadeInScale 1s ease-in-out 0.3s forwards",
                 filter: "drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4))",
                 backgroundColor: "rgba(255, 255, 255, 0.95)",
-                padding: { xs: 2, md: 3 },
+                padding: { xs: 2, md: 2.5 },
                 borderRadius: 3,
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                 "@keyframes fadeInScale": {

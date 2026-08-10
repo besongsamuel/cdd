@@ -144,9 +144,13 @@ export const SignupPage = () => {
               src={cddLogo}
               alt="City of David Logo"
               sx={{
-                height: { xs: 80, md: 100 },
+                height: { xs: 72, md: 88 },
                 width: "auto",
                 objectFit: "contain",
+                backgroundColor: "rgba(255, 255, 255, 0.97)",
+                borderRadius: 2,
+                px: 2,
+                py: 1.5,
               }}
             />
           </Box>
@@ -282,7 +286,7 @@ export const SignupPage = () => {
               src={cddLogo}
               alt="City of David Logo"
               sx={{
-                height: 80,
+                height: 72,
                 width: "auto",
                 objectFit: "contain",
               }}
