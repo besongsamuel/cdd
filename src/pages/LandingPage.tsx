@@ -96,7 +96,7 @@ export const LandingPage = () => {
         <Box
           sx={{
             position: "relative",
-            minHeight: { xs: "85vh", md: "100vh" },
+            minHeight: { xs: "auto", md: "100vh" },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -143,7 +143,7 @@ export const LandingPage = () => {
               position: "relative",
               zIndex: 2,
               px: 3,
-              py: { xs: 8, md: 12 },
+              py: { xs: 6, md: 8 },
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -211,13 +211,17 @@ export const LandingPage = () => {
                   "& .MuiToggleButtonGroup-grouped": {
                     border: 0,
                     borderRadius: "999px !important",
-                    px: { xs: 2.5, sm: 3.5 },
+                    minWidth: { xs: 108, sm: 120 },
+                    px: 2,
                     py: 0.85,
                     color: "rgba(255, 255, 255, 0.88)",
                     fontSize: { xs: 13, sm: 14 },
                     fontWeight: 600,
                     textTransform: "none",
                     letterSpacing: "0.01em",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    lineHeight: 1.2,
                     "&.Mui-selected": {
                       bgcolor: "rgba(255, 255, 255, 0.95)",
                       color: "primary.main",
@@ -291,6 +295,10 @@ export const LandingPage = () => {
               key={`${campus}-info`}
               sx={{
                 mb: 4,
+                width: "100%",
+                maxWidth: isKinshasa ? 420 : 480,
+                display: "flex",
+                justifyContent: "center",
                 animation: "fadeInUp 0.45s ease-out forwards",
               }}
             >
@@ -300,30 +308,45 @@ export const LandingPage = () => {
                   backdropFilter: "blur(10px)",
                   borderRadius: 3,
                   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-                  maxWidth: isKinshasa ? 640 : 600,
-                  mx: "auto",
+                  width: "100%",
                   textAlign: "left",
                 }}
               >
-                <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <CardContent sx={{ p: { xs: 2.5, sm: 3 }, "&:last-child": { pb: { xs: 2.5, sm: 3 } } }}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "28px minmax(0, 1fr)",
+                      columnGap: 1.5,
+                      rowGap: 1.75,
+                      alignItems: "center",
+                      width: "fit-content",
+                      maxWidth: "100%",
+                      mx: "auto",
+                      "& .info-icon": {
+                        width: 28,
+                        height: 28,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        "& .MuiSvgIcon-root": {
+                          fontSize: 22,
+                        },
+                      },
+                    }}
+                  >
                     {Array.isArray(schedule) &&
                       schedule.map((item) => (
                         <Box
                           key={`${item.when}-${item.time}`}
                           sx={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: 1.25,
+                            display: "contents",
                           }}
                         >
-                          <AccessTimeIcon
-                            sx={{
-                              color: "primary.main",
-                              fontSize: 22,
-                              mt: 0.25,
-                            }}
-                          />
+                          <Box className="info-icon">
+                            <AccessTimeIcon sx={{ color: "primary.main" }} />
+                          </Box>
                           <Box>
                             <Typography
                               variant="body1"
@@ -331,13 +354,19 @@ export const LandingPage = () => {
                                 fontWeight: 600,
                                 fontSize: { xs: "15px", sm: "16px" },
                                 color: "text.primary",
+                                lineHeight: 1.35,
                               }}
                             >
                               {item.when} · {item.time}
                             </Typography>
                             <Typography
                               variant="body2"
-                              sx={{ color: "text.secondary", fontSize: 14 }}
+                              sx={{
+                                color: "text.secondary",
+                                fontSize: 14,
+                                lineHeight: 1.35,
+                                mt: 0.25,
+                              }}
                             >
                               {item.title}
                             </Typography>
@@ -347,24 +376,22 @@ export const LandingPage = () => {
 
                     <Box
                       sx={{
+                        gridColumn: "1 / -1",
                         display: "flex",
-                        alignItems: "flex-start",
-                        gap: 1.25,
+                        alignItems: "center",
+                        gap: 1.5,
                       }}
                     >
-                      <LocationOnIcon
-                        sx={{
-                          color: "primary.main",
-                          fontSize: 22,
-                          mt: 0.25,
-                        }}
-                      />
+                      <Box className="info-icon">
+                        <LocationOnIcon sx={{ color: "primary.main" }} />
+                      </Box>
                       <Typography
                         variant="body2"
                         sx={{
                           fontSize: { xs: "14px", sm: "15px" },
                           color: "text.secondary",
-                          pt: 0.25,
+                          lineHeight: 1.2,
+                          m: 0,
                         }}
                       >
                         {campusAddress}
@@ -375,21 +402,19 @@ export const LandingPage = () => {
                       <Box
                         key={phone.tel}
                         sx={{
+                          gridColumn: "1 / -1",
                           display: "flex",
                           alignItems: "center",
-                          gap: 1.25,
-                          flexWrap: "wrap",
+                          gap: 1.5,
                         }}
                       >
-                        {phone.whatsapp ? (
-                          <WhatsAppIcon
-                            sx={{ color: "#25D366", fontSize: 22 }}
-                          />
-                        ) : (
-                          <PhoneIcon
-                            sx={{ color: "primary.main", fontSize: 22 }}
-                          />
-                        )}
+                        <Box className="info-icon">
+                          {phone.whatsapp ? (
+                            <WhatsAppIcon sx={{ color: "#25D366" }} />
+                          ) : (
+                            <PhoneIcon sx={{ color: "primary.main" }} />
+                          )}
+                        </Box>
                         <Typography
                           component="a"
                           href={
@@ -406,6 +431,10 @@ export const LandingPage = () => {
                             fontSize: { xs: "14px", sm: "15px" },
                             color: "text.secondary",
                             textDecoration: "none",
+                            lineHeight: 1.2,
+                            m: 0,
+                            display: "inline-flex",
+                            alignItems: "center",
                             "&:hover": {
                               color: "primary.main",
                               textDecoration: "underline",
@@ -416,20 +445,23 @@ export const LandingPage = () => {
                         </Typography>
                       </Box>
                     ))}
-
-                    {isKinshasa && config.socialHandle && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: 13,
-                          color: "text.secondary",
-                          pl: 4.5,
-                        }}
-                      >
-                        {t("campuses.kinshasa.socialHandle")}
-                      </Typography>
-                    )}
                   </Box>
+
+                  {isKinshasa && config.socialHandle && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1.75,
+                        fontSize: 13,
+                        color: "text.secondary",
+                        lineHeight: 1.4,
+                        textAlign: "center",
+                        width: "100%",
+                      }}
+                    >
+                      {t("campuses.kinshasa.socialHandle")}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Box>

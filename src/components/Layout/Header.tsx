@@ -34,7 +34,7 @@ const navButtonSx = (active: boolean) => ({
   color: active ? "primary.main" : "text.primary",
   fontSize: "15px",
   fontWeight: active ? 600 : 500,
-  px: 1.75,
+  px: 1.5,
   py: 1,
   borderRadius: 0,
   minHeight: 48,
@@ -45,19 +45,22 @@ const navButtonSx = (active: boolean) => ({
     content: '""',
     position: "absolute",
     bottom: 0,
-    left: 12,
-    right: 12,
+    left: "50%",
+    width: "56%",
     height: "2px",
     borderRadius: "2px 2px 0 0",
     background: "linear-gradient(90deg, #005078 0%, #0077a8 100%)",
-    transform: active ? "scaleX(1)" : "scaleX(0)",
+    transform: active
+      ? "translateX(-50%) scaleX(1)"
+      : "translateX(-50%) scaleX(0)",
+    transformOrigin: "center",
     transition: "transform 0.2s ease",
   },
   "&:hover": {
     backgroundColor: "transparent",
     color: "primary.main",
     "&::after": {
-      transform: "scaleX(1)",
+      transform: "translateX(-50%) scaleX(1)",
     },
   },
 });
@@ -67,11 +70,13 @@ const utilityLinkSx = {
   fontSize: "13px",
   fontWeight: 500,
   px: 1.25,
-  py: 0.5,
+  py: 0.75,
   minWidth: 0,
-  minHeight: 0,
+  minHeight: 32,
+  height: 32,
   textTransform: "none" as const,
   whiteSpace: "nowrap" as const,
+  lineHeight: 1,
   "&:hover": {
     backgroundColor: "transparent",
     color: "primary.main",
@@ -376,8 +381,24 @@ export const Header = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
-                gap: 0.5,
-                minHeight: 36,
+                gap: 0.75,
+                minHeight: 40,
+                py: 0.5,
+                "& .MuiButton-root": {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  lineHeight: 1.2,
+                },
+                "& .MuiIconButton-root": {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 32,
+                  height: 32,
+                  minWidth: 32,
+                  minHeight: 32,
+                  p: 0.5,
+                },
               }}
             >
               <Button
